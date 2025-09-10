@@ -2,41 +2,39 @@ console.log("Server booted at", new Date().toISOString());
 
 import express from "express";
 import cors from "cors";
-import serverless from "serverless-http";
+// remove serverless-http
+// import serverless from "serverless-http";
 
-// Routers
 import { healthRouter } from "./routes/health.js";
 
 const app = express();
 
-// CORS — allow only your deployed frontend (you can comma-separate multiple origins)
 const allowed = (process.env.ALLOWED_ORIGIN ?? "")
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
+
 app.use(
   cors({
-    origin: allowed.length ? allowed : true, // during local dev if empty, allow all
+    origin: allowed.length ? allowed : true,
     credentials: true,
   })
 );
 
-// Body parsing
 app.use(express.json());
 
-// Mount routes under /api
+// NOTE: Vercel routes /api/* TO this handler.
+// So keep the mount at /api so /api/health resolves correctly.
 app.use("/api", healthRouter);
 
+// temporary direct test
 app.get("/api/health-direct", (_req, res) => {
+  console.log("Hit /api/health-direct");
   res.json({ ok: true, via: "direct" });
-}); // for quick testing without router
-
-// Simple not-found handler
-app.use((_req, res) => {
-  res.status(404).json({ error: "NotFound" });
 });
 
-// Centralized error handler (Express 5 catches async errors)
+// 404 + error handlers
+app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
 app.use(
   (
     err: unknown,
@@ -49,5 +47,5 @@ app.use(
   }
 );
 
-// Export serverless handler for Vercel
-export default serverless(app);
+// ✅ Export the Express app itself. Vercel's Node runtime can call it directly.
+export default app;
