@@ -1,3 +1,5 @@
+console.log("Server booted at", new Date().toISOString());
+
 import express from "express";
 import cors from "cors";
 import serverless from "serverless-http";
