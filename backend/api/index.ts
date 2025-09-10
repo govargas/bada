@@ -1,10 +1,8 @@
-// backend/api/index.ts
 console.log("Server booted at", new Date().toISOString());
 
 import express from "express";
 import cors from "cors";
 import serverless from "serverless-http";
-
 import { healthRouter } from "../src/routes/health.js";
 
 const app = express();
@@ -23,31 +21,21 @@ app.use(
 
 app.use(express.json());
 
-// Mount routes under /api (the function path is /api, so this becomes /api/health)
-app.use("/api", healthRouter);
+// IMPORTANT: the function is already mounted at /api
+// so we mount our router at the root ("") here
+app.use(healthRouter);
 
-// Temporary direct route for sanity:
-app.get("/api/health-direct", (_req, res) => {
-  console.log("Hit /api/health-direct");
+// Temporary direct route for sanity (now at /api/health-direct)
+app.get("/health-direct", (_req, res) => {
+  console.log("Hit /health-direct");
   res.json({ ok: true, via: "direct" });
 });
 
-// 404
-app.use((_req, res) => {
-  res.status(404).json({ error: "NotFound" });
+// 404 + error handlers
+app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
+app.use((err: unknown, _req: any, res: any, _next: any) => {
+  console.error("[ERROR]", err);
+  res.status(500).json({ error: "InternalServerError" });
 });
-
-// Error handler
-app.use(
-  (
-    err: unknown,
-    _req: express.Request,
-    res: express.Response,
-    _next: express.NextFunction
-  ) => {
-    console.error("[ERROR]", err);
-    res.status(500).json({ error: "InternalServerError" });
-  }
-);
 
 export default serverless(app);
