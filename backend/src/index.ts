@@ -25,6 +25,10 @@ app.use(express.json());
 // Mount routes under /api
 app.use("/api", healthRouter);
 
+app.get("/api/health-direct", (_req, res) => {
+  res.json({ ok: true, via: "direct" });
+}); // for quick testing without router
+
 // Simple not-found handler
 app.use((_req, res) => {
   res.status(404).json({ error: "NotFound" });
