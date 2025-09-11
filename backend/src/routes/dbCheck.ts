@@ -1,12 +1,14 @@
 import { Router, Request, Response } from "express";
 import mongoose from "mongoose";
+import { connectDB } from "../lib/db.js";
 
 export const dbCheckRouter = Router();
 
 dbCheckRouter.get("/db-check", async (_req: Request, res: Response) => {
   try {
-    const state = mongoose.connection.readyState;
-    // 0 = disconnected, 1 = connected, 2 = connecting, 3 = disconnecting
+    // Ensure we attempt a connection before reporting
+    await connectDB();
+    const state = mongoose.connection.readyState; // 0=disconnected, 1=connected, 2=connecting, 3=disconnecting
 
     res.json({
       ok: state === 1,

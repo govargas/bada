@@ -2,9 +2,13 @@ console.log("Server booted at", new Date().toISOString());
 
 import express from "express";
 import cors from "cors";
-
 import { healthRouter } from "./routes/health.js";
 import { dbCheckRouter } from "./routes/dbCheck.js";
+import { connectDB } from "./lib/db.js";
+
+connectDB()
+  .then(() => console.log("Mongo connected"))
+  .catch((e) => console.error("Mongo error", e));
 
 // 1) Create app first
 const app = express();
