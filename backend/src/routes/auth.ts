@@ -6,6 +6,8 @@ import { User } from "../models/User.js";
 
 export const authRouter = Router();
 
+authRouter.get("/ping", (_req, res) => res.json({ ok: true, from: "auth" }));
+
 const zCreds = z.object({
   email: z.string().email(),
   password: z.string().min(8, "Password must be at least 8 characters"),
