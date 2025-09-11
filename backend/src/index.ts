@@ -2,8 +2,6 @@ console.log("Server booted at", new Date().toISOString());
 
 import express from "express";
 import cors from "cors";
-// remove serverless-http
-// import serverless from "serverless-http";
 
 import { healthRouter } from "./routes/health.js";
 
