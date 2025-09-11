@@ -7,6 +7,11 @@ import { healthRouter } from "./routes/health.js";
 import { dbCheckRouter } from "./routes/dbCheck.js";
 import { authRouter } from "./routes/auth.js";
 import { requireAuth } from "./middleware/auth.js";
+import { connectDB } from "./lib/db.js";
+
+connectDB()
+  .then(() => console.log("Mongo connected"))
+  .catch((e) => console.error("Mongo error", e));
 
 const app = express();
 
