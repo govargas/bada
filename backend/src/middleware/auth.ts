@@ -2,14 +2,10 @@ import { Request, Response, NextFunction } from "express";
 import jwt from "jsonwebtoken";
 
 export interface AuthedRequest extends Request {
-  user?: { sub: string; email: string };
+  user: { sub: string; email: string }; // ← non-optional
 }
 
-export function requireAuth(
-  req: AuthedRequest,
-  res: Response,
-  next: NextFunction
-) {
+export function requireAuth(req: Request, res: Response, next: NextFunction) {
   try {
     const header = req.headers.authorization; // "Bearer <token>"
     if (!header) return res.status(401).json({ error: "NoAuthHeader" });
@@ -22,7 +18,7 @@ export function requireAuth(
       sub: string;
       email: string;
     };
-    req.user = payload;
+    (req as AuthedRequest).user = payload; // set strongly-typed user
     next();
   } catch {
     return res.status(401).json({ error: "InvalidToken" });

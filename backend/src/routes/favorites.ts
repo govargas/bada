@@ -3,6 +3,7 @@ import { z } from "zod";
 import { Favorite } from "../models/Favorite.js";
 import { requireAuth, AuthedRequest } from "../middleware/auth.js";
 import { connectDB } from "../lib/db.js";
+import mongoose from "mongoose";
 
 export const favoritesRouter = Router();
 
@@ -22,58 +23,66 @@ favoritesRouter.use(async (_req, _res, next) => {
 });
 
 // GET /api/favorites  -> list current user's favorites
-favoritesRouter.get(
-  "/favorites",
-  requireAuth,
-  async (req: AuthedRequest, res) => {
-    const userId = req.user!.sub;
-    const items = await Favorite.find({ userId })
-      .sort({ order: 1, createdAt: -1 })
-      .lean();
-    res.json(items);
+favoritesRouter.get("/favorites", requireAuth, async (req, res) => {
+  const userId = (req as AuthedRequest).user.sub;
+  const items = await Favorite.find({ userId })
+    .sort({ order: 1, createdAt: -1 })
+    .lean();
+  res.json(items);
+});
+
+// POST /api/favorites
+favoritesRouter.post("/favorites", requireAuth, async (req, res) => {
+  const parsed = zCreate.safeParse(req.body);
+  if (!parsed.success) {
+    return res
+      .status(400)
+      .json({ error: "InvalidBody", details: z.treeifyError(parsed.error) });
   }
-);
 
-// POST /api/favorites  -> add a favorite
-favoritesRouter.post(
-  "/favorites",
-  requireAuth,
-  async (req: AuthedRequest, res) => {
-    const parsed = zCreate.safeParse(req.body);
-    if (!parsed.success)
-      return res
-        .status(400)
-        .json({ error: "InvalidBody", details: parsed.error.flatten() });
+  const { beachId, note } = parsed.data;
+  const userId = (req as AuthedRequest).user.sub;
 
-    const { beachId, note } = parsed.data;
-    const userId = req.user!.sub;
-
-    try {
-      const created = await Favorite.create({
-        userId,
-        beachId,
-        note: note ?? "",
-      });
-      return res.status(201).json(created);
-    } catch (err: any) {
-      // Handle duplicate key (already favorited)
-      if (err?.code === 11000) {
-        return res.status(409).json({ error: "AlreadyFavorited" });
-      }
-      throw err;
+  try {
+    const created = await Favorite.create({
+      userId,
+      beachId,
+      note: note ?? "",
+    });
+    return res.status(201).json(created);
+  } catch (err: any) {
+    if (err?.code === 11000) {
+      return res.status(409).json({ error: "AlreadyFavorited" });
     }
+    throw err;
   }
-);
+});
 
-// DELETE /api/favorites/:id  -> remove a favorite by its _id
+// DELETE /api/favorites/:id
+favoritesRouter.delete("/favorites/:id", requireAuth, async (req, res) => {
+  const userId = (req as AuthedRequest).user.sub;
+
+  const id = req.params.id as string | undefined;
+  if (!id) return res.status(400).json({ error: "MissingId" });
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(400).json({ error: "InvalidId" });
+  }
+
+  const deleted = await Favorite.findOneAndDelete({ _id: id, userId });
+  if (!deleted) return res.status(404).json({ error: "NotFound" });
+  res.json({ ok: true });
+});
+
+// DELETE /api/favorites/by-beach/:beachId
 favoritesRouter.delete(
-  "/favorites/:id",
+  "/favorites/by-beach/:beachId",
   requireAuth,
-  async (req: AuthedRequest, res) => {
-    const userId = req.user!.sub;
-    const { id } = req.params;
+  async (req, res) => {
+    const userId = (req as AuthedRequest).user.sub;
+    const { beachId } = req.params;
 
-    const deleted = await Favorite.findOneAndDelete({ _id: id, userId });
+    const deleted = await Favorite.findOneAndDelete({ beachId, userId });
     if (!deleted) return res.status(404).json({ error: "NotFound" });
     res.json({ ok: true });
   }
