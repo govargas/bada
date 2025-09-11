@@ -1,4 +1,4 @@
-import { Schema, model, models, InferSchemaType, Model } from "mongoose";
+import mongoose, { Schema, model, InferSchemaType, Model } from "mongoose";
 
 const userSchema = new Schema(
   {
@@ -8,9 +8,10 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-// Document type inferred from schema
+// Infer the document shape from the schema
 export type UserDoc = InferSchemaType<typeof userSchema>;
 
-// Single, strongly-typed Model<UserDoc> (no union)
+// Always return a single, strongly-typed Model<UserDoc> (no union)
 export const User: Model<UserDoc> =
-  (models.User as Model<UserDoc>) ?? model<UserDoc>("User", userSchema);
+  (mongoose.models.User as Model<UserDoc>) ??
+  model<UserDoc>("User", userSchema);
