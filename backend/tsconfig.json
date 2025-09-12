@@ -14,6 +14,7 @@
     "forceConsistentCasingInFileNames": true,
     "isolatedModules": true,
     "skipLibCheck": true,
+    "lib": ["ES2022", "DOM"],
 
     /* Type Checking */
     "strict": true,
