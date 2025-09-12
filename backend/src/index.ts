@@ -9,6 +9,7 @@ import { authRouter } from "./routes/auth.js";
 import { requireAuth } from "./middleware/auth.js";
 import { connectDB } from "./lib/db.js";
 import { favoritesRouter } from "./routes/favorites.js";
+import { beachesRouter } from "./routes/beaches.js";
 
 connectDB()
   .then(() => console.log("Mongo connected"))
@@ -35,6 +36,7 @@ app.use(express.json());
 app.use("/api", healthRouter);
 app.use("/api", dbCheckRouter);
 app.use("/api", favoritesRouter);
+app.use("/api", beachesRouter);
 
 // 🔐 Auth routes (public endpoints: /register, /login)
 app.use("/api/auth", authRouter);
