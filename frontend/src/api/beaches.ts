@@ -1,4 +1,3 @@
-// frontend/src/api/beaches.ts
 import {
   BeachSummary,
   BeachDetail,
@@ -10,13 +9,11 @@ import {
 async function apiGet<T>(path: string): Promise<T> {
   const base = import.meta.env.VITE_API_BASE; // e.g. https://bada-backend.vercel.app/api
   const res = await fetch(`${base}${path}`);
-  if (!res.ok) {
-    throw new Error(`API error ${res.status}`);
-  }
+  if (!res.ok) throw new Error(`API error ${res.status}`);
   return res.json() as Promise<T>;
 }
 
-// List all beaches → map GeoJSON features to BeachSummary[]
+// List all beaches → BeachSummary[]
 export async function fetchBeaches(): Promise<BeachSummary[]> {
   const data = await apiGet<BeachFeatureCollection>("/beaches");
   return data.features
@@ -24,7 +21,7 @@ export async function fetchBeaches(): Promise<BeachSummary[]> {
     .filter((x): x is BeachSummary => x !== null);
 }
 
-// Get a single beach detail
+// One beach detail
 export async function fetchBeach(id: string): Promise<BeachDetail> {
   return apiGet<BeachDetail>(`/beaches/${id}`);
 }
