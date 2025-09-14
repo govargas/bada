@@ -1,8 +1,10 @@
+// frontend/src/components/BeachesList.tsx
 import { useEffect, useMemo } from "react";
-import { fetchBeaches } from "../api/beaches";
-import { BeachSummary } from "../types/beaches";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+
+import { fetchBeaches } from "../api/beaches";
+import { BeachSummary } from "../types/beaches";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { distanceKm, formatKm } from "../utils/geo";
 
@@ -20,7 +22,7 @@ export default function BeachesList() {
     request,
   } = useGeolocation();
 
-  // Re-sort by proximity when coords arrive (no re-fetch needed)
+  // Derive sorted items (nearest first when we have coords)
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
     if (!coords) return data;
@@ -36,7 +38,7 @@ export default function BeachesList() {
     return withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0));
   }, [data, coords]);
 
-  // optional: ensure we refetch once on mount in case cache is empty
+  // Refetch once on mount if cache was empty
   useEffect(() => {
     if (!data && !isLoading) refetch();
   }, [data, isLoading, refetch]);
@@ -90,7 +92,7 @@ export default function BeachesList() {
       {/* Location action + status */}
       <div className="flex items-center gap-3">
         <button
-          className="px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           onClick={request}
           disabled={geoLoading}
         >
@@ -100,14 +102,14 @@ export default function BeachesList() {
         <div aria-live="polite" className="text-sm">
           {coords && (
             <span className="text-ink-muted">
-              Using your location for proximity.
+              Sorting by proximity to your location.
             </span>
           )}
           {geoError && <span className="text-red-600">{geoError}</span>}
         </div>
       </div>
 
-      {/* List */}
+      {/* Card list */}
       <ul className="space-y-3">
         {items.slice(0, 50).map((b) => (
           <li key={b.id}>
