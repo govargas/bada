@@ -4,17 +4,17 @@ export type LngLat = [number, number]; // GeoJSON order: [lon, lat]
 
 // --- GeoJSON (list) ---
 export interface BeachFeatureProperties {
-  NUTSKOD: string; // e.g. "SE0441273000000001" (stable beach ID)
-  NAMN: string; // e.g. "Hökarängsbadet, Drevviken"
+  NUTSKOD: string; // stable beach ID
+  NAMN: string; // name
   KMN_NAMN?: string; // municipality (optional)
 }
 
 export interface BeachFeature {
   type: "Feature";
   id?: string;
-  geometry: { type: "Point"; coordinates: LngLat };
+  geometry?: { type: "Point"; coordinates: LngLat };
   geometry_name?: string;
-  properties: BeachFeatureProperties;
+  properties?: BeachFeatureProperties;
 }
 
 export interface BeachFeatureCollection {
@@ -22,24 +22,35 @@ export interface BeachFeatureCollection {
   features: BeachFeature[];
 }
 
-// Simplified list item for UI
+// --- Simplified list item for UI ---
 export interface BeachSummary {
   id: string; // NUTSKOD
   name: string; // NAMN
-  municipality?: string; // KMN_NAMN
+  municipality: string; // KMN_NAMN (empty string if missing)
   lat: number;
-  lng: number;
+  lon: number; // canonical longitude
+  lng?: number; // temporary alias (same as lon) to avoid breaking older code
 }
 
+/**
+ * Map a GeoJSON feature → BeachSummary.
+ * Returns null if coordinates are missing/invalid.
+ */
 export function featureToSummary(f: BeachFeature): BeachSummary | null {
-  const [lng, lat] = f.geometry?.coordinates ?? [];
-  if (typeof lat !== "number" || typeof lng !== "number") return null;
+  const props = f.properties;
+  const coords = f.geometry?.coordinates;
+  if (!props || !coords) return null;
+
+  const [lon, lat] = coords;
+  if (typeof lat !== "number" || typeof lon !== "number") return null;
+
   return {
-    id: f.properties.NUTSKOD,
-    name: f.properties.NAMN,
-    municipality: f.properties.KMN_NAMN,
+    id: props.NUTSKOD ?? f.id ?? "",
+    name: props.NAMN ?? "Okänd",
+    municipality: props.KMN_NAMN ?? "",
     lat,
-    lng,
+    lon,
+    lng: lon, // alias for any code still using `lng`
   };
 }
 
