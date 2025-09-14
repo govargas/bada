@@ -25,3 +25,6 @@ export async function fetchBeaches(): Promise<BeachSummary[]> {
 export async function fetchBeach(id: string): Promise<BeachDetail> {
   return apiGet<BeachDetail>(`/beaches/${id}`);
 }
+
+console.log("API_BASE =", import.meta.env.VITE_API_BASE);
+// For debugging; remove later
