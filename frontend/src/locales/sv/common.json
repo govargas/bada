@@ -1,0 +1,19 @@
+{
+  "appTitle": "BADA",
+  "beaches": "Badplatser",
+  "loadingBeaches": "Laddar badplatser…",
+  "loadError": "Kunde inte ladda data.",
+  "back": "Tillbaka",
+  "waterQuality": "Vattenkvalitet",
+  "latestYear": "Senaste år",
+  "coordinates": "Koordinater",
+  "municipality": "Kommun",
+  "classification": {
+    "excellent": "Utmärkt kvalitet",
+    "good": "Bra kvalitet",
+    "sufficient": "Tillfredsställande kvalitet",
+    "poor": "Dålig kvalitet",
+    "unknown": "Okänd"
+  },
+  "sourceTextNote": "Källtext på svenska"
+}
