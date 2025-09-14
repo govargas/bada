@@ -1,0 +1,19 @@
+{
+  "appTitle": "BADA",
+  "beaches": "Beaches",
+  "loadingBeaches": "Loading beaches…",
+  "loadError": "Could not load data.",
+  "back": "Back",
+  "waterQuality": "Water quality",
+  "latestYear": "Latest year",
+  "coordinates": "Coordinates",
+  "municipality": "Municipality",
+  "classification": {
+    "excellent": "Excellent",
+    "good": "Good",
+    "sufficient": "Sufficient",
+    "poor": "Poor",
+    "unknown": "Unknown"
+  },
+  "sourceTextNote": "Source text in Swedish"
+}
