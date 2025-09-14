@@ -6,12 +6,14 @@ import Header from "./components/Header";
 
 export default function App() {
   return (
-    <div className="bg-surface text-ink min-h-screen">
+    <div className="min-h-screen">
       <Header />
-      <main className="p-4">
-        {/* Keep language switcher (you may later move it into the menu) */}
-        <LanguageSwitcher />
 
+      {/* TEMP: Tailwind smoke test */}
+      <div className="bg-red-500 text-white p-2">Tailwind OK</div>
+
+      <main className="p-4">
+        <LanguageSwitcher />
         <Routes>
           <Route path="/" element={<BeachesList />} />
           <Route path="/beach/:id" element={<BeachDetailPage />} />

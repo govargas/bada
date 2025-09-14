@@ -1,27 +1,40 @@
 @import "tailwindcss";
 
-/* Theme variables — LIGHT */
-:root {
-  --color-surface: 239 235 228; /* #efebe4 */
-  --color-surface-muted: 246 242 236;
-  --color-ink: 26 26 26;
-  --color-ink-muted: 100 104 108;
-  --color-border: 205 200 192; /* #cdc8c0 */
-  --color-accent: 10 90 130;
-  --color-badge: 230 228 220;
+/* Design tokens (Tailwind v4) */
+@theme {
+  /* Light theme */
+  --color-surface: #efebe4;
+  --color-surface-muted: #f6f2ec;
+  --color-ink: #1a1a1a;
+  --color-ink-muted: #64686c;
+  --color-border: #cdc8c0;
+  --color-accent: #0a5a82;
+  --color-badge: #e6e4dc;
+
+  /* Quality colors */
+  --color-quality-excellent: #1f6fb2;
+  --color-quality-good: #2b8a3e;
+  --color-quality-sufficient: #b08900;
+  --color-quality-poor: #c0392b;
+  --color-quality-unknown: #6b7280;
+
+  /* Fonts */
+  --font-spectral: "Spectral", serif;
+  --font-inter: "Inter", system-ui, sans-serif;
 }
 
-/* Theme variables — DARK */
+/* Dark theme overrides */
 .dark {
-  --color-surface: 22 16 17; /* #161011 */
-  --color-surface-muted: 30 24 25;
-  --color-ink: 240 237 230;
-  --color-ink-muted: 184 178 170;
-  --color-border: 64 56 58;
-  --color-accent: 94 165 210;
-  --color-badge: 48 42 44;
+  --color-surface: #161011;
+  --color-surface-muted: #1e1819;
+  --color-ink: #f0ede6;
+  --color-ink-muted: #b8b2aa;
+  --color-border: #40383a;
+  --color-accent: #5ea5d2;
+  --color-badge: #302a2c;
 }
 
+/* Base defaults */
 @layer base {
   html,
   body,
@@ -30,51 +43,46 @@
   }
 
   body {
-    @apply bg-surface text-ink antialiased;
+    @apply bg-surface text-ink antialiased font-inter;
   }
 
-  a {
-    @apply text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded-sm;
-  }
-
-  /* Headings: Spectral; content: Inter */
   h1,
   h2,
   h3,
   h4 {
     @apply font-spectral text-ink;
   }
-  p,
-  li,
-  small,
-  input,
-  button,
-  label {
-    @apply font-inter;
+
+  a {
+    @apply text-accent underline-offset-2 hover:underline
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-accent/50 rounded-sm;
   }
 }
 
+/* Reusable bits */
 @layer components {
   .card {
-    @apply bg-surface-muted rounded-xl2 shadow-card dark:shadow-cardDark border border-border;
+    @apply bg-surface-muted rounded-2xl shadow border border-border;
   }
   .badge {
-    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-badge text-ink;
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full
+           text-xs font-medium bg-badge text-ink;
   }
-  /* KPI helpers using generated utilities */
+
   .kpi-excellent {
-    @apply text-quality-excellent;
+    color: var(--color-quality-excellent);
   }
   .kpi-good {
-    @apply text-quality-good;
+    color: var(--color-quality-good);
   }
   .kpi-sufficient {
-    @apply text-quality-sufficient;
+    color: var(--color-quality-sufficient);
   }
   .kpi-poor {
-    @apply text-quality-poor;
+    color: var(--color-quality-poor);
   }
   .kpi-unknown {
-    @apply text-quality-unknown;
+    color: var(--color-quality-unknown);
   }
 }
