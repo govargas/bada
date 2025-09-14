@@ -19,3 +19,27 @@ export function getQualityLabel(
   if (!entry) return lang === "sv" ? "Okänd" : "Unknown";
   return entry[lang];
 }
+
+// Map detail object to a normalized classification code
+export function deriveClassificationCode(detail: {
+  classification?: number;
+  qualityRating?: { qualityRating?: number; ratingYear?: number }[];
+}): "excellent" | "good" | "sufficient" | "poor" | "unknown" {
+  const numeric =
+    detail.classification ??
+    detail.qualityRating?.find((q) => typeof q.qualityRating === "number")
+      ?.qualityRating;
+
+  switch (numeric) {
+    case 1:
+      return "excellent";
+    case 2:
+      return "good";
+    case 3:
+      return "sufficient";
+    case 4:
+      return "poor";
+    default:
+      return "unknown";
+  }
+}
