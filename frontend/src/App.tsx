@@ -8,10 +8,6 @@ export default function App() {
   return (
     <div className="min-h-screen">
       <Header />
-
-      {/* TEMP: Tailwind smoke test */}
-      <div className="bg-red-500 text-white p-2">Tailwind OK</div>
-
       <main className="p-4">
         <LanguageSwitcher />
         <Routes>

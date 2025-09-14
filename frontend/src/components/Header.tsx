@@ -185,9 +185,6 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
             placeholder="Search beaches…"
             className="flex-1 rounded-2xl border border-border bg-surface-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/40"
           />
-          <button className="rounded-2xl border border-border bg-surface-muted px-3 py-2 hover:bg-surface focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40">
-            Use location
-          </button>
         </div>
       </div>
     </header>
