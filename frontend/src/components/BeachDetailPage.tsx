@@ -32,6 +32,21 @@ function qualityClass(q?: number | string) {
   return "kpi-unknown";
 }
 
+function pickLatestSampleDate(d: BeachDetail): string | undefined {
+  // check common flat fields first
+  const direct = d.latestSampleDate || d.sampleDate || d.lastSampleDate;
+
+  if (direct) return direct;
+
+  // try nested shapes if available
+  if (Array.isArray(d.samples) && d.samples.length) {
+    return d.samples[0]?.date;
+  }
+  if (d.lastSample?.date) return d.lastSample.date;
+
+  return undefined;
+}
+
 export default function BeachDetailPage() {
   const { id } = useParams<{ id: string }>();
 
@@ -81,6 +96,7 @@ export default function BeachDetailPage() {
   const qualityNum = data.classification; // 1..4 (current)
   const qualityText = data.classificationText ?? ""; // e.g. "Bra kvalitet"
   const year = data.classificationYear;
+  const latestSampleDate = pickLatestSampleDate(data);
 
   // Most recent rating in the history array (if present)
   const latestRating =
@@ -112,6 +128,12 @@ export default function BeachDetailPage() {
       {/* Quick facts row (expand later maybe) */}
       <section className="card p-3">
         <ul className="text-sm space-y-1">
+          {latestSampleDate && (
+            <li>
+              <span className="text-ink-muted">Provdatum:</span>{" "}
+              <span>{formatDate(latestSampleDate)}</span>
+            </li>
+          )}
           {typeof data.algalText === "string" && (
             <li>
               <span className="text-ink-muted">Algblomning:</span>{" "}
