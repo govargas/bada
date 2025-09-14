@@ -21,8 +21,8 @@ export default function BeachesList() {
   } = useGeolocation();
 
   // Re-sort by proximity when coords arrive (no re-fetch needed)
-  const items = useMemo(() => {
-    if (!data) return [] as (BeachSummary & { _distanceKm?: number })[];
+  const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
+    if (!data) return [];
     if (!coords) return data;
 
     const withDist = data.map((b) => {
@@ -30,9 +30,7 @@ export default function BeachesList() {
         { lat: coords.lat, lon: coords.lon },
         { lat: b.lat, lon: b.lon }
       );
-      return { ...b, _distanceKm: km } as BeachSummary & {
-        _distanceKm: number;
-      };
+      return { ...b, _distanceKm: km };
     });
 
     return withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0));
