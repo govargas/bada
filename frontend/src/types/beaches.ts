@@ -74,8 +74,16 @@ export interface BeachDetail {
   dissuasion?: string[];
   euMotive?: string;
   euType?: boolean;
-  locationArea?: string; // municipality/area
-  locationName?: string; // beach name
-  nutsCode: string; // stable id (same as NUTSKOD)
+  locationArea?: string;
+  locationName?: string;
+  nutsCode: string;
   qualityRating?: BeachQualityRating[];
+
+  // ⬇️ Likely sample-date candidates we’ll probe for:
+  latestSampleDate?: string;
+  sampleDate?: string;
+  lastSampleDate?: string;
+  // sometimes APIs nest:
+  samples?: Array<{ date?: string; [k: string]: unknown }>;
+  lastSample?: { date?: string; [k: string]: unknown };
 }
