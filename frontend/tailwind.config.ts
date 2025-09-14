@@ -5,7 +5,7 @@ const config: Config = {
   darkMode: "class", // toggle by adding/removing `class="dark"` on <html>
   theme: {
     extend: {
-      // Semantic color tokens (use these in your components)
+      // Semantic color tokens mapped to CSS variables for light/dark mode
       colors: {
         surface: "rgb(var(--color-surface) / <alpha-value>)",
         surfaceMuted: "rgb(var(--color-surface-muted) / <alpha-value>)",
@@ -29,7 +29,7 @@ const config: Config = {
         inter: ["Inter", "system-ui", "sans-serif"],
       },
       letterSpacing: {
-        // Title “BADA” tracking ≈ -0.06em looks like your mockup
+        // Title “BADA” tracking ≈ -0.06em looks like the UI mockup
         tighter2: "-0.06em",
       },
       lineHeight: {

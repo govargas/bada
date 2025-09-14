@@ -1,18 +1,82 @@
 @import "tailwindcss";
 
+/* Theme variables — LIGHT */
+:root {
+  /* Light background ~ your beige (#efebe4), nudged for AA on white cards/text */
+  --color-surface: 239 235 228; /* #efebe4 */
+  --color-surface-muted: 246 242 236; /* slightly lighter for containers */
+  --color-ink: 26 26 26; /* near-black text */
+  --color-ink-muted: 100 104 108; /* secondary text */
+  --color-border: 205 200 192; /* subtle lines (#cdc8c0) */
+  --color-accent: 10 90 130; /* accessible blue for links/buttons */
+  --color-badge: 230 228 220; /* pill bg on light */
+}
+
+/* Theme variables — DARK (#161011 base, adjusted) */
+.dark {
+  --color-surface: 22 16 17; /* #161011 */
+  --color-surface-muted: 30 24 25; /* card bg */
+  --color-ink: 240 237 230; /* sand-ish text for dark */
+  --color-ink-muted: 184 178 170; /* secondary text in dark */
+  --color-border: 64 56 58; /* separators on dark */
+  --color-accent: 94 165 210; /* lighter blue for dark contrast */
+  --color-badge: 48 42 44; /* pill bg on dark */
+}
+
+/* Base defaults */
 @layer base {
   html,
   body,
   #root {
     height: 100%;
   }
+
   body {
-    @apply bg-sand-100 text-ink-900 dark:bg-ink-950 dark:text-sand-100 antialiased;
+    @apply bg-surface text-ink antialiased;
+  }
+
+  a {
+    @apply text-accent underline-offset-2 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 rounded-sm;
+  }
+
+  /* Headings: Spectral; content: Inter */
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-spectral text-ink;
+  }
+  p,
+  li,
+  small,
+  input,
+  button,
+  label {
+    @apply font-inter;
   }
 }
 
+/* Components/utilities I can reuse */
 @layer components {
+  .card {
+    @apply bg-surface-muted rounded-xl2 shadow-card dark:shadow-cardDark border border-border;
+  }
   .badge {
-    @apply inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium;
+    @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-badge text-ink;
+  }
+  .kpi-excellent {
+    color: theme(colors.quality.excellent);
+  }
+  .kpi-good {
+    color: theme(colors.quality.good);
+  }
+  .kpi-sufficient {
+    color: theme(colors.quality.sufficient);
+  }
+  .kpi-poor {
+    color: theme(colors.quality.poor);
+  }
+  .kpi-unknown {
+    color: theme(colors.quality.unknown);
   }
 }
