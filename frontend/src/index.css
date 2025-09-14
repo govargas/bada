@@ -1,2 +1,18 @@
 @import "tailwindcss";
-/* I'll add custom layers + colors after I see styles appear */
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-sand-100 text-ink-900 dark:bg-ink-950 dark:text-sand-100 antialiased;
+  }
+}
+
+@layer components {
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium;
+  }
+}
