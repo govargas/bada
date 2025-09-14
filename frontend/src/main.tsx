@@ -12,6 +12,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
+        {/* 🔴 TEMP: Tailwind smoke test */}
+        <div className="m-4 p-4 bg-red-500 text-white rounded-card">
+          Tailwind OK
+        </div>
         <App />
       </BrowserRouter>
     </QueryClientProvider>
