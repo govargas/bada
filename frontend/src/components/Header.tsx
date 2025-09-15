@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
+import { useUI } from "../store/ui";
 
 /** Simple outside-click hook so the menus close on blur */
 function useOutsideClose<T extends HTMLElement>(onClose: () => void) {
@@ -39,6 +40,10 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
   const menuRef = useOutsideClose<HTMLDivElement>(() => setMenuOpen(false));
   const userRef = useOutsideClose<HTMLDivElement>(() => setUserOpen(false));
   const { isDark, setIsDark } = useDarkMode();
+
+  // 🔎 global search state (used by BeachesList to filter)
+  const search = useUI((s) => s.search);
+  const setSearch = useUI((s) => s.setSearch);
 
   return (
     <header className="bg-surface sticky top-0 z-50 border-b border-border">
@@ -176,15 +181,26 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
         </div>
       </div>
 
-      {/* Optional: Search + “Use current location” bar lives just under header */}
-      {/* I’ll wire these as actual components later */}
+      {/* Search bar (now actually filters via global store) */}
       <div className="mx-auto max-w-screen-lg px-3 pb-2">
-        <div className="flex gap-2">
+        <div className="flex gap-2 items-center">
           <input
             type="search"
             placeholder="Search beaches…"
             className="flex-1 rounded-2xl border border-border bg-surface-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/40"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
           />
+          {search && (
+            <button
+              className="rounded-2xl border border-border bg-surface px-3 py-2 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              onClick={() => setSearch("")}
+              aria-label="Clear search"
+              title="Clear"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
     </header>
