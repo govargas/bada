@@ -7,6 +7,7 @@ import { fetchBeaches } from "../api/beaches";
 import { BeachSummary } from "../types/beaches";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { distanceKm, formatKm } from "../utils/geo";
+import { useUI } from "../store/ui"; // ← ✅ read search text from Zustand
 
 export default function BeachesList() {
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -37,6 +38,18 @@ export default function BeachesList() {
 
     return withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0));
   }, [data, coords]);
+
+  // 🔎 Filter by search (from Zustand store)
+  const search = useUI((s) => s.search);
+  const q = search.trim().toLowerCase();
+
+  const filtered = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
+    if (!q) return items;
+    return items.filter((b) => {
+      const hay = `${b.name} ${b.municipality ?? ""}`.toLowerCase();
+      return hay.includes(q);
+    });
+  }, [items, q]);
 
   // Refetch once on mount if cache was empty
   useEffect(() => {
@@ -80,7 +93,19 @@ export default function BeachesList() {
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
         <p className="font-spectral text-lg">No beaches found.</p>
         <p className="text-sm text-ink-muted mt-1">
-          Try refreshing or adjusting your filters.
+          Try refreshing or adjusting the filters.
+        </p>
+      </div>
+    );
+  }
+
+  // If we have items but none match the current filter
+  if (q && filtered.length === 0) {
+    return (
+      <div className="rounded-2xl border border-border bg-surface-muted p-4">
+        <p className="font-spectral text-lg">No matches.</p>
+        <p className="text-sm text-ink-muted mt-1">
+          Nothing matches “{search}”. Try a different name or municipality.
         </p>
       </div>
     );
@@ -111,7 +136,7 @@ export default function BeachesList() {
 
       {/* Card list */}
       <ul className="space-y-3">
-        {items.slice(0, 50).map((b) => (
+        {filtered.slice(0, 50).map((b) => (
           <li key={b.id}>
             <Link
               to={`/beach/${b.id}`}
