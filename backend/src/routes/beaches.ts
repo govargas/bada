@@ -1,4 +1,3 @@
-// backend/src/routes/beaches.ts
 import { Router } from "express";
 import { havGet, getLatestSampleDate } from "../lib/hav.js";
 
@@ -6,12 +5,10 @@ export const beachesRouter = Router();
 
 /**
  * GET /api/beaches
- * Proxies HaV "feature" endpoint and returns (likely) GeoJSON.
- * Kept as a thin proxy; normalization can be added later if needed.
+ * Proxies HaV "feature" endpoint (GeoJSON-like).
  */
 beachesRouter.get("/beaches", async (_req, res, next) => {
   try {
-    // Easiest JSON form; if upstream returns XML, switch to explicit WFS params.
     const data = await havGet("/feature/?format=json", 5 * 60 * 1000); // cache 5 min
     res.json(data);
   } catch (err) {
@@ -21,24 +18,29 @@ beachesRouter.get("/beaches", async (_req, res, next) => {
 
 /**
  * GET /api/beaches/:id
- * Proxies HaV detail endpoint for a single bathing site by ID
- * and augments with latest sample date from the v2 API.
- * Example ID: SE0441273000000001
+ * HaV v1 detail + latest sample date from HaV v2 results.
+ * Example ID: SE0110180000001869
  */
 beachesRouter.get("/beaches/:id", async (req, res, next) => {
   try {
     const { id } = req.params;
 
-    // Fetch v1 detail and v2 latest sample date in parallel
-    const [detail, latestSampleDate] = await Promise.all([
-      havGet(`/detail/${encodeURIComponent(id)}`, 5 * 60 * 1000),
-      getLatestSampleDate(id).catch(() => null), // don't fail the whole request if v2 hiccups
-    ]);
+    // v1 detail
+    const data = await havGet(
+      `/detail/${encodeURIComponent(id)}`,
+      5 * 60 * 1000
+    );
 
-    res.json({
-      ...detail,
-      latestSampleDate, // ISO string or null
-    });
+    // v2 latest sample date
+    let latestSampleDate: string | null = null;
+    try {
+      latestSampleDate = await getLatestSampleDate(id);
+    } catch (e) {
+      console.error("[HaV v2 latest sample error]", e);
+      // keep going; we still return the v1 detail
+    }
+
+    res.json({ ...data, latestSampleDate });
   } catch (err) {
     next(err);
   }
