@@ -2,63 +2,79 @@
 import { cache } from "./cache.js";
 
 const HAV_BASE_URL = process.env.HAV_BASE_URL!;
-const HAV_USER_AGENT = process.env.HAV_USER_AGENT!;
-
-// Accept either HAV_V2_BASE or HAV_V2_BASE_URL (backward-compatible)
+const HAV_USER_AGENT = process.env.HAV_USER_AGENT || "BADA/1.0";
 const HAV_V2_BASE =
-  process.env.HAV_V2_BASE || process.env.HAV_V2_BASE_URL || "";
+  process.env.HAV_V2_BASE ?? "https://api.havochvatten.se/bathingwaters/v2";
 
-if (!HAV_BASE_URL) throw new Error("HAV_BASE_URL not set");
-if (!HAV_USER_AGENT) throw new Error("HAV_USER_AGENT not set");
-if (!HAV_V2_BASE)
-  console.warn(
-    "[warn] HAV_V2_BASE(_URL) not set — latestSampleDate will be null"
-  );
-
-// Small key helper for the v1 cache
 function key(path: string) {
   return `hav:${path}`;
 }
 
-// --- v1 fetcher (existing)
+/** v1 fetcher (old endpoints like /feature, /detail) */
 export async function havGet(path: string, ttlMs = 5 * 60 * 1000) {
   const k = key(`v1:${path}`);
   const cached = cache.get(k);
   if (cached) return cached;
 
   const url = `${HAV_BASE_URL}${path}`;
+  // TEMP: trace outgoing in dev
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[HaV v1] GET ${url}`);
+  }
+
   const res = await fetch(url, {
     headers: {
       "User-Agent": HAV_USER_AGENT,
       Accept: "application/json",
     },
   });
-  if (!res.ok)
-    throw new Error(`HaV API error: ${res.status} ${res.statusText}`);
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    console.warn(
+      `[HaV v1] ${res.status} ${res.statusText} for ${url}: ${text.slice(
+        0,
+        500
+      )}`
+    );
+    throw new Error(`HaV v1 error ${res.status} ${res.statusText}`);
+  }
+
   const data = await res.json();
   cache.set(k, data, ttlMs);
   return data;
 }
 
-// --- v2 fetcher
+/** Minimal v2 fetcher (used for monitoring results, etc.) */
 export async function havV2Get<T>(
   path: string,
   init?: RequestInit
 ): Promise<T> {
-  if (!HAV_V2_BASE) throw new Error("HAV_V2_BASE not configured");
   const url = `${HAV_V2_BASE}${path}`;
+  if (process.env.NODE_ENV !== "production") {
+    console.log(`[HaV v2] GET ${url}`);
+  }
+
   const res = await fetch(url, {
     headers: { Accept: "application/json" },
     ...init,
   });
+
   if (!res.ok) {
     const text = await res.text().catch(() => "");
-    throw new Error(`HaV v2 error ${res.status} ${res.statusText}: ${text}`);
+    console.warn(
+      `[HaV v2] ${res.status} ${res.statusText} for ${url}: ${text.slice(
+        0,
+        500
+      )}`
+    );
+    throw new Error(`HaV v2 error ${res.status} ${res.statusText}`);
   }
+
   return res.json() as Promise<T>;
 }
 
-// Pull latest sample date from v2 results
+/** Pull latest sample date (ISO string) from /bathing-waters/{id}/results */
 export async function getLatestSampleDate(id: string): Promise<string | null> {
   type MonitoringResult = { takenAt?: string | null };
   type Results = { results?: MonitoringResult[] };
@@ -66,6 +82,7 @@ export async function getLatestSampleDate(id: string): Promise<string | null> {
   const data = await havV2Get<Results>(
     `/bathing-waters/${encodeURIComponent(id)}/results`
   );
+
   const latest =
     (data.results ?? [])
       .map((r) => r.takenAt)

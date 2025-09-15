@@ -52,8 +52,10 @@ app.get("/api/health-direct", (_req, res) => {
   res.json({ ok: true, via: "direct" });
 });
 
-// --- 404 + error handlers ---
+// 404
 app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
+
+// Error handler
 app.use(
   (
     err: unknown,
@@ -62,7 +64,11 @@ app.use(
     _next: express.NextFunction
   ) => {
     console.error("[ERROR]", err);
-    res.status(500).json({ error: "InternalServerError" });
+    const message =
+      process.env.NODE_ENV !== "production" && err instanceof Error
+        ? err.message
+        : undefined;
+    res.status(500).json({ error: "InternalServerError", message });
   }
 );
 
