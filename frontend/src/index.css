@@ -87,3 +87,10 @@
     color: var(--color-quality-unknown);
   }
 }
+
+@layer utilities {
+  /* widely supported; falls back to the fixed min-height below */
+  .aspect-square {
+    aspect-ratio: 1 / 1;
+  }
+}

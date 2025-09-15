@@ -1,4 +1,3 @@
-// frontend/src/components/BeachesList.tsx
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -134,10 +133,15 @@ export default function BeachesList() {
         </div>
       </div>
 
-      {/* Map (mobile-first height; matches card style) */}
-      <div className="rounded-2xl border border-border overflow-hidden">
-        <MapView />
-      </div>
+      {/* Map (mobile-first) */}
+      <MapView
+        points={filtered.slice(0, 200).map((b) => ({
+          id: b.id,
+          name: b.name,
+          lat: b.lat,
+          lon: b.lon,
+        }))}
+      />
 
       {/* Card list */}
       <ul className="space-y-3">
