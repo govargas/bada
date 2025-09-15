@@ -1,7 +1,13 @@
 import { useParams, Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
+import {
+  useFavorites,
+  useAddFavorite,
+  useRemoveFavorite,
+} from "../api/favorites";
+import { getToken, setToken } from "../utils/auth";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -39,6 +45,15 @@ export default function BeachDetailPage() {
     queryFn: () => fetchBeach(id!),
     staleTime: 5 * 60 * 1000,
   });
+
+  // --- FAVORITES HOOKS ---
+  const queryClient = useQueryClient();
+  const token = getToken();
+  const { data: favorites } = useFavorites();
+  const addFav = useAddFavorite();
+  const rmFav = useRemoveFavorite();
+  const existingFav = favorites?.find((f) => f.beachId === id);
+  const isFav = !!existingFav;
 
   if (isLoading) {
     return (
@@ -85,9 +100,7 @@ export default function BeachDetailPage() {
         )
       : undefined;
 
-  // If HaV exposes a specific sample date string elsewhere, prefer that;
-  // otherwise show the newest rating year as a year-only fallback.
-  const latestSampleLabel = (data as any).latestSampleDate // if you later add a normalized date, use it here
+  const latestSampleLabel = (data as any).latestSampleDate
     ? formatDate((data as any).latestSampleDate)
     : latestSample
     ? String(latestSample.ratingYear)
@@ -134,12 +147,36 @@ export default function BeachDetailPage() {
         {/* Actions row */}
         <div className="pt-2 flex items-center gap-2">
           <button
-            className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-            // TODO: wire to favorites POST /api/favorites
-            onClick={() => alert("TODO: save as favorite")}
+            className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-60"
+            onClick={async () => {
+              if (!getToken()) {
+                const pasted = window.prompt(
+                  "Paste your JWT token to enable favorites:"
+                );
+                if (pasted) {
+                  setToken(pasted.trim());
+                  window.location.reload();
+                }
+                return;
+              }
+              try {
+                if (isFav) {
+                  await rmFav.mutateAsync({
+                    id: existingFav?._id,
+                    beachId: id,
+                  });
+                } else {
+                  await addFav.mutateAsync(id!);
+                }
+              } catch (e: any) {
+                alert(e?.message ?? "Favorite action failed");
+              }
+            }}
+            disabled={addFav.isPending || rmFav.isPending}
           >
-            ☆ Save as favorite
+            {isFav ? "★ Remove favorite" : "☆ Save as favorite"}
           </button>
+
           <Link
             to="/"
             className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
