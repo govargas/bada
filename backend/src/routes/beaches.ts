@@ -1,4 +1,3 @@
-// backend/src/routes/beaches.ts
 import { Router } from "express";
 import { havGet, getLatestSampleDate } from "../lib/hav.js";
 
@@ -19,37 +18,39 @@ beachesRouter.get("/beaches", async (_req, res, next) => {
 
 /**
  * GET /api/beaches/:id
- * Returns HaV v1 detail + (best-effort) latestSampleDate from v2.
+ * Proxies HaV v1 detail and augments with latestSampleDate.
+ * Prefers v1.sampleDate (epoch ms); falls back to v2 results when needed.
  */
-beachesRouter.get("/beaches/:id", async (req, res) => {
-  const { id } = req.params;
-
-  // 1) fetch v1 detail — if this fails, respond with a 502 and a helpful message
+beachesRouter.get("/beaches/:id", async (req, res, next) => {
   try {
+    const { id } = req.params;
+
+    // v1 detail
     const detail = await havGet(
       `/detail/${encodeURIComponent(id)}`,
       5 * 60 * 1000
     );
 
-    // 2) try to enrich with v2 latest sample date — if that fails, do NOT fail the endpoint
+    // prefer v1 sampleDate (epoch ms)
     let latestSampleDate: string | null = null;
-    try {
-      latestSampleDate = await getLatestSampleDate(id);
-    } catch (e) {
-      console.warn(
-        `[beaches/:id] v2 results fetch failed for ${id}:`,
-        (e as Error)?.message
-      );
-      latestSampleDate = null;
+    const v1Ms = (detail as any)?.sampleDate;
+    if (typeof v1Ms === "number" && isFinite(v1Ms)) {
+      latestSampleDate = new Date(v1Ms).toISOString();
+    } else {
+      // fallback to v2
+      try {
+        latestSampleDate = await getLatestSampleDate(id);
+      } catch (e) {
+        // don't fail the whole request if v2 errors; just leave null
+        console.warn(
+          "[/beaches/:id] v2 fallback failed:",
+          (e as Error)?.message
+        );
+      }
     }
 
-    return res.json({ ...detail, latestSampleDate });
-  } catch (e) {
-    // v1 detail failed → surface as a 502 (bad gateway) with a friendly message in dev
-    const msg = (e as Error)?.message || "Upstream error";
-    if (process.env.NODE_ENV !== "production") {
-      return res.status(502).json({ error: "UpstreamError", message: msg });
-    }
-    return res.status(502).json({ error: "UpstreamError" });
+    res.json({ ...detail, latestSampleDate });
+  } catch (err) {
+    next(err);
   }
 });

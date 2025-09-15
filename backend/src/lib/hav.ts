@@ -1,4 +1,3 @@
-// backend/src/lib/hav.ts
 import { cache } from "./cache.js";
 
 const HAV_BASE_URL = process.env.HAV_BASE_URL!;
