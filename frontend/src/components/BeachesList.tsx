@@ -2,12 +2,13 @@
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
+import MapView from "./MapView";
 
 import { fetchBeaches } from "../api/beaches";
 import { BeachSummary } from "../types/beaches";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { distanceKm, formatKm } from "../utils/geo";
-import { useUI } from "../store/ui"; // ← ✅ read search text from Zustand
+import { useUI } from "../store/ui";
 
 export default function BeachesList() {
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -99,7 +100,6 @@ export default function BeachesList() {
     );
   }
 
-  // If we have items but none match the current filter
   if (q && filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
@@ -132,6 +132,11 @@ export default function BeachesList() {
           )}
           {geoError && <span className="text-red-600">{geoError}</span>}
         </div>
+      </div>
+
+      {/* Map (mobile-first height; matches card style) */}
+      <div className="rounded-2xl border border-border overflow-hidden">
+        <MapView />
       </div>
 
       {/* Card list */}
