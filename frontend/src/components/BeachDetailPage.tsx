@@ -93,17 +93,8 @@ export default function BeachDetailPage() {
   const qualityText = data.classificationText ?? "Okänd";
   const pillClass = qualityClass(qualityNum ?? qualityText);
 
-  const latestSample =
-    data.qualityRating && data.qualityRating.length
-      ? data.qualityRating.reduce((acc, cur) =>
-          cur.ratingYear > acc.ratingYear ? cur : acc
-        )
-      : undefined;
-
-  const latestSampleLabel = (data as any).latestSampleDate
-    ? formatDate((data as any).latestSampleDate)
-    : latestSample
-    ? String(latestSample.ratingYear)
+  const latestSampleLabel = data.latestSampleDate
+    ? formatDate(data.latestSampleDate, "short")
     : "—";
 
   return (
