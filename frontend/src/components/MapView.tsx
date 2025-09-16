@@ -1,3 +1,4 @@
+// frontend/src/components/MapView.tsx
 import { useEffect, useRef } from "react";
 import maplibregl, { Map } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
@@ -5,7 +6,6 @@ import "maplibre-gl/dist/maplibre-gl.css";
 type Point = { id: string; name: string; lat: number; lon: number };
 type Props = { points?: Point[] };
 
-// The published styles from MapTiler Customize (already include ?key=…)
 const STYLE_LIGHT =
   "https://api.maptiler.com/maps/019951a8-6432-7aea-b555-2ac65a59181f/style.json?key=Dh5hFFvt6R7cmui0rEtJ";
 const STYLE_DARK =
@@ -15,11 +15,9 @@ function isDark() {
   return document.documentElement.classList.contains("dark");
 }
 function getAccent() {
-  // reads Tailwind token set in :root / .dark
   const v = getComputedStyle(document.documentElement)
     .getPropertyValue("--color-accent")
     .trim();
-  // token is "r g b" (from the setup), normalize to rgb()
   return v.includes(" ") ? `rgb(${v})` : v || "#0a5a82";
 }
 function styleForTheme() {
@@ -34,10 +32,11 @@ export default function MapView({ points = [] }: Props) {
   useEffect(() => {
     if (!ref.current) return;
 
+    // Initialize map
     const map = new maplibregl.Map({
       container: ref.current,
       style: styleForTheme(),
-      center: [15, 62], // Sweden-ish
+      center: [15, 62],
       zoom: 4.3,
       minZoom: 3,
       maxZoom: 14,
@@ -47,27 +46,23 @@ export default function MapView({ points = [] }: Props) {
     });
     mapRef.current = map;
 
-    map.once("load", () => {
-      // ensure it fills after layout settles
-      setTimeout(() => map.resize(), 0);
-    });
+    map.once("load", () => setTimeout(() => map.resize(), 0));
 
-    // helper to (re)draw markers
+    // Draw markers function
     const drawMarkers = () => {
       const accent = getAccent();
+
       // clear old
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
 
       points.forEach((p) => {
         const el = document.createElement("div");
-        el.style.width = "12px";
-        el.style.height = "12px";
-        el.style.borderRadius = "9999px";
+        // class for size + border; inline background so it follows the accent token dynamically
+        el.className =
+          "w-3 h-3 rounded-full shadow " +
+          (isDark() ? "ring-2 ring-black/60" : "ring-2 ring-white/85");
         el.style.background = accent;
-        el.style.boxShadow = isDark()
-          ? "0 0 0 2px rgba(0,0,0,0.6)"
-          : "0 0 0 2px rgba(255,255,255,0.85)";
 
         const marker = new maplibregl.Marker({ element: el })
           .setLngLat([p.lon, p.lat])
@@ -79,7 +74,6 @@ export default function MapView({ points = [] }: Props) {
         markersRef.current.push(marker);
       });
 
-      // Fit view if there are several points
       if (points.length >= 2) {
         const b = new maplibregl.LngLatBounds();
         points.forEach((p) => b.extend([p.lon, p.lat]));
@@ -89,7 +83,7 @@ export default function MapView({ points = [] }: Props) {
 
     drawMarkers();
 
-    // Swap style when the page toggles dark mode
+    // redraw markers when points change
     const obs = new MutationObserver(() => {
       const url = styleForTheme();
       map.setStyle(url);
@@ -100,6 +94,7 @@ export default function MapView({ points = [] }: Props) {
       attributeFilter: ["class"],
     });
 
+    // cleanup
     return () => {
       obs.disconnect();
       markersRef.current.forEach((m) => m.remove());
@@ -112,8 +107,7 @@ export default function MapView({ points = [] }: Props) {
     <div className="card p-0">
       <div
         ref={ref}
-        className="w-full h-[260px] rounded-2xl"
-        style={{ overflow: "hidden" }}
+        className="w-full aspect-square min-h-[180px] rounded-2xl overflow-hidden"
       />
     </div>
   );
