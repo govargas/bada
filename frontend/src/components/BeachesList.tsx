@@ -1,3 +1,4 @@
+// frontend/src/components/BeachesList.tsx
 import { useEffect, useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
@@ -8,6 +9,8 @@ import { BeachSummary } from "../types/beaches";
 import { useGeolocation } from "../hooks/useGeolocation";
 import { distanceKm, formatKm } from "../utils/geo";
 import { useUI } from "../store/ui";
+
+const RADIUS_KM = 10; // ← limit
 
 export default function BeachesList() {
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -23,7 +26,7 @@ export default function BeachesList() {
     request,
   } = useGeolocation();
 
-  // Derive sorted items (nearest first when we have coords)
+  // Distances (only used for sorting and the badge)
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
     if (!coords) return data;
@@ -39,11 +42,10 @@ export default function BeachesList() {
     return withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0));
   }, [data, coords]);
 
-  // 🔎 Filter by search (from Zustand store)
+  // Search filter
   const search = useUI((s) => s.search);
   const q = search.trim().toLowerCase();
-
-  const filtered = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
+  const filteredBySearch = useMemo(() => {
     if (!q) return items;
     return items.filter((b) => {
       const hay = `${b.name} ${b.municipality ?? ""}`.toLowerCase();
@@ -51,7 +53,14 @@ export default function BeachesList() {
     });
   }, [items, q]);
 
-  // Refetch once on mount if cache was empty
+  // Radius filter (only when we have coords)
+  const filtered = useMemo(() => {
+    if (!coords) return filteredBySearch;
+    return filteredBySearch.filter((b) =>
+      typeof b._distanceKm === "number" ? b._distanceKm <= RADIUS_KM : true
+    );
+  }, [filteredBySearch, coords]);
+
   useEffect(() => {
     if (!data && !isLoading) refetch();
   }, [data, isLoading, refetch]);
@@ -99,12 +108,15 @@ export default function BeachesList() {
     );
   }
 
-  if (q && filtered.length === 0) {
+  if ((q || coords) && filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">No matches.</p>
+        <p className="font-spectral text-lg">
+          No matches within {RADIUS_KM} km.
+        </p>
         <p className="text-sm text-ink-muted mt-1">
-          Nothing matches “{search}”. Try a different name or municipality.
+          Nothing matches “{search}”{" "}
+          {coords ? `within ${RADIUS_KM} km of you` : ""}.
         </p>
       </div>
     );
@@ -126,16 +138,16 @@ export default function BeachesList() {
         <div aria-live="polite" className="text-sm">
           {coords && (
             <span className="text-ink-muted">
-              Sorting by proximity to your location.
+              Showing beaches within {RADIUS_KM} km & sorting by proximity.
             </span>
           )}
           {geoError && <span className="text-red-600">{geoError}</span>}
         </div>
       </div>
 
-      {/* Map (mobile-first) */}
+      {/* Map — pass ALL filtered points so panning doesn’t “run out” of dots */}
       <MapView
-        points={filtered.slice(0, 200).map((b) => ({
+        points={filtered.map((b) => ({
           id: b.id,
           name: b.name,
           lat: b.lat,
@@ -161,8 +173,7 @@ export default function BeachesList() {
                     {b.lon.toFixed(4)}
                   </p>
                 </div>
-
-                {"_distanceKm" in b && b._distanceKm !== undefined && (
+                {typeof b._distanceKm === "number" && (
                   <span className="badge shrink-0">
                     {formatKm(b._distanceKm)}
                   </span>
@@ -176,7 +187,6 @@ export default function BeachesList() {
   );
 }
 
-/** small skeleton block for loading state */
 function CardSkeleton() {
   return (
     <div className="rounded-2xl border border-border bg-surface-muted p-3">
