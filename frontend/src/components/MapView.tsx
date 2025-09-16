@@ -64,10 +64,10 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
     const map = new maplibregl.Map({
       container: ref.current,
       style: styleForTheme(),
-      center: [18.0649, 59.3326], // Stockholm default
-      zoom: 9,
+      center: [15, 62],
+      zoom: 4.3,
       minZoom: 3,
-      maxZoom: 16,
+      maxZoom: 14,
       dragRotate: false,
       pitchWithRotate: false,
       attributionControl: { compact: true },
@@ -76,16 +76,18 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
 
     map.once("load", () => setTimeout(() => map.resize(), 0));
 
+    // --- drawMarkers (unchanged) ---
     const drawMarkers = () => {
       const accent = getAccent();
       markersRef.current.forEach((m) => m.remove());
       markersRef.current = [];
-
       points.forEach((p) => {
         const el = document.createElement("div");
         el.className =
           "w-3 h-3 rounded-full shadow " +
-          (isDark() ? "ring-2 ring-black/60" : "ring-2 ring-white/85");
+          (document.documentElement.classList.contains("dark")
+            ? "ring-2 ring-black/60"
+            : "ring-2 ring-white/85");
         el.style.background = accent;
 
         const marker = new maplibregl.Marker({ element: el })
@@ -97,47 +99,50 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
 
         markersRef.current.push(marker);
       });
+
+      if (points.length >= 2) {
+        const b = new maplibregl.LngLatBounds();
+        points.forEach((p) => b.extend([p.lon, p.lat]));
+        map.fitBounds(b, { padding: 24, maxZoom: 8 });
+      }
     };
 
     drawMarkers();
 
-    // Theme watcher — swap style, then redraw markers
+    // Swap style when dark mode toggles
     const obs = new MutationObserver(() => {
       const url = styleForTheme();
       map.setStyle(url);
-      map.once("styledata", () => {
-        drawMarkers();
-        // re-apply focus after style swap
-        if (focus?.center && focus.radiusKm) {
-          const b = circleBounds(focus.center, focus.radiusKm);
-          map.fitBounds(b, { padding: 24, maxZoom: 12 });
-        } else if (focus?.center) {
-          map.flyTo({ center: [focus.center.lon, focus.center.lat], zoom: 12 });
-        }
-      });
+      map.once("styledata", drawMarkers);
     });
     obs.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
 
-    // Move end callback → parent
-    if (onMoveEnd) {
-      map.on("moveend", () => {
-        const b = map.getBounds();
-        const c = map.getCenter();
-        onMoveEnd({
-          bounds: {
-            west: b.getWest(),
-            south: b.getSouth(),
-            east: b.getEast(),
-            north: b.getNorth(),
-          },
-          center: { lon: c.lng, lat: c.lat },
-          zoom: map.getZoom(),
-        });
+    // ✅ Only fire onMoveEnd when the user actually interacted
+    let userMoving = false;
+    map.on("movestart", (e) => {
+      // e.originalEvent exists only for user-initiated interactions
+      userMoving = !!(e as any).originalEvent;
+    });
+    map.on("moveend", () => {
+      if (!userMoving) return;
+      userMoving = false;
+      if (!onMoveEnd) return;
+      const b = map.getBounds();
+      const c = map.getCenter();
+      onMoveEnd({
+        bounds: {
+          west: b.getWest(),
+          south: b.getSouth(),
+          east: b.getEast(),
+          north: b.getNorth(),
+        },
+        center: { lon: c.lng, lat: c.lat },
+        zoom: map.getZoom(),
       });
-    }
+    });
 
     return () => {
       obs.disconnect();
@@ -145,8 +150,7 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
       map.remove();
       mapRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [points, onMoveEnd]);
 
   // respond to points change (redraw markers + maybe fit)
   useEffect(() => {

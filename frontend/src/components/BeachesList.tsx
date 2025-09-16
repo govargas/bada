@@ -12,8 +12,8 @@ import { useUI } from "../store/ui";
 
 // Defaults
 const SERGELS_TORG = { lat: 59.3326, lon: 18.0649 };
-const DEFAULT_RADIUS_KM = 20;
-const NEARBY_RADIUS_KM = 10;
+const DEFAULT_RADIUS_KM = 10;
+const NEARBY_RADIUS_KM = 5;
 
 type Mode = "default" | "nearby" | "viewport";
 
@@ -51,8 +51,8 @@ export default function BeachesList() {
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
 
-    // reference point for distance: center in default/nearby; none for viewport
-    const refPoint = mode === "viewport" ? null : center;
+    // Prefer user coords when available; otherwise use center in default/nearby; none in viewport
+    const refPoint = coords ? coords : mode === "viewport" ? null : center;
 
     // Always include _distanceKm (undefined if no ref point) so the type is stable
     const withDist = data.map((b) => {
