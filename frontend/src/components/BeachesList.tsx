@@ -1,5 +1,5 @@
 // frontend/src/components/BeachesList.tsx
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router-dom";
 import MapView from "./MapView";
@@ -10,7 +10,12 @@ import { useGeolocation } from "../hooks/useGeolocation";
 import { distanceKm, formatKm } from "../utils/geo";
 import { useUI } from "../store/ui";
 
-const RADIUS_KM = 10; // ← limit
+// Defaults
+const SERGELS_TORG = { lat: 59.3326, lon: 18.0649 };
+const DEFAULT_RADIUS_KM = 20;
+const NEARBY_RADIUS_KM = 10;
+
+type Mode = "default" | "nearby" | "viewport";
 
 export default function BeachesList() {
   const { data, isLoading, isError, error, refetch } = useQuery({
@@ -19,6 +24,11 @@ export default function BeachesList() {
     staleTime: 5 * 60 * 1000,
   });
 
+  // Global search text
+  const search = useUI((s) => s.search);
+  const q = search.trim().toLowerCase();
+
+  // Geo hook
   const {
     coords,
     loading: geoLoading,
@@ -26,25 +36,42 @@ export default function BeachesList() {
     request,
   } = useGeolocation();
 
-  // Distances (only used for sorting and the badge)
+  // View state (center/radius or viewport bounds)
+  const [mode, setMode] = useState<Mode>("default");
+  const [center, setCenter] = useState(SERGELS_TORG);
+  const [radiusKm, setRadiusKm] = useState(DEFAULT_RADIUS_KM);
+  const [bounds, setBounds] = useState<{
+    west: number;
+    south: number;
+    east: number;
+    north: number;
+  } | null>(null);
+
+  // Build a distance-annotated array (used for sorting + badge)
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
-    if (!coords) return data;
 
+    // reference point for distance: center in default/nearby; none for viewport
+    const refPoint = mode === "viewport" ? null : center;
+
+    // Always include _distanceKm (undefined if no ref point) so the type is stable
     const withDist = data.map((b) => {
-      const km = distanceKm(
-        { lat: coords.lat, lon: coords.lon },
-        { lat: b.lat, lon: b.lon }
-      );
+      const km = refPoint
+        ? distanceKm(
+            { lat: refPoint.lat, lon: refPoint.lon },
+            { lat: b.lat, lon: b.lon }
+          )
+        : undefined;
       return { ...b, _distanceKm: km };
     });
 
-    return withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0));
-  }, [data, coords]);
+    // Sort only if we have distances
+    return refPoint
+      ? withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0))
+      : withDist;
+  }, [data, center, mode]);
 
-  // Search filter
-  const search = useUI((s) => s.search);
-  const q = search.trim().toLowerCase();
+  // Text filter
   const filteredBySearch = useMemo(() => {
     if (!q) return items;
     return items.filter((b) => {
@@ -53,17 +80,63 @@ export default function BeachesList() {
     });
   }, [items, q]);
 
-  // Radius filter (only when we have coords)
+  // Radius or viewport filter
   const filtered = useMemo(() => {
-    if (!coords) return filteredBySearch;
-    return filteredBySearch.filter((b) =>
-      typeof b._distanceKm === "number" ? b._distanceKm <= RADIUS_KM : true
-    );
-  }, [filteredBySearch, coords]);
+    if (mode === "viewport" && bounds) {
+      // show beaches inside current map view
+      return filteredBySearch.filter(
+        (b) =>
+          b.lon >= bounds.west &&
+          b.lon <= bounds.east &&
+          b.lat >= bounds.south &&
+          b.lat <= bounds.north
+      );
+    }
 
+    // default/nearby → use radius from current center
+    return filteredBySearch.filter((b) => {
+      if (mode === "default" || mode === "nearby") {
+        const km = distanceKm(center, { lat: b.lat, lon: b.lon });
+        return km <= radiusKm;
+      }
+      return true;
+    });
+  }, [filteredBySearch, mode, bounds, center, radiusKm]);
+
+  // Initial fetch safeguard
   useEffect(() => {
     if (!data && !isLoading) refetch();
   }, [data, isLoading, refetch]);
+
+  // When geolocation coordinates arrive/changes, switch to nearby mode and fit
+  useEffect(() => {
+    if (!coords) return;
+    setCenter({ lat: coords.lat, lon: coords.lon });
+    setRadiusKm(NEARBY_RADIUS_KM);
+    setMode("nearby");
+  }, [coords]);
+
+  // “Use current location” — request permission/position (no return value expected)
+  const handleUseLocation = async () => {
+    await request();
+    // coords effect above will run when the hook sets coordinates
+  };
+
+  // Map move -> switch to viewport mode and filter by bounds
+  const handleMoveEnd = (e: {
+    bounds: { west: number; south: number; east: number; north: number };
+    center: { lon: number; lat: number };
+    zoom: number;
+  }) => {
+    setBounds(e.bounds);
+    setMode("viewport");
+  };
+
+  // Focus prop for the map: in default/nearby we guide the map to center+radius
+  const mapFocus =
+    mode === "viewport"
+      ? undefined
+      : { center: { lon: center.lon, lat: center.lat }, radiusKm };
 
   /* ---------- STATES ---------- */
   if (isLoading) {
@@ -108,15 +181,14 @@ export default function BeachesList() {
     );
   }
 
-  if ((q || coords) && filtered.length === 0) {
+  if ((q || mode !== "default") && filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">
-          No matches within {RADIUS_KM} km.
-        </p>
+        <p className="font-spectral text-lg">No matches here.</p>
         <p className="text-sm text-ink-muted mt-1">
-          Nothing matches “{search}”{" "}
-          {coords ? `within ${RADIUS_KM} km of you` : ""}.
+          {mode === "viewport"
+            ? "Pan or zoom to a different area."
+            : `Try widening the radius around this area.`}
         </p>
       </div>
     );
@@ -125,27 +197,38 @@ export default function BeachesList() {
   /* ---------- UI ---------- */
   return (
     <div className="space-y-4">
-      {/* Location action + status */}
+      {/* Controls + status */}
       <div className="flex items-center gap-3">
         <button
           className="px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          onClick={request}
+          onClick={handleUseLocation}
           disabled={geoLoading}
         >
           {geoLoading ? "Getting location…" : "Use current location"}
         </button>
 
         <div aria-live="polite" className="text-sm">
-          {coords && (
+          {mode === "default" && (
             <span className="text-ink-muted">
-              Showing beaches within {RADIUS_KM} km & sorting by proximity.
+              Default view: Sergels torg ± {DEFAULT_RADIUS_KM} km.
             </span>
           )}
-          {geoError && <span className="text-red-600">{geoError}</span>}
+          {mode === "nearby" && (
+            <span className="text-ink-muted">
+              Showing beaches within {NEARBY_RADIUS_KM} km & sorting by
+              proximity.
+            </span>
+          )}
+          {mode === "viewport" && (
+            <span className="text-ink-muted">
+              Showing beaches in the current map view.
+            </span>
+          )}
+          {geoError && <span className="text-red-600"> {geoError}</span>}
         </div>
       </div>
 
-      {/* Map — pass ALL filtered points so panning doesn’t “run out” of dots */}
+      {/* Map */}
       <MapView
         points={filtered.map((b) => ({
           id: b.id,
@@ -153,9 +236,11 @@ export default function BeachesList() {
           lat: b.lat,
           lon: b.lon,
         }))}
+        focus={mapFocus}
+        onMoveEnd={handleMoveEnd}
       />
 
-      {/* Card list */}
+      {/* List (keep to 50 for UX) */}
       <ul className="space-y-3">
         {filtered.slice(0, 50).map((b) => (
           <li key={b.id}>
