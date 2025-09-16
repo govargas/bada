@@ -107,7 +107,8 @@ export default function MapView({ points = [] }: Props) {
     <div className="card p-0">
       <div
         ref={ref}
-        className="w-full aspect-square min-h-[180px] rounded-2xl overflow-hidden"
+        className="w-full h-[260px] rounded-2xl"
+        style={{ overflow: "hidden" }}
       />
     </div>
   );
