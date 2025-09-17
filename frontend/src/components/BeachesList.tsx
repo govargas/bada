@@ -69,7 +69,7 @@ export default function BeachesList() {
     return refPoint
       ? withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0))
       : withDist;
-  }, [data, center, mode]);
+  }, [data, coords, center, mode]); // ← added `coords` here
 
   // Text filter
   const filteredBySearch = useMemo(() => {

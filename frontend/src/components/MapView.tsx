@@ -8,7 +8,7 @@ type Props = {
   points?: Point[];
   /** If provided, the map fits to this center (+ optional radiusKm) */
   focus?: { center: { lon: number; lat: number }; radiusKm?: number };
-  /** Notifies parent when user stops moving the map (for viewport-based filtering) */
+  /** Fires only on *user*-initiated pan/zoom (not programmatic fits) */
   onMoveEnd?: (args: {
     bounds: { west: number; south: number; east: number; north: number };
     center: { lon: number; lat: number };
@@ -40,7 +40,7 @@ function circleBounds(
   radiusKm: number
 ): LngLatBoundsLike {
   const lat = center.lat;
-  const dLat = radiusKm / 111; // ~111km per deg
+  const dLat = radiusKm / 111; // ~111 km per deg
   const dLon = radiusKm / (111 * Math.cos((lat * Math.PI) / 180));
   const west = center.lon - dLon;
   const east = center.lon + dLon;
@@ -56,8 +56,10 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
+  const onMoveEndRef = useRef(onMoveEnd);
+  onMoveEndRef.current = onMoveEnd; // keep latest callback without re-binding listeners
 
-  // init + theme swap + markers
+  // Init map ONCE
   useEffect(() => {
     if (!ref.current) return;
 
@@ -76,63 +78,32 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
 
     map.once("load", () => setTimeout(() => map.resize(), 0));
 
-    // --- drawMarkers (unchanged) ---
-    const drawMarkers = () => {
-      const accent = getAccent();
-      markersRef.current.forEach((m) => m.remove());
-      markersRef.current = [];
-      points.forEach((p) => {
-        const el = document.createElement("div");
-        el.className =
-          "w-3 h-3 rounded-full shadow " +
-          (document.documentElement.classList.contains("dark")
-            ? "ring-2 ring-black/60"
-            : "ring-2 ring-white/85");
-        el.style.background = accent;
-
-        const marker = new maplibregl.Marker({ element: el })
-          .setLngLat([p.lon, p.lat])
-          .setPopup(
-            new maplibregl.Popup({ closeButton: false }).setText(p.name)
-          )
-          .addTo(map);
-
-        markersRef.current.push(marker);
-      });
-
-      if (points.length >= 2) {
-        const b = new maplibregl.LngLatBounds();
-        points.forEach((p) => b.extend([p.lon, p.lat]));
-        map.fitBounds(b, { padding: 24, maxZoom: 8 });
-      }
-    };
-
-    drawMarkers();
-
-    // Swap style when dark mode toggles
+    // Dark/light swap only when theme class changes
     const obs = new MutationObserver(() => {
       const url = styleForTheme();
       map.setStyle(url);
-      map.once("styledata", drawMarkers);
+      // Markers survive style swaps; if your style clears layers we can redraw, but
+      // here we just wait for style to settle so tiles don’t appear blank.
+      map.once("styledata", () => {
+        // no-op; we keep existing markers (no flicker)
+      });
     });
     obs.observe(document.documentElement, {
       attributes: true,
       attributeFilter: ["class"],
     });
 
-    // ✅ Only fire onMoveEnd when the user actually interacted
+    // Only count *user* moves
     let userMoving = false;
     map.on("movestart", (e) => {
-      // e.originalEvent exists only for user-initiated interactions
-      userMoving = !!(e as any).originalEvent;
+      userMoving = !!(e as any).originalEvent; // programmatic fits won't set this
     });
     map.on("moveend", () => {
-      if (!userMoving) return;
+      if (!userMoving || !onMoveEndRef.current) return;
       userMoving = false;
-      if (!onMoveEnd) return;
       const b = map.getBounds();
       const c = map.getCenter();
-      onMoveEnd({
+      onMoveEndRef.current({
         bounds: {
           west: b.getWest(),
           south: b.getSouth(),
@@ -150,45 +121,55 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
       map.remove();
       mapRef.current = null;
     };
-  }, [points, onMoveEnd]);
+  }, []); // ← no dependencies (don’t recreate the map)
 
-  // respond to points change (redraw markers + maybe fit)
+  // Update markers when points change (NO map re-init, NO auto-fit here)
   useEffect(() => {
     const map = mapRef.current;
     if (!map) return;
 
-    // redraw markers
     const accent = getAccent();
+    // clear old
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
+
     points.forEach((p) => {
       const el = document.createElement("div");
       el.className =
         "w-3 h-3 rounded-full shadow " +
         (isDark() ? "ring-2 ring-black/60" : "ring-2 ring-white/85");
       el.style.background = accent;
+
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([p.lon, p.lat])
         .setPopup(new maplibregl.Popup({ closeButton: false }).setText(p.name))
         .addTo(map);
+
       markersRef.current.push(marker);
     });
-
-    // If points are many, keep view; if 1, zoom closer
-    if (points.length === 1) {
-      const p = points[0];
-      map.flyTo({ center: [p.lon, p.lat], zoom: 12 });
-    }
   }, [points]);
 
-  // respond to focus changes (fit to radius/center)
+  // Fit to focus (center + radius) without flashing; allow closer zoom for small radii
   useEffect(() => {
     const map = mapRef.current;
     if (!map || !focus?.center) return;
 
+    map.stop(); // cancel any ongoing camera animation
+
     if (focus.radiusKm && focus.radiusKm > 0) {
-      const b = circleBounds(focus.center, focus.radiusKm);
-      map.fitBounds(b, { padding: 24, maxZoom: 12 });
+      const r = focus.radiusKm;
+
+      // 🔧 TIGHTEN the fit for small radii
+      // - Shrink the radius a bit so bounds aren’t too wide
+      // - Reduce padding so more of the view is the actual area of interest
+      // - Let the map zoom in a bit more
+      const isSmall = r <= 5; // the 5 km “nearby” case
+      const effective = isSmall ? r * 0.65 : r; // <— tighten bounds
+      const padding = isSmall ? 12 : 24; // less padding on small areas
+      const maxZoom = isSmall ? 16 : 12; // allow closer zoom on small areas
+
+      const b = circleBounds(focus.center, effective);
+      map.fitBounds(b, { padding, maxZoom });
     } else {
       map.flyTo({ center: [focus.center.lon, focus.center.lat], zoom: 11 });
     }
