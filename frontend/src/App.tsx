@@ -1,7 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import BeachesList from "./components/BeachesList";
 import BeachDetailPage from "./components/BeachDetailPage";
-import LanguageSwitcher from "./components/LanguageSwitcher";
 import Header from "./components/Header";
 
 export default function App() {

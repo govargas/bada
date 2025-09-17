@@ -47,14 +47,10 @@ export default function BeachesList() {
     north: number;
   } | null>(null);
 
-  // Build a distance-annotated array (used for sorting + badge)
+  // Distance-annotated list (stable type)
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
-
-    // Prefer user coords when available; otherwise use center in default/nearby; none in viewport
     const refPoint = coords ? coords : mode === "viewport" ? null : center;
-
-    // Always include _distanceKm (undefined if no ref point) so the type is stable
     const withDist = data.map((b) => {
       const km = refPoint
         ? distanceKm(
@@ -64,12 +60,10 @@ export default function BeachesList() {
         : undefined;
       return { ...b, _distanceKm: km };
     });
-
-    // Sort only if we have distances
     return refPoint
       ? withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0))
       : withDist;
-  }, [data, coords, center, mode]); // ← added `coords` here
+  }, [data, coords, center, mode]);
 
   // Text filter
   const filteredBySearch = useMemo(() => {
@@ -83,7 +77,6 @@ export default function BeachesList() {
   // Radius or viewport filter
   const filtered = useMemo(() => {
     if (mode === "viewport" && bounds) {
-      // show beaches inside current map view
       return filteredBySearch.filter(
         (b) =>
           b.lon >= bounds.west &&
@@ -92,8 +85,6 @@ export default function BeachesList() {
           b.lat <= bounds.north
       );
     }
-
-    // default/nearby → use radius from current center
     return filteredBySearch.filter((b) => {
       if (mode === "default" || mode === "nearby") {
         const km = distanceKm(center, { lat: b.lat, lon: b.lon });
@@ -108,7 +99,7 @@ export default function BeachesList() {
     if (!data && !isLoading) refetch();
   }, [data, isLoading, refetch]);
 
-  // When geolocation coordinates arrive/changes, switch to nearby mode and fit
+  // Geolocation → nearby mode
   useEffect(() => {
     if (!coords) return;
     setCenter({ lat: coords.lat, lon: coords.lon });
@@ -116,13 +107,11 @@ export default function BeachesList() {
     setMode("nearby");
   }, [coords]);
 
-  // “Use current location” — request permission/position (no return value expected)
   const handleUseLocation = async () => {
-    await request();
-    // coords effect above will run when the hook sets coordinates
+    await request(); // coords effect handles the rest
   };
 
-  // Map move -> switch to viewport mode and filter by bounds
+  // Map move → viewport mode
   const handleMoveEnd = (e: {
     bounds: { west: number; south: number; east: number; north: number };
     center: { lon: number; lat: number };
@@ -132,7 +121,6 @@ export default function BeachesList() {
     setMode("viewport");
   };
 
-  // Focus prop for the map: in default/nearby we guide the map to center+radius
   const mapFocus =
     mode === "viewport"
       ? undefined
@@ -162,7 +150,7 @@ export default function BeachesList() {
         </p>
         <button
           onClick={() => refetch()}
-          className="mt-3 px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="mt-3 w-full px-3 py-3 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
           Retry
         </button>
@@ -188,7 +176,7 @@ export default function BeachesList() {
         <p className="text-sm text-ink-muted mt-1">
           {mode === "viewport"
             ? "Pan or zoom to a different area."
-            : `Try widening the radius around this area.`}
+            : `Try widening the radius.`}
         </p>
       </div>
     );
@@ -197,37 +185,6 @@ export default function BeachesList() {
   /* ---------- UI ---------- */
   return (
     <div className="space-y-4">
-      {/* Controls + status */}
-      <div className="flex items-center gap-3">
-        <button
-          className="px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          onClick={handleUseLocation}
-          disabled={geoLoading}
-        >
-          {geoLoading ? "Getting location…" : "Use current location"}
-        </button>
-
-        <div aria-live="polite" className="text-sm">
-          {mode === "default" && (
-            <span className="text-ink-muted">
-              Default view: Sergels torg ± {DEFAULT_RADIUS_KM} km.
-            </span>
-          )}
-          {mode === "nearby" && (
-            <span className="text-ink-muted">
-              Showing beaches within {NEARBY_RADIUS_KM} km & sorting by
-              proximity.
-            </span>
-          )}
-          {mode === "viewport" && (
-            <span className="text-ink-muted">
-              Showing beaches in the current map view.
-            </span>
-          )}
-          {geoError && <span className="text-red-600"> {geoError}</span>}
-        </div>
-      </div>
-
       {/* Map */}
       <MapView
         points={filtered.map((b) => ({
@@ -239,6 +196,17 @@ export default function BeachesList() {
         focus={mapFocus}
         onMoveEnd={handleMoveEnd}
       />
+
+      {/* Use current location — full width, now under the map */}
+      <div className="px-0">
+        <button
+          className="w-full px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          onClick={handleUseLocation}
+          disabled={geoLoading}
+        >
+          {geoLoading ? "Getting location…" : "Use current location"}
+        </button>
+      </div>
 
       {/* List (keep to 50 for UX) */}
       <ul className="space-y-3">
