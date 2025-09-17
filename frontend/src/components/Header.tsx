@@ -109,7 +109,7 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
             {/* Title BADA (Spectral, tight tracking) */}
             <Link
               to="/"
-              className="font-spectral text-2xl tracking-[-0.06em] leading-none text-ink"
+              className="font-spectral text-4xl font-bold tracking-[-0.06em] leading-none text-ink"
               aria-label="BADA – home"
             >
               BADA
