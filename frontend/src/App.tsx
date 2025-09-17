@@ -9,7 +9,6 @@ export default function App() {
     <div className="min-h-screen">
       <Header />
       <main className="p-4">
-        <LanguageSwitcher />
         <Routes>
           <Route path="/" element={<BeachesList />} />
           <Route path="/beach/:id" element={<BeachDetailPage />} />
