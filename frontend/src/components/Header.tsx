@@ -55,30 +55,13 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
             className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            {/* three wavy lines (replace later with /src/assets/menu_icon.svg) */}
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M3 6c2 2 4 2 6 0s4-2 6 0 4 2 6 0"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-              <path
-                d="M3 12c2 2 4 2 6 0s4-2 6 0 4 2 6 0"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-              <path
-                d="M3 18c2 2 4 2 6 0s4-2 6 0 4 2 6 0"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="1.8"
-                strokeLinecap="round"
-              />
-            </svg>
+            <img
+              src={new URL("../assets/menu_icon.svg", import.meta.url).href}
+              alt=""
+              width={30}
+              height={30}
+              aria-hidden="true"
+            />
           </button>
 
           {/* Flyout menu */}
@@ -130,17 +113,13 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
             className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
             onClick={() => setUserOpen((v) => !v)}
           >
-            {/* swimmer icon (replace with /src/assets/user_icon.svg later */}
-            <svg width="24" height="24" viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M7 14c1.5-1 3-1 4.5 0s3 1 4.5 0M4 18c2-1.3 4-1.3 6 0s4 1.3 6 0"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                fill="none"
-                strokeLinecap="round"
-              />
-              <circle cx="16.5" cy="8.5" r="1.5" fill="currentColor" />
-            </svg>
+            <img
+              src={new URL("../assets/user_icon.svg", import.meta.url).href}
+              alt=""
+              width={40}
+              height={40}
+              aria-hidden="true"
+            />
           </button>
 
           {userOpen && (
