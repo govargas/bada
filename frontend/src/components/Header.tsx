@@ -105,17 +105,17 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
 
         {/* Center: Brand block */}
         <div className="flex-1 min-w-0">
-          <div className="flex flex-col items-center">
-            {/* Title BADA (Spectral, tight tracking) */}
+          <div className="flex items-center justify-center gap-2">
+            {/* Title BADA */}
             <Link
               to="/"
-              className="font-spectral text-4xl font-bold tracking-[-0.06em] leading-none text-ink"
+              className="font-spectral text-4xl font-bold tracking-[-0.06em] leading-none text-ink shrink-0"
               aria-label="BADA – home"
             >
               BADA
             </Link>
-            {/* Subtitle (Inter, two-line, leading to match height visually) */}
-            <div className="text-center text-sm text-ink-muted leading-[1.1]">
+            {/* Subtitle stacked next to it */}
+            <div className="text-left text-sm text-ink-muted leading-[1.1] shrink-0">
               EU Beaches
               <br />
               in Sweden
