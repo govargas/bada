@@ -1,8 +1,10 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUI } from "../store/ui";
+import MenuIcon from "../assets/menu_icon.svg?react";
+import UserIcon from "../assets/user_icon.svg?react";
 
-/** Simple outside-click hook so the menus close on blur */
+// Close popovers when clicking outside
 function useOutsideClose<T extends HTMLElement>(onClose: () => void) {
   const ref = useRef<T | null>(null);
   useEffect(() => {
@@ -15,22 +17,19 @@ function useOutsideClose<T extends HTMLElement>(onClose: () => void) {
   return ref;
 }
 
-/** Dark mode toggle — flips the `dark` class on <html> */
+// Toggle the .dark class on <html>
 function useDarkMode() {
   const [isDark, setIsDark] = useState(() =>
     document.documentElement.classList.contains("dark")
   );
   useEffect(() => {
-    if (isDark) document.documentElement.classList.add("dark");
-    else document.documentElement.classList.remove("dark");
+    document.documentElement.classList.toggle("dark", isDark);
   }, [isDark]);
   return { isDark, setIsDark };
 }
 
 type HeaderProps = {
-  /** Optional: render a language switcher control I already have */
   languageSwitcher?: React.ReactNode;
-  /** Is the user authenticated? (for conditional user menu) */
   authed?: boolean;
 };
 
@@ -41,7 +40,6 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
   const userRef = useOutsideClose<HTMLDivElement>(() => setUserOpen(false));
   const { isDark, setIsDark } = useDarkMode();
 
-  // 🔎 global search state (used by BeachesList to filter)
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
 
@@ -52,19 +50,12 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
         <div className="relative" ref={menuRef}>
           <button
             aria-label="Open menu"
-            className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
             onClick={() => setMenuOpen((v) => !v)}
           >
-            <img
-              src={new URL("../assets/menu_icon.svg", import.meta.url).href}
-              alt=""
-              width={30}
-              height={30}
-              aria-hidden="true"
-            />
+            <MenuIcon width={30} height={30} aria-hidden="true" />
           </button>
 
-          {/* Flyout menu */}
           {menuOpen && (
             <div
               role="menu"
@@ -89,7 +80,6 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
         {/* Center: Brand block */}
         <div className="flex-1 min-w-0">
           <div className="flex items-center justify-center gap-2">
-            {/* Title BADA */}
             <Link
               to="/"
               className="font-spectral text-4xl font-bold tracking-[-0.06em] leading-none text-ink shrink-0"
@@ -97,7 +87,6 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
             >
               BADA
             </Link>
-            {/* Subtitle stacked next to it */}
             <div className="text-left text-sm text-ink-muted leading-[1.1] shrink-0">
               EU Beaches
               <br />
@@ -110,16 +99,10 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
         <div className="relative" ref={userRef}>
           <button
             aria-label="User menu"
-            className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50"
+            className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
             onClick={() => setUserOpen((v) => !v)}
           >
-            <img
-              src={new URL("../assets/user_icon.svg", import.meta.url).href}
-              alt=""
-              width={40}
-              height={40}
-              aria-hidden="true"
-            />
+            <UserIcon width={40} height={40} aria-hidden="true" />
           </button>
 
           {userOpen && (
@@ -160,7 +143,7 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
         </div>
       </div>
 
-      {/* Search bar (now actually filters via global store) */}
+      {/* Search bar */}
       <div className="mx-auto max-w-screen-lg px-3 pb-2">
         <div className="flex gap-2 items-center">
           <input
