@@ -107,7 +107,8 @@ Frontend runs on http://localhost:5173
 ## 👤 Test User Credentials
 
 - Use these to try the app without registering:
-  Email: test@bada.app
+
+Email: test@bada.app
 
 Password: Test1234
 
