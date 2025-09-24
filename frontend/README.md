@@ -1,5 +1,15 @@
 # 🏖️ BADA – Find Safe Beaches in Sweden
 
+![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=white)
+![Express](https://img.shields.io/badge/Backend-Express-000000?logo=express&logoColor=white)
+![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
+![TypeScript](https://img.shields.io/badge/Code-TypeScript-3178C6?logo=typescript&logoColor=white)
+![TailwindCSS](https://img.shields.io/badge/UI-Tailwind_CSS-38B2AC?logo=tailwind-css&logoColor=white)
+![MapLibre](https://img.shields.io/badge/Maps-MapLibre-4264FB?logo=openstreetmap&logoColor=white)
+![i18next](https://img.shields.io/badge/Translations-i18next-26A69A?logo=i18next&logoColor=white)
+![TanStack Query](https://img.shields.io/badge/State-TanStack_Query-FF4154?logo=reactquery&logoColor=white)
+![Deployed](https://img.shields.io/badge/Deployed-Vercel-000000?logo=vercel&logoColor=white)
+
 **BADA** helps beachgoers and families in Sweden find safe, EU-classified bathing waters with real-time quality updates.  
 It replaces outdated or clunky websites with a **clean, mobile-friendly experience** where you can browse nearby beaches on a map, check water quality, and save your favourites.
 
