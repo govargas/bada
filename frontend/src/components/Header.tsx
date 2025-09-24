@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import { useUI } from "../store/ui";
+import { useAuth } from "@/store/auth";
+import { useQueryClient } from "@tanstack/react-query";
 import MenuIcon from "../assets/menu_icon.svg?react";
 import UserIcon from "../assets/user_icon.svg?react";
 
@@ -30,10 +32,9 @@ function useDarkMode() {
 
 type HeaderProps = {
   languageSwitcher?: React.ReactNode;
-  authed?: boolean;
 };
 
-export default function Header({ languageSwitcher, authed }: HeaderProps) {
+export default function Header({ languageSwitcher }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const menuRef = useOutsideClose<HTMLDivElement>(() => setMenuOpen(false));
@@ -42,6 +43,16 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
 
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
+
+  const { token, clearToken } = useAuth();
+  const authed = !!token;
+  const qc = useQueryClient();
+
+  function handleLogout() {
+    clearToken();
+    qc.clear(); // clear cached queries (favorites, etc.)
+    setUserOpen(false);
+  }
 
   return (
     <header className="bg-surface sticky top-0 z-50 border-b border-border">
@@ -124,6 +135,13 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
                   <MenuLink to="/favorites">Favourite beaches</MenuLink>
                   <MenuLink to="/profile">Profile</MenuLink>
                   <MenuLink to="/settings">Settings</MenuLink>
+                  <div className="h-px bg-border my-1" />
+                  <button
+                    className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
+                    onClick={handleLogout}
+                  >
+                    Log out
+                  </button>
                 </>
               )}
               <button
@@ -132,12 +150,6 @@ export default function Header({ languageSwitcher, authed }: HeaderProps) {
               >
                 {isDark ? "Dark theme: on" : "Dark theme: off"}
               </button>
-              {authed && (
-                <>
-                  <div className="h-px bg-border my-1" />
-                  <MenuLink to="/logout">Log out</MenuLink>
-                </>
-              )}
             </div>
           )}
         </div>
