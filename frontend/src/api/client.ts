@@ -24,7 +24,6 @@ export async function apiFetch<T = unknown>(
 
   const res = await fetch(url, { ...options, headers });
 
-  // Optional: normalize common error shapes from backend
   if (!res.ok) {
     let body: any = null;
     try {
@@ -38,7 +37,6 @@ export async function apiFetch<T = unknown>(
     throw error;
   }
 
-  // For 204 No Content
   if (res.status === 204) return undefined as T;
 
   return (await res.json()) as T;
