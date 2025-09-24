@@ -1,4 +1,5 @@
 import { useAuth } from "@/store/auth";
+import { logApi } from "@/utils/logger";
 
 const API_BASE = import.meta.env.VITE_API_BASE;
 
@@ -10,7 +11,7 @@ export async function apiFetch<T = unknown>(
   path: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  const token = useAuth.getState().token; // read current token without subscribing
+  const token = useAuth.getState().token;
   const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
 
   const headers: Record<string, string> = {
@@ -22,15 +23,17 @@ export async function apiFetch<T = unknown>(
     headers.Authorization = `Bearer ${token}`;
   }
 
+  logApi("→", options.method ?? "GET", url, { headers, body: options.body });
+
   const res = await fetch(url, { ...options, headers });
+
+  logApi("←", res.status, res.statusText, url);
 
   if (!res.ok) {
     let body: any = null;
     try {
       body = await res.json();
-    } catch {
-      // ignore parse error
-    }
+    } catch {}
     const error = new Error(body?.error || res.statusText);
     (error as any).status = res.status;
     (error as any).details = body;
