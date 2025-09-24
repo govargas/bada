@@ -57,7 +57,7 @@ It replaces outdated or clunky websites with a **clean, mobile-friendly experien
 
 ## 📸 Screenshots
 
-_(Add screenshots or GIFs here once deployed – e.g. home page, map view, beach detail page, favourites page)_
+_(Will add screenshots or GIFs here once deployed – e.g. home page, map view, beach detail page, favourites page)_
 
 ---
 
@@ -72,18 +72,26 @@ cd bada
 ```
 
 **Backend**
+
+```bash
 cd backend
 cp .env.example .env.local # then fill in your values
 npm install
 npm run dev
 
+```
+
 Backend runs on http://localhost:3000
 
 **Frontend**
+
+```bash
 cd frontend
 cp .env.example .env.local # then fill in your values
 npm install
 npm run dev
+
+```
 
 Frontend runs on http://localhost:5173
 
@@ -91,15 +99,16 @@ Frontend runs on http://localhost:5173
 
 ## 🔑 Environment Variables
 
-See .env.example in both backend/ and frontend/.
-Fill in with your own values (MongoDB Atlas, JWT secret, MapTiler key).
+- See .env.example in both backend/ and frontend/.
+- Fill in with your own values (MongoDB Atlas, JWT secret, MapTiler key).
 
 ---
 
 ## 👤 Test User Credentials
 
-Use these to try the app without registering:
-Email: test@bada.app
+- Use these to try the app without registering:
+  Email: test@bada.app
+
 Password: Test1234
 
 This account already has some favourite beaches saved.
@@ -108,8 +117,8 @@ This account already has some favourite beaches saved.
 
 ## 🌍 Deployment
 
-    •	Frontend: Deployed on Vercel
-    •	Backend: Deployed on Vercel
+- Frontend: Deployed on Vercel
+- Backend: Deployed on Vercel
 
 (Will replace with actual links when deployed)
 
@@ -117,39 +126,38 @@ This account already has some favourite beaches saved.
 
 ## ✅ Requirements Checklist
 
-    •	React frontend
-    •	Node.js + Express backend
-    •	MongoDB database
-    •	Authentication (JWT)
-    •	React Router navigation
-    •	Global state management (Zustand)
-    •	≥2 external libraries (TanStack Query, MapLibre, react-hook-form, i18next)
-    •	Custom React hooks
-    •	Responsive (320px → 1600px+)
-    •	Accessibility & Lighthouse 100% (AA compliant)
-    •	Clean Code practices
+- React frontend
+- Node.js + Express backend
+- MongoDB database
+- Authentication (JWT)
+- React Router navigation
+- Global state management (Zustand)
+- ≥2 external libraries (TanStack Query, MapLibre, react-hook-form, i18next)
+- Custom React hooks
+- Responsive (320px → 1600px+)
+- Accessibility & Lighthouse 100% (AA compliant)
+- Clean Code practices
 
 ---
 
 ## 🧭 Roadmap
 
-    •	Add drag-and-drop sorting for favourites
-    •	Allow notes/tips per beach (e.g. “good for kids”)
-    •	Integrate OpenWeatherMap for weather & water temperature
-    •	Accessibility extras (reduced motion, ARIA live regions)
-    •	Polish with animations and micro-interactions
+- Add drag-and-drop sorting for favourites
+- Allow notes/tips per beach (e.g. “good for kids”)
+- Integrate OpenWeatherMap for weather & water temperature
+- Accessibility extras (reduced motion, ARIA live regions)
+- Polish with animations and micro-interactions
 
 ---
 
 ## 💡 Inspiration & Credits
 
-    •	Data from the Swedish Agency for Marine and Water Management (HaV)
-    •	Maps powered by OpenStreetMap + MapTiler
-    •	Built during the Technigo Fullstack JavaScript Bootcamp (2025)
+- Data from the Swedish Agency for Marine and Water Management (HaV)
+- Maps powered by OpenStreetMap + MapTiler
+- Built during the Technigo Fullstack JavaScript Bootcamp (2025)
 
 ---
 
 ## 👨‍💻 Author
 
-Created by Talo Vargas
-2025
+Created by Talo Vargas, 2025
