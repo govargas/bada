@@ -60,14 +60,19 @@ export default function FavoritesPage() {
         </Link>
       </div>
 
-      {(!favorites || favorites.length === 0) && (
-        <p className="text-ink-muted">
-          You don’t have any favorites yet. Go to the{" "}
-          <Link to="/" className="text-accent underline">
-            map
-          </Link>{" "}
-          and save your first one!
-        </p>
+      {favorites && favorites.length === 0 && (
+        <div className="card p-6">
+          <h2 className="font-spectral text-lg mb-1">No favorites yet</h2>
+          <p className="text-sm text-ink-muted mb-3">
+            Browse the map and tap “Save as favorite” on a beach you like.
+          </p>
+          <Link
+            to="/"
+            className="inline-block px-3 py-2 rounded-2xl border border-border hover:bg-surface-muted"
+          >
+            Go to map
+          </Link>
+        </div>
       )}
 
       <ul className="space-y-3">
