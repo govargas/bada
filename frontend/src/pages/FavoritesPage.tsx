@@ -99,8 +99,11 @@ export default function FavoritesPage() {
                 <div className="text-sm text-ink-muted truncate">
                   {muni || "—"}
                 </div>
-                <div className="mt-1">
+                <div className="mt-1 flex items-center gap-2">
                   <span className={`badge ${qClass}`}>{qText}</span>
+                  {details.isLoading && (
+                    <span className="text-xs text-ink-muted">updating…</span>
+                  )}
                 </div>
               </div>
 
