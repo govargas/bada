@@ -1,2 +1,3 @@
-export declare const healthRouter: import("express-serve-static-core").Router;
+declare const router: import("express-serve-static-core").Router;
+export { router as healthRouter };
 //# sourceMappingURL=health.d.ts.map

@@ -1,10 +1,14 @@
+console.log("Server booted at", new Date().toISOString());
 import express from "express";
 import cors from "cors";
-import serverless from "serverless-http";
-// Routers
 import { healthRouter } from "./routes/health.js";
+import { dbCheckRouter } from "./routes/dbCheck.js";
+import { authRouter } from "./routes/auth.js";
+import { requireAuth } from "./middleware/auth.js";
+import { favoritesRouter } from "./routes/favorites.js";
+import { beachesRouter } from "./routes/beaches.js";
 const app = express();
-// CORS — allow only your deployed frontend (you can comma-separate multiple origins)
+// --- Global middleware ---
 const allowed = (process.env.ALLOWED_ORIGIN ?? "")
     .split(",")
     .map((s) => s.trim())
@@ -13,19 +17,36 @@ app.use(cors({
     origin: allowed.length ? allowed : true, // during local dev if empty, allow all
     credentials: true,
 }));
-// Body parsing
 app.use(express.json());
-// Mount routes under /api
+// --- Public routes (mounted under /api) ---
 app.use("/api", healthRouter);
-// Simple not-found handler
-app.use((_req, res) => {
-    res.status(404).json({ error: "NotFound" });
+app.use("/api", dbCheckRouter);
+app.use("/api", favoritesRouter);
+app.use("/api", beachesRouter);
+// 🔐 Auth routes (public endpoints: /register, /login)
+app.use("/api/auth", authRouter);
+// 🔒 Example protected endpoints (require a Bearer token)
+app.get("/api/protected/ping", requireAuth, (req, res) => {
+    res.json({ ok: true, user: req.user });
 });
-// Centralized error handler (Express 5 catches async errors)
+// To protect /api/auth/me this can also be used
+app.get("/api/auth/me", requireAuth, (req, res) => {
+    res.json({ user: req.user });
+});
+// Temporary direct test
+app.get("/api/health-direct", (_req, res) => {
+    console.log("Hit /api/health-direct");
+    res.json({ ok: true, via: "direct" });
+});
+// 404
+app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
+// Error handler
 app.use((err, _req, res, _next) => {
     console.error("[ERROR]", err);
-    res.status(500).json({ error: "InternalServerError" });
+    const message = process.env.NODE_ENV !== "production" && err instanceof Error
+        ? err.message
+        : undefined;
+    res.status(500).json({ error: "InternalServerError", message });
 });
-// Export serverless handler for Vercel
-export default serverless(app);
+export default app;
 //# sourceMappingURL=index.js.map
