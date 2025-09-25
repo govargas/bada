@@ -1,4 +1,4 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
@@ -7,7 +7,7 @@ import {
   useAddFavorite,
   useRemoveFavorite,
 } from "../api/favorites";
-import { getToken, setToken } from "../utils/auth";
+import { useAuth } from "@/store/auth"; // NEW
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -38,6 +38,9 @@ function qualityClass(q: number | string | undefined) {
 
 export default function BeachDetailPage() {
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const { token } = useAuth(); // NEW
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["beach", id],
@@ -48,7 +51,6 @@ export default function BeachDetailPage() {
 
   // --- FAVORITES HOOKS ---
   const queryClient = useQueryClient();
-  const token = getToken();
   const { data: favorites } = useFavorites();
   const addFav = useAddFavorite();
   const rmFav = useRemoveFavorite();
@@ -97,6 +99,26 @@ export default function BeachDetailPage() {
     ? formatDate(data.latestSampleDate, "short")
     : "—";
 
+  async function handleFavoriteClick() {
+    if (!token) {
+      // Not logged in → route to login and return here after
+      navigate("/login", { replace: false, state: { from: location } });
+      return;
+    }
+    try {
+      if (isFav) {
+        await rmFav.mutateAsync({ id: existingFav?._id, beachId: id });
+      } else {
+        await addFav.mutateAsync(id!); // mutation takes beachId string
+      }
+      // Optional: refresh favorites/beach queries
+      queryClient.invalidateQueries({ queryKey: ["favorites", token] });
+      queryClient.invalidateQueries({ queryKey: ["beach", id] });
+    } catch (e: any) {
+      alert(e?.message ?? "Favorite action failed");
+    }
+  }
+
   return (
     <section className="p-4 space-y-4">
       {/* Heading block */}
@@ -139,30 +161,7 @@ export default function BeachDetailPage() {
         <div className="pt-2 flex items-center gap-2">
           <button
             className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-60"
-            onClick={async () => {
-              if (!getToken()) {
-                const pasted = window.prompt(
-                  "Paste your JWT token to enable favorites:"
-                );
-                if (pasted) {
-                  setToken(pasted.trim());
-                  window.location.reload();
-                }
-                return;
-              }
-              try {
-                if (isFav) {
-                  await rmFav.mutateAsync({
-                    id: existingFav?._id,
-                    beachId: id,
-                  });
-                } else {
-                  await addFav.mutateAsync(id!);
-                }
-              } catch (e: any) {
-                alert(e?.message ?? "Favorite action failed");
-              }
-            }}
+            onClick={handleFavoriteClick}
             disabled={addFav.isPending || rmFav.isPending}
           >
             {isFav ? "★ Remove favorite" : "☆ Save as favorite"}
