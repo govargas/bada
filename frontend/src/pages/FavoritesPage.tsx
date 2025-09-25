@@ -1,6 +1,7 @@
 import { useFavorites, useRemoveFavorite } from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
 import { Link } from "react-router-dom";
+import { useState, useMemo, useEffect } from "react";
 
 function qualityClass(q?: number | string) {
   if (typeof q === "number") {
@@ -24,6 +25,42 @@ export default function FavoritesPage() {
   const details = useBeachDetails(ids);
   const rmFav = useRemoveFavorite();
 
+  // --- Sorting state with persistence ---
+  const [sortBy, setSortBy] = useState<"name" | "municipality">(() => {
+    return (
+      (localStorage.getItem("favoritesSort") as "name" | "municipality") ??
+      "name"
+    );
+  });
+
+  useEffect(() => {
+    localStorage.setItem("favoritesSort", sortBy);
+  }, [sortBy]);
+
+  // --- Derived, enriched list ---
+  const items = useMemo(() => {
+    if (!favorites) return [];
+    const enriched = favorites.map((f) => {
+      const info = details.byId.get(f.beachId);
+      return {
+        fav: f,
+        name: info?.locationName ?? f.beachId,
+        muni: info?.locationArea ?? "",
+        classification: info?.classification,
+        classificationText: info?.classificationText ?? "Unknown",
+      };
+    });
+
+    const collator = new Intl.Collator(undefined, { sensitivity: "base" });
+    enriched.sort((a, b) => {
+      if (sortBy === "name") return collator.compare(a.name, b.name);
+      return collator.compare(a.muni, b.muni);
+    });
+
+    return enriched;
+  }, [favorites, details.byId, sortBy]);
+
+  // --- Loading state ---
   if (isLoading) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
@@ -40,6 +77,7 @@ export default function FavoritesPage() {
     );
   }
 
+  // --- Error state ---
   if (isError) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
@@ -51,13 +89,29 @@ export default function FavoritesPage() {
     );
   }
 
+  // --- Normal render ---
   return (
     <main className="max-w-screen-lg mx-auto p-6 space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="font-spectral text-2xl">Your favorite beaches</h1>
-        <Link to="/" className="underline text-accent">
-          Browse all beaches
-        </Link>
+        <div className="flex items-center gap-3">
+          <label className="text-sm">
+            Sort by:{" "}
+            <select
+              value={sortBy}
+              onChange={(e) =>
+                setSortBy(e.target.value as "name" | "municipality")
+              }
+              className="ml-1 border rounded px-2 py-1 text-sm"
+            >
+              <option value="name">Name</option>
+              <option value="municipality">Municipality</option>
+            </select>
+          </label>
+          <Link to="/" className="underline text-accent">
+            Browse all beaches
+          </Link>
+        </div>
       </div>
 
       {favorites && favorites.length === 0 && (
@@ -76,12 +130,9 @@ export default function FavoritesPage() {
       )}
 
       <ul className="space-y-3">
-        {favorites?.map((fav) => {
-          const info = details.byId.get(fav.beachId);
-          const title = info?.locationName ?? fav.beachId;
-          const muni = info?.locationArea ?? "";
-          const qText = info?.classificationText ?? "Unknown";
-          const qClass = qualityClass(info?.classification ?? qText);
+        {items.map((item) => {
+          const { fav, name, muni, classification, classificationText } = item;
+          const qClass = qualityClass(classification ?? classificationText);
 
           return (
             <li
@@ -92,15 +143,17 @@ export default function FavoritesPage() {
                 <Link
                   to={`/beach/${fav.beachId}`}
                   className="font-medium hover:underline block truncate"
-                  title={title}
+                  title={name}
                 >
-                  {title}
+                  {name}
                 </Link>
                 <div className="text-sm text-ink-muted truncate">
                   {muni || "—"}
                 </div>
                 <div className="mt-1 flex items-center gap-2">
-                  <span className={`badge ${qClass}`}>{qText}</span>
+                  <span className={`badge ${qClass}`}>
+                    {classificationText}
+                  </span>
                   {details.isLoading && (
                     <span className="text-xs text-ink-muted">updating…</span>
                   )}
@@ -120,7 +173,7 @@ export default function FavoritesPage() {
                   onClick={() =>
                     rmFav.mutateAsync({ id: fav._id, beachId: fav.beachId })
                   }
-                  aria-label={`Remove ${title} from favorites`}
+                  aria-label={`Remove ${name} from favorites`}
                 >
                   Remove
                 </button>
