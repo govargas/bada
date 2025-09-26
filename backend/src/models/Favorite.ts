@@ -8,9 +8,12 @@ const favoriteSchema = new Schema(
       required: true,
       index: true,
     },
-    beachId: { type: String, required: true }, // HaV beach identifier (string)
-    note: { type: String, default: "" }, // optional user note
-    order: { type: Number, default: 0 }, // for drag & drop later
+    // HaV beach identifier (string)
+    beachId: { type: String, required: true, index: true },
+    // optional user note
+    note: { type: String, default: "" },
+    // for drag & drop ordering (lower = earlier)
+    order: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
