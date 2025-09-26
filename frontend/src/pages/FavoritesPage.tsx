@@ -2,6 +2,7 @@ import {
   useFavorites,
   useRemoveFavorite,
   type Favorite,
+  useReorderFavorites,
 } from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
 import { Link } from "react-router-dom";
@@ -45,17 +46,13 @@ export default function FavoritesPage() {
   const ids = favorites?.map((f) => f.beachId);
   const details = useBeachDetails(ids);
   const rmFav = useRemoveFavorite();
+  const reorderFavs = useReorderFavorites();
 
   // --- Sort mode with persistence
   const [sortBy, setSortBy] = useState<"custom" | "name" | "municipality">(
-    () => {
-      return (
-        (localStorage.getItem(SORT_KEY) as
-          | "custom"
-          | "name"
-          | "municipality") ?? "name"
-      );
-    }
+    () =>
+      (localStorage.getItem(SORT_KEY) as "custom" | "name" | "municipality") ??
+      "name"
   );
   useEffect(() => {
     localStorage.setItem(SORT_KEY, sortBy);
@@ -75,9 +72,7 @@ export default function FavoritesPage() {
     if (!favorites) return;
     const favIds = favorites.map((f) => f.beachId);
     const known = new Set(order);
-    // add new
     const merged = [...order, ...favIds.filter((id) => !known.has(id))];
-    // remove deleted
     const filtered = merged.filter((id) => favIds.includes(id));
     if (JSON.stringify(filtered) !== JSON.stringify(order)) {
       setOrder(filtered);
@@ -121,11 +116,9 @@ export default function FavoritesPage() {
     const favIds = favorites.map((f) => f.beachId);
 
     if (sortBy === "custom" && order.length) {
-      // follow custom order, but only those that still exist
       return order.filter((id) => favIds.includes(id));
     }
 
-    // Name / Municipality sorting
     const list = favIds.slice();
     const collator = new Intl.Collator(undefined, { sensitivity: "base" });
     list.sort((a, b) => {
@@ -144,7 +137,7 @@ export default function FavoritesPage() {
   );
 
   function onDragEnd(event: DragEndEvent) {
-    if (sortBy !== "custom") return; // only draggable in custom mode
+    if (sortBy !== "custom") return;
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
@@ -154,6 +147,14 @@ export default function FavoritesPage() {
 
     const next = arrayMove(order, oldIndex, newIndex);
     setOrder(next);
+
+    // Call backend to persist
+    reorderFavs.mutate(next, {
+      onError: () => {
+        // Rollback on error
+        setOrder(order);
+      },
+    });
   }
 
   // --- Loading state
@@ -227,7 +228,6 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      {/* Responsive grid: sm≥768:2col, lg≥1024:3col, 2xl≥1536:4col */}
       <DndContext
         sensors={sensors}
         collisionDetection={closestCenter}
@@ -255,7 +255,6 @@ export default function FavoritesPage() {
                     rmFav
                       .mutateAsync({ id: fav._id, beachId: fav.beachId })
                       .then(() => {
-                        // also update local custom order
                         setOrder((prev) => prev.filter((x) => x !== id));
                       })
                   }
