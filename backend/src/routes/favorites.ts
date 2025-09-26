@@ -4,6 +4,7 @@ import { Favorite } from "../models/Favorite.js";
 import { requireAuth, AuthedRequest } from "../middleware/auth.js";
 import { connectDB } from "../lib/db.js";
 import mongoose from "mongoose";
+import type { AnyBulkWriteOperation } from "mongoose";
 
 export const favoritesRouter = Router();
 
@@ -119,7 +120,13 @@ favoritesRouter.patch("/favorites/reorder", requireAuth, async (req, res) => {
         .json({ error: "InvalidBody", details: parsed.error.flatten() });
     }
 
-    const { order } = parsed.data;
+    // Deduplicate ids while preserving first occurrence order
+    const seen = new Set<string>();
+    const order = parsed.data.order.filter((id) => {
+      if (seen.has(id)) return false;
+      seen.add(id);
+      return true;
+    });
 
     // Fetch user's current favorites
     const favs = await Favorite.find({ userId }, { beachId: 1 }).lean();
@@ -129,7 +136,7 @@ favoritesRouter.patch("/favorites/reorder", requireAuth, async (req, res) => {
     const sanitized = order.filter((id) => currentIds.has(id));
 
     // Bulk update for provided ids
-    const ops: any[] = sanitized.map((beachId, idx) => ({
+    const ops: AnyBulkWriteOperation[] = sanitized.map((beachId, idx) => ({
       updateOne: {
         filter: { userId, beachId },
         update: { $set: { order: idx } },
