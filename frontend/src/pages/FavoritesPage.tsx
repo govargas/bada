@@ -1,7 +1,25 @@
-import { useFavorites, useRemoveFavorite } from "@/api/favorites";
+import {
+  useFavorites,
+  useRemoveFavorite,
+  type Favorite,
+} from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
 import { Link } from "react-router-dom";
 import { useState, useMemo, useEffect } from "react";
+import {
+  DndContext,
+  closestCenter,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+} from "@dnd-kit/sortable";
+import SortableFavorite from "@/components/SortableFavorite";
 
 function qualityClass(q?: number | string) {
   if (typeof q === "number") {
@@ -19,48 +37,126 @@ function qualityClass(q?: number | string) {
   return "kpi-unknown";
 }
 
+const SORT_KEY = "favoritesSort"; // 'custom' | 'name' | 'municipality'
+const ORDER_KEY = "favoritesOrder:v1"; // stores array of beachIds
+
 export default function FavoritesPage() {
   const { data: favorites, isLoading, isError, error } = useFavorites();
   const ids = favorites?.map((f) => f.beachId);
   const details = useBeachDetails(ids);
   const rmFav = useRemoveFavorite();
 
-  // --- Sorting state with persistence ---
-  const [sortBy, setSortBy] = useState<"name" | "municipality">(() => {
-    return (
-      (localStorage.getItem("favoritesSort") as "name" | "municipality") ??
-      "name"
-    );
-  });
-
+  // --- Sort mode with persistence
+  const [sortBy, setSortBy] = useState<"custom" | "name" | "municipality">(
+    () => {
+      return (
+        (localStorage.getItem(SORT_KEY) as
+          | "custom"
+          | "name"
+          | "municipality") ?? "name"
+      );
+    }
+  );
   useEffect(() => {
-    localStorage.setItem("favoritesSort", sortBy);
+    localStorage.setItem(SORT_KEY, sortBy);
   }, [sortBy]);
 
-  // --- Derived, enriched list ---
-  const items = useMemo(() => {
-    if (!favorites) return [];
-    const enriched = favorites.map((f) => {
+  // --- Custom order state (array of beachIds), persisted
+  const [order, setOrder] = useState<string[]>(() => {
+    try {
+      const raw = localStorage.getItem(ORDER_KEY);
+      return raw ? (JSON.parse(raw) as string[]) : [];
+    } catch {
+      return [];
+    }
+  });
+  // Reconcile order whenever favorites change (add missing, remove gone)
+  useEffect(() => {
+    if (!favorites) return;
+    const favIds = favorites.map((f) => f.beachId);
+    const known = new Set(order);
+    // add new
+    const merged = [...order, ...favIds.filter((id) => !known.has(id))];
+    // remove deleted
+    const filtered = merged.filter((id) => favIds.includes(id));
+    if (JSON.stringify(filtered) !== JSON.stringify(order)) {
+      setOrder(filtered);
+    }
+  }, [favorites]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    localStorage.setItem(ORDER_KEY, JSON.stringify(order));
+  }, [order]);
+
+  // --- Enriched items map
+  const enriched = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        fav: Favorite;
+        name: string;
+        muni: string;
+        classification?: number | string;
+        classificationText: string;
+      }
+    >();
+
+    if (!favorites) return map;
+
+    for (const f of favorites) {
       const info = details.byId.get(f.beachId);
-      return {
+      map.set(f.beachId, {
         fav: f,
         name: info?.locationName ?? f.beachId,
         muni: info?.locationArea ?? "",
-        classification: info?.classification,
+        classification: info?.classification ?? info?.classificationText,
         classificationText: info?.classificationText ?? "Unknown",
-      };
-    });
+      });
+    }
+    return map;
+  }, [favorites, details.byId]);
 
+  // --- Items to render (IDs in display order)
+  const displayIds = useMemo(() => {
+    if (!favorites) return [];
+    const favIds = favorites.map((f) => f.beachId);
+
+    if (sortBy === "custom" && order.length) {
+      // follow custom order, but only those that still exist
+      return order.filter((id) => favIds.includes(id));
+    }
+
+    // Name / Municipality sorting
+    const list = favIds.slice();
     const collator = new Intl.Collator(undefined, { sensitivity: "base" });
-    enriched.sort((a, b) => {
-      if (sortBy === "name") return collator.compare(a.name, b.name);
-      return collator.compare(a.muni, b.muni);
+    list.sort((a, b) => {
+      const A = enriched.get(a);
+      const B = enriched.get(b);
+      if (!A || !B) return 0;
+      if (sortBy === "name") return collator.compare(A.name, B.name);
+      return collator.compare(A.muni, B.muni);
     });
+    return list;
+  }, [favorites, sortBy, order, enriched]);
 
-    return enriched;
-  }, [favorites, details.byId, sortBy]);
+  // --- DnD sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } })
+  );
 
-  // --- Loading state ---
+  function onDragEnd(event: DragEndEvent) {
+    if (sortBy !== "custom") return; // only draggable in custom mode
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = order.indexOf(String(active.id));
+    const newIndex = order.indexOf(String(over.id));
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const next = arrayMove(order, oldIndex, newIndex);
+    setOrder(next);
+  }
+
+  // --- Loading state
   if (isLoading) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
@@ -77,7 +173,7 @@ export default function FavoritesPage() {
     );
   }
 
-  // --- Error state ---
+  // --- Error state
   if (isError) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
@@ -89,10 +185,10 @@ export default function FavoritesPage() {
     );
   }
 
-  // --- Normal render ---
+  // --- Normal render
   return (
     <main className="max-w-screen-lg mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <h1 className="font-spectral text-2xl">Your favorite beaches</h1>
         <div className="flex items-center gap-3">
           <label className="text-sm">
@@ -100,12 +196,14 @@ export default function FavoritesPage() {
             <select
               value={sortBy}
               onChange={(e) =>
-                setSortBy(e.target.value as "name" | "municipality")
+                setSortBy(e.target.value as "custom" | "name" | "municipality")
               }
               className="ml-1 border rounded px-2 py-1 text-sm"
+              aria-label="Sort favorites"
             >
-              <option value="name">Name</option>
-              <option value="municipality">Municipality</option>
+              <option value="custom">Custom (drag & drop)</option>
+              <option value="name">Name (A–Z)</option>
+              <option value="municipality">Municipality (A–Z)</option>
             </select>
           </label>
           <Link to="/" className="underline text-accent">
@@ -129,59 +227,44 @@ export default function FavoritesPage() {
         </div>
       )}
 
-      <ul className="space-y-3">
-        {items.map((item) => {
-          const { fav, name, muni, classification, classificationText } = item;
-          const qClass = qualityClass(classification ?? classificationText);
+      {/* Responsive grid: sm≥768:2col, lg≥1024:3col, 2xl≥1536:4col */}
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCenter}
+        onDragEnd={onDragEnd}
+      >
+        <SortableContext items={displayIds} strategy={rectSortingStrategy}>
+          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+            {displayIds.map((id) => {
+              const item = enriched.get(id);
+              if (!item) return null;
+              const { fav, name, muni, classification, classificationText } =
+                item;
+              const klass = qualityClass(classification ?? classificationText);
 
-          return (
-            <li
-              key={fav._id}
-              className="card p-4 flex items-center justify-between gap-4"
-            >
-              <div className="min-w-0">
-                <Link
-                  to={`/beach/${fav.beachId}`}
-                  className="font-medium hover:underline block truncate"
-                  title={name}
-                >
-                  {name}
-                </Link>
-                <div className="text-sm text-ink-muted truncate">
-                  {muni || "—"}
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className={`badge ${qClass}`}>
-                    {classificationText}
-                  </span>
-                  {details.isLoading && (
-                    <span className="text-xs text-ink-muted">updating…</span>
-                  )}
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2 shrink-0">
-                <Link
-                  to={`/beach/${fav.beachId}`}
-                  className="px-3 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-sm"
-                >
-                  View
-                </Link>
-                <button
-                  className="px-3 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-sm"
-                  disabled={rmFav.isPending}
-                  onClick={() =>
-                    rmFav.mutateAsync({ id: fav._id, beachId: fav.beachId })
+              return (
+                <SortableFavorite
+                  key={fav._id}
+                  id={id}
+                  name={name}
+                  muni={muni}
+                  classificationText={classificationText}
+                  classificationClass={klass}
+                  disabled={sortBy !== "custom"}
+                  onRemove={() =>
+                    rmFav
+                      .mutateAsync({ id: fav._id, beachId: fav.beachId })
+                      .then(() => {
+                        // also update local custom order
+                        setOrder((prev) => prev.filter((x) => x !== id));
+                      })
                   }
-                  aria-label={`Remove ${name} from favorites`}
-                >
-                  Remove
-                </button>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
+                />
+              );
+            })}
+          </ul>
+        </SortableContext>
+      </DndContext>
     </main>
   );
 }
