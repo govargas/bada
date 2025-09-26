@@ -12,16 +12,25 @@ export type Favorite = {
   updatedAt?: string;
 };
 
+/**
+ * List favorites for the current user.
+ * IMPORTANT: subscribe to token via selector so the query updates on login/logout.
+ */
 export function useFavorites() {
-  const token = useAuth.getState().token;
+  const token = useAuth((s) => s.token);
   return useQuery<Favorite[]>({
     queryKey: ["favorites", token],
     enabled: !!token,
     queryFn: () => apiFetch("/favorites"),
     staleTime: 60_000,
+    // keepPreviousData: true, // optional for smoother transitions
   });
 }
 
+/**
+ * Add a new favorite by beachId.
+ * OK to use getState() in mutations to avoid unnecessary re-renders.
+ */
 export function useAddFavorite() {
   const qc = useQueryClient();
   const token = useAuth.getState().token;
@@ -38,6 +47,9 @@ export function useAddFavorite() {
   });
 }
 
+/**
+ * Remove a favorite (by _id or by beachId) with a small optimistic update.
+ */
 export function useRemoveFavorite() {
   const qc = useQueryClient();
   const token = useAuth.getState().token;
@@ -49,11 +61,9 @@ export function useRemoveFavorite() {
         : `/favorites/by-beach/${vars.beachId}`;
       return apiFetch<void>(url, { method: "DELETE" });
     },
-    // small optimistic update (works for either id or beachId)
     onMutate: async (vars) => {
       await qc.cancelQueries({ queryKey: ["favorites", token] });
       const prev = qc.getQueryData<Favorite[]>(["favorites", token]);
-
       if (prev) {
         const next = prev.filter((f) =>
           vars.id ? f._id !== vars.id : f.beachId !== vars.beachId
@@ -71,6 +81,10 @@ export function useRemoveFavorite() {
   });
 }
 
+/**
+ * Persist custom order of favorites on the server.
+ * Accepts an array of beachIds in the desired order.
+ */
 export function useReorderFavorites() {
   const qc = useQueryClient();
   const token = useAuth.getState().token;

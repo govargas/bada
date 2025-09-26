@@ -11,6 +11,12 @@ export async function apiFetch<T = unknown>(
   path: string,
   options: FetchOptions = {}
 ): Promise<T> {
+  if (!API_BASE && !path.startsWith("http")) {
+    throw new Error(
+      "VITE_API_BASE is not set. Did you configure frontend/.env(.local)?"
+    );
+  }
+
   const token = useAuth.getState().token;
   const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
 
@@ -33,7 +39,9 @@ export async function apiFetch<T = unknown>(
     let body: any = null;
     try {
       body = await res.json();
-    } catch {}
+    } catch {
+      // non-JSON error response
+    }
     const error = new Error(body?.error || res.statusText);
     (error as any).status = res.status;
     (error as any).details = body;
