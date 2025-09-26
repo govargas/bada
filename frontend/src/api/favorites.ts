@@ -70,3 +70,18 @@ export function useRemoveFavorite() {
     },
   });
 }
+
+export function useReorderFavorites() {
+  const qc = useQueryClient();
+  const token = useAuth.getState().token;
+  return useMutation({
+    mutationFn: (order: string[]) =>
+      apiFetch<void>("/favorites/reorder", {
+        method: "PATCH",
+        body: JSON.stringify({ order }),
+      }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["favorites", token] });
+    },
+  });
+}
