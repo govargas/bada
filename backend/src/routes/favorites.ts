@@ -12,8 +12,8 @@ const zCreate = z.object({
   note: z.string().max(500).optional(),
 });
 
+// Ensure DB connection for every favorites op
 favoritesRouter.use(async (_req, _res, next) => {
-  // ensure DB connection for every favorites op
   try {
     await connectDB();
     next();
@@ -22,19 +22,26 @@ favoritesRouter.use(async (_req, _res, next) => {
   }
 });
 
-// GET /api/favorites  -> list current user's favorites
+/**
+ * GET /api/favorites
+ * List current user's favorites (stable order)
+ */
 favoritesRouter.get("/favorites", requireAuth, async (req, res) => {
   const userId = (req as AuthedRequest).user.sub;
   const items = await Favorite.find({ userId })
-    .sort({ order: 1, createdAt: -1 })
+    .sort({ order: 1, updatedAt: 1, _id: 1 }) // stable sort
     .lean();
   res.json(items);
 });
 
-// POST /api/favorites
+/**
+ * POST /api/favorites
+ */
 favoritesRouter.post("/favorites", requireAuth, async (req, res) => {
   const parsed = zCreate.safeParse(req.body);
   if (!parsed.success) {
+    // keep the existing error style
+    // @ts-ignore - z.treeifyError is available in the codebase
     return res
       .status(400)
       .json({ error: "InvalidBody", details: z.treeifyError(parsed.error) });
@@ -58,7 +65,9 @@ favoritesRouter.post("/favorites", requireAuth, async (req, res) => {
   }
 });
 
-// DELETE /api/favorites/:id
+/**
+ * DELETE /api/favorites/:id
+ */
 favoritesRouter.delete("/favorites/:id", requireAuth, async (req, res) => {
   const userId = (req as AuthedRequest).user.sub;
 
@@ -74,7 +83,9 @@ favoritesRouter.delete("/favorites/:id", requireAuth, async (req, res) => {
   res.json({ ok: true });
 });
 
-// DELETE /api/favorites/by-beach/:beachId
+/**
+ * DELETE /api/favorites/by-beach/:beachId
+ */
 favoritesRouter.delete(
   "/favorites/by-beach/:beachId",
   requireAuth,
@@ -87,3 +98,65 @@ favoritesRouter.delete(
     res.json({ ok: true });
   }
 );
+
+/**
+ * PATCH /api/favorites/reorder
+ * Persist custom order. Accepts: { order: string[] } where each string is a beachId.
+ * Non-owned or unknown ids are ignored. Any favorites not included are appended after.
+ */
+favoritesRouter.patch("/favorites/reorder", requireAuth, async (req, res) => {
+  try {
+    const userId = (req as AuthedRequest).user.sub;
+
+    const schema = z.object({
+      order: z.array(z.string()).min(0),
+    });
+
+    const parsed = schema.safeParse(req.body);
+    if (!parsed.success) {
+      return res
+        .status(400)
+        .json({ error: "InvalidBody", details: parsed.error.flatten() });
+    }
+
+    const { order } = parsed.data;
+
+    // Fetch user's current favorites
+    const favs = await Favorite.find({ userId }, { beachId: 1 }).lean();
+    const currentIds = new Set(favs.map((f) => f.beachId));
+
+    // Keep only valid (owned) ids, preserve payload order
+    const sanitized = order.filter((id) => currentIds.has(id));
+
+    // Bulk update for provided ids
+    const ops: any[] = sanitized.map((beachId, idx) => ({
+      updateOne: {
+        filter: { userId, beachId },
+        update: { $set: { order: idx } },
+      },
+    }));
+
+    // Append any missing favorites not included in payload
+    const missing = favs
+      .map((f) => f.beachId)
+      .filter((id) => !sanitized.includes(id));
+
+    ops.push(
+      ...missing.map((beachId, addIdx) => ({
+        updateOne: {
+          filter: { userId, beachId },
+          update: { $set: { order: sanitized.length + addIdx } },
+        },
+      }))
+    );
+
+    if (ops.length > 0) {
+      await Favorite.bulkWrite(ops, { ordered: false });
+    }
+
+    return res.status(204).end();
+  } catch (err) {
+    console.error("REORDER_ERR", err);
+    return res.status(500).json({ error: "InternalServerError" });
+  }
+});
