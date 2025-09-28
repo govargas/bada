@@ -12,19 +12,42 @@ import { beachesRouter } from "./routes/beaches.js";
 
 const app = express();
 
-// --- Global middleware ---
-const allowed = (process.env.ALLOWED_ORIGIN ?? "")
+// --- CORS setup ---
+// Prefer CORS_ORIGIN; fallback to ALLOWED_ORIGIN.
+// Example env: CORS_ORIGIN="http://localhost:5173,https://your-site.netlify.app"
+const allowedOrigins = (
+  process.env.CORS_ORIGIN ||
+  process.env.ALLOWED_ORIGIN ||
+  ""
+)
   .split(",")
   .map((s) => s.trim())
   .filter(Boolean);
 
-app.use(
-  cors({
-    origin: allowed.length ? allowed : true, // during local dev if empty, allow all
-    credentials: true,
-  })
-);
+const corsOptions: cors.CorsOptions = {
+  origin(origin, callback) {
+    // Allow requests without Origin header (e.g. Postman, curl)
+    if (!origin) return callback(null, true);
 
+    if (allowedOrigins.length === 0) {
+      // no origins configured → dev mode → allow all
+      return callback(null, true);
+    }
+
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    }
+    return callback(new Error("Not allowed by CORS"));
+  },
+  credentials: true,
+  methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+};
+
+app.use(cors(corsOptions));
+// Preflight for all routes
+app.options("*", cors(corsOptions));
+
+// --- Global middleware ---
 app.use(express.json());
 
 // --- Public routes (mounted under /api) ---
@@ -41,7 +64,6 @@ app.get("/api/protected/ping", requireAuth, (req, res) => {
   res.json({ ok: true, user: (req as any).user });
 });
 
-// To protect /api/auth/me this can also be used
 app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json({ user: (req as any).user });
 });
