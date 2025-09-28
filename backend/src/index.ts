@@ -44,8 +44,6 @@ const corsOptions: cors.CorsOptions = {
 };
 
 app.use(cors(corsOptions));
-// Preflight for all routes
-app.options("*", cors(corsOptions));
 
 // --- Global middleware ---
 app.use(express.json());
