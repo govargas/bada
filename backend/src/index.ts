@@ -12,24 +12,6 @@ import { beachesRouter } from "./routes/beaches.js";
 
 const app = express();
 
-/** ── TEMP GUARD: log/neutralize invalid Express-5 star preflights ───────────────── */
-const originalOptions = (app as any).options?.bind(app);
-(app as any).options = (path: any, ...handlers: any[]) => {
-  // Log every options registration, so we see who calls it
-  console.error("[guard] app.options called with path =", path);
-  // Also log the stack once (trim to keep logs readable)
-  const stack = (new Error().stack || "").split("\n").slice(0, 8).join("\n");
-  console.error(stack);
-
-  if (path === "*") {
-    console.warn("[guard] Blocking app.options('*') (invalid on Express 5)");
-    // don't register, just return app to avoid crash
-    return app;
-  }
-  return originalOptions(path, ...handlers);
-};
-/** ───────────────────────────────────────────────────────────────────────────────── */
-
 /** ── TEMP: dump routes after mounting, to spot any '*' entries ─────────────────── */
 function dumpRoutes(label: string) {
   try {
