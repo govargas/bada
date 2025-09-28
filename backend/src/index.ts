@@ -12,37 +12,6 @@ import { beachesRouter } from "./routes/beaches.js";
 
 const app = express();
 
-/** ── TEMP: dump routes after mounting, to spot any '*' entries ─────────────────── */
-function dumpRoutes(label: string) {
-  try {
-    // @ts-ignore internal structure
-    const stack = app._router?.stack || [];
-    console.log(`[routes dump] ${label}`);
-    for (const layer of stack) {
-      // layers with .route have concrete methods/paths
-      if (layer.route) {
-        const methods = Object.keys(layer.route.methods)
-          .filter(Boolean)
-          .join(",");
-        console.log("  →", methods, layer.route.path);
-      } else if (layer.name === "router" && layer.handle?.stack) {
-        // mounted routers
-        for (const s of layer.handle.stack) {
-          if (s.route) {
-            const methods = Object.keys(s.route.methods)
-              .filter(Boolean)
-              .join(",");
-            console.log("  ↳", methods, s.route.path);
-          }
-        }
-      }
-    }
-  } catch (e) {
-    console.log("[routes dump] failed:", e);
-  }
-}
-/** ──────────────────────────────────────────────────────────────────────────────── */
-
 // --- CORS setup ---
 // Prefer CORS_ORIGIN; fallback to ALLOWED_ORIGIN.
 // Example env: CORS_ORIGIN="http://localhost:5173,https://your-site.netlify.app"
