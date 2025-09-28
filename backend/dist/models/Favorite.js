@@ -6,9 +6,12 @@ const favoriteSchema = new Schema({
         required: true,
         index: true,
     },
-    beachId: { type: String, required: true }, // HaV beach identifier (string)
-    note: { type: String, default: "" }, // optional user note
-    order: { type: Number, default: 0 }, // for drag & drop later
+    // HaV beach identifier (string)
+    beachId: { type: String, required: true, index: true },
+    // optional user note
+    note: { type: String, default: "" },
+    // for drag & drop ordering (lower = earlier)
+    order: { type: Number, default: 0 },
 }, { timestamps: true });
 // Prevent duplicates: one user can favorite each beach only once
 favoriteSchema.index({ userId: 1, beachId: 1 }, { unique: true });

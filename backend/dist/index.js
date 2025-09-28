@@ -1,3 +1,4 @@
+// backend/src/index.ts
 console.log("Server booted at", new Date().toISOString());
 import express from "express";
 import cors from "cors";
@@ -8,39 +9,62 @@ import { requireAuth } from "./middleware/auth.js";
 import { favoritesRouter } from "./routes/favorites.js";
 import { beachesRouter } from "./routes/beaches.js";
 const app = express();
-// --- Global middleware ---
-const allowed = (process.env.ALLOWED_ORIGIN ?? "")
+/** ── CORS (allow comma-separated origins via CORS_ORIGIN or ALLOWED_ORIGIN) ── */
+const allowedOrigins = (process.env.CORS_ORIGIN ||
+    process.env.ALLOWED_ORIGIN ||
+    "")
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean);
-app.use(cors({
-    origin: allowed.length ? allowed : true, // during local dev if empty, allow all
+const corsOptions = {
+    origin(origin, cb) {
+        if (!origin)
+            return cb(null, true); // non-browser clients
+        if (allowedOrigins.length === 0)
+            return cb(null, true); // dev fallback
+        if (allowedOrigins.includes(origin))
+            return cb(null, true);
+        return cb(new Error("Not allowed by CORS"));
+    },
     credentials: true,
-}));
+    methods: "GET,HEAD,PUT,PATCH,POST,DELETE",
+};
+app.use(cors(corsOptions));
 app.use(express.json());
-// --- Public routes (mounted under /api) ---
+/** ── TEMP DIAG: env presence (put this BEFORE the 404) ───────────────────── */
+app.get("/api/debug/env", (_req, res) => {
+    res.json({
+        HAV_BASE_URL: !!process.env.HAV_BASE_URL,
+        HAV_USER_AGENT: !!process.env.HAV_USER_AGENT,
+        HAV_V2_BASE: !!process.env.HAV_V2_BASE,
+        ALLOWED_ORIGIN: process.env.ALLOWED_ORIGIN ?? "",
+        CORS_ORIGIN: process.env.CORS_ORIGIN ?? "",
+        MONGODB_URI_present: !!process.env.MONGODB_URI,
+        JWT_SECRET_present: !!process.env.JWT_SECRET,
+        NODE_ENV: process.env.NODE_ENV ?? "undefined",
+        PORT: process.env.PORT ?? "undefined",
+    });
+});
+/** ── Public routers under /api ───────────────────────────────────────────── */
 app.use("/api", healthRouter);
 app.use("/api", dbCheckRouter);
 app.use("/api", favoritesRouter);
 app.use("/api", beachesRouter);
-// 🔐 Auth routes (public endpoints: /register, /login)
+/** ── Auth ───────────────────────────────────────────────────────────────── */
 app.use("/api/auth", authRouter);
-// 🔒 Example protected endpoints (require a Bearer token)
 app.get("/api/protected/ping", requireAuth, (req, res) => {
     res.json({ ok: true, user: req.user });
 });
-// To protect /api/auth/me this can also be used
 app.get("/api/auth/me", requireAuth, (req, res) => {
     res.json({ user: req.user });
 });
-// Temporary direct test
+/** ── Quick direct health ping ────────────────────────────────────────────── */
 app.get("/api/health-direct", (_req, res) => {
     console.log("Hit /api/health-direct");
     res.json({ ok: true, via: "direct" });
 });
-// 404
+/** ── 404 + error handler (MUST be last) ──────────────────────────────────── */
 app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
-// Error handler
 app.use((err, _req, res, _next) => {
     console.error("[ERROR]", err);
     const message = process.env.NODE_ENV !== "production" && err instanceof Error
