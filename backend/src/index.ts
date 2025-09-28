@@ -72,8 +72,6 @@ app.get("/api/health-direct", (_req, res) => {
   res.json({ ok: true, via: "direct" });
 });
 
-dumpRoutes("after mount");
-
 // 404
 app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
 
