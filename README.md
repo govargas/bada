@@ -1,5 +1,7 @@
 # 🏖️ BADA – Find Safe Beaches in Sweden
 
+- [Try it out here](https://badaweb.netlify.app/) (deployed on Netlify)
+
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=white)
 ![Express](https://img.shields.io/badge/Backend-Express-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
@@ -23,6 +25,7 @@ It replaces outdated or clunky websites with a **clean, mobile-friendly experien
 - ❤️ **Create an account and save favourite beaches** to your profile
 - 🌗 **Dark mode** and responsive design (mobile → desktop)
 - 🌐 **Multi-language support** (Swedish / English)
+- 🔀 **Drag-and-drop sorting for favorites**
 
 ---
 
@@ -118,10 +121,8 @@ This account already has some favourite beaches saved.
 
 ## 🌍 Deployment
 
-- Frontend: Deployed on Vercel
-- Backend: Deployed on Vercel
-
-(Will replace with actual links when deployed)
+- Frontend: Deployed on Netlify: https://badaweb.netlify.app/
+- Backend: Deployed on Vercel → https://bada-backend.vercel.app/api/health
 
 ---
 
@@ -143,7 +144,6 @@ This account already has some favourite beaches saved.
 
 ## 🧭 Roadmap
 
-- Add drag-and-drop sorting for favourites
 - Allow notes/tips per beach (e.g. “good for kids”)
 - Integrate OpenWeatherMap for weather & water temperature
 - Accessibility extras (reduced motion, ARIA live regions)
