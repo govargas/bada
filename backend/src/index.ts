@@ -12,6 +12,55 @@ import { beachesRouter } from "./routes/beaches.js";
 
 const app = express();
 
+/** ── TEMP GUARD: log/neutralize invalid Express-5 star preflights ───────────────── */
+const originalOptions = (app as any).options?.bind(app);
+(app as any).options = (path: any, ...handlers: any[]) => {
+  // Log every options registration, so we see who calls it
+  console.error("[guard] app.options called with path =", path);
+  // Also log the stack once (trim to keep logs readable)
+  const stack = (new Error().stack || "").split("\n").slice(0, 8).join("\n");
+  console.error(stack);
+
+  if (path === "*") {
+    console.warn("[guard] Blocking app.options('*') (invalid on Express 5)");
+    // don't register, just return app to avoid crash
+    return app;
+  }
+  return originalOptions(path, ...handlers);
+};
+/** ───────────────────────────────────────────────────────────────────────────────── */
+
+/** ── TEMP: dump routes after mounting, to spot any '*' entries ─────────────────── */
+function dumpRoutes(label: string) {
+  try {
+    // @ts-ignore internal structure
+    const stack = app._router?.stack || [];
+    console.log(`[routes dump] ${label}`);
+    for (const layer of stack) {
+      // layers with .route have concrete methods/paths
+      if (layer.route) {
+        const methods = Object.keys(layer.route.methods)
+          .filter(Boolean)
+          .join(",");
+        console.log("  →", methods, layer.route.path);
+      } else if (layer.name === "router" && layer.handle?.stack) {
+        // mounted routers
+        for (const s of layer.handle.stack) {
+          if (s.route) {
+            const methods = Object.keys(s.route.methods)
+              .filter(Boolean)
+              .join(",");
+            console.log("  ↳", methods, s.route.path);
+          }
+        }
+      }
+    }
+  } catch (e) {
+    console.log("[routes dump] failed:", e);
+  }
+}
+/** ──────────────────────────────────────────────────────────────────────────────── */
+
 // --- CORS setup ---
 // Prefer CORS_ORIGIN; fallback to ALLOWED_ORIGIN.
 // Example env: CORS_ORIGIN="http://localhost:5173,https://your-site.netlify.app"
@@ -71,6 +120,8 @@ app.get("/api/health-direct", (_req, res) => {
   console.log("Hit /api/health-direct");
   res.json({ ok: true, via: "direct" });
 });
+
+dumpRoutes("after mount");
 
 // 404
 app.use((_req, res) => res.status(404).json({ error: "NotFound" }));
