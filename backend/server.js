@@ -16,7 +16,7 @@ mongoose.connect(mongoUrl);
 mongoose.Promise = Promise;
 
 // --- CORS setup ---
-// Example: CORS_ORIGIN="http://localhost:5173,https://netlifylink.app
+// Example: CORS_ORIGIN="http://localhost:5173,https://netlifylink.app"
 const allowedOrigins = (process.env.CORS_ORIGIN || "")
   .split(",")
   .map((s) => s.trim())
@@ -42,12 +42,21 @@ const corsOptions = {
 // Apply CORS + JSON
 const app = express();
 app.use(cors(corsOptions));
-// For preflight requests across all routes
 app.use(express.json());
 
 // --- Routes ---
 app.get("/", (_req, res) => {
   res.send("Hello Technigo!");
+});
+
+// ✅ Health check
+app.get("/api/health", (_req, res) => {
+  res.json({
+    ok: true,
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    mongoConnected: mongoose.connection.readyState === 1,
+  });
 });
 
 // --- Server ---
