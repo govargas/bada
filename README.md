@@ -1,7 +1,5 @@
 # 🏖️ BADA – Find Safe Beaches in Sweden
 
-- [Try it out here](https://badaweb.netlify.app/) (deployed on Netlify)
-
 ![React](https://img.shields.io/badge/Frontend-React-61DAFB?logo=react&logoColor=white)
 ![Express](https://img.shields.io/badge/Backend-Express-000000?logo=express&logoColor=white)
 ![MongoDB](https://img.shields.io/badge/Database-MongoDB-47A248?logo=mongodb&logoColor=white)
@@ -14,6 +12,8 @@
 
 **BADA** helps beachgoers and families in Sweden find safe, EU-classified bathing waters with real-time quality updates.  
 It replaces outdated or clunky websites with a **clean, mobile-friendly experience** where you can browse nearby beaches on a map, check water quality, and save your favourites.
+
+[Try it out here](https://badaweb.netlify.app/) (deployed on Netlify)
 
 ---
 
