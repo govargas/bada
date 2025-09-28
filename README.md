@@ -111,7 +111,7 @@ Frontend runs on http://localhost:5173
 
 - Use these to try the app without registering:
 
-Email: test@bada.app
+Email: smoke@test.com
 
 Password: Test1234
 
