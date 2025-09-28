@@ -33,49 +33,46 @@ export default function SortableFavorite({
   const style: React.CSSProperties = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.8 : 1,
+    opacity: isDragging ? 0.85 : 1,
   };
 
   return (
     <li
       ref={setNodeRef}
       style={style}
-      className="card p-4 flex items-center justify-between gap-4"
+      className="w-full card p-4 flex items-start justify-between gap-4"
     >
-      <div className="min-w-0">
+      <div className="min-w-0 flex-1">
         <div className="flex items-center gap-2">
-          {/* Drag handle (hidden when disabled) */}
+          {/* Drag handle */}
           {!disabled && (
             <button
               aria-label="Drag to reorder"
-              className="cursor-grab active:cursor-grabbing rounded p-1 border border-transparent hover:border-border"
+              className="shrink-0 w-6 h-6 grid place-items-center cursor-grab active:cursor-grabbing rounded hover:bg-surface-muted"
               {...attributes}
               {...listeners}
             >
-              {/* simple grip dots */}
-              <span
-                aria-hidden
-                className="inline-block w-1.5 h-1.5 bg-ink/60 rounded-sm mr-0.5"
-              />
-              <span
-                aria-hidden
-                className="inline-block w-1.5 h-1.5 bg-ink/60 rounded-sm mr-0.5"
-              />
-              <span
-                aria-hidden
-                className="inline-block w-1.5 h-1.5 bg-ink/60 rounded-sm"
-              />
+              {/* 2x2 grip dots */}
+              <span className="grid grid-cols-2 gap-0.5" aria-hidden>
+                <span className="w-1.5 h-1.5 bg-ink/60 rounded-sm" />
+                <span className="w-1.5 h-1.5 bg-ink/60 rounded-sm" />
+                <span className="w-1.5 h-1.5 bg-ink/60 rounded-sm" />
+                <span className="w-1.5 h-1.5 bg-ink/60 rounded-sm" />
+              </span>
             </button>
           )}
+
           <Link
             to={`/beach/${id}`}
-            className="font-medium hover:underline block truncate"
+            className="font-medium hover:underline block truncate max-w-[200px] sm:max-w-none"
             title={name}
           >
             {name}
           </Link>
         </div>
+
         <div className="text-sm text-ink-muted truncate">{muni || "—"}</div>
+
         <div className="mt-1">
           <span className={`badge ${classificationClass}`}>
             {classificationText}
@@ -83,7 +80,8 @@ export default function SortableFavorite({
         </div>
       </div>
 
-      <div className="flex items-center gap-2 shrink-0">
+      {/* Actions - allow wrapping on narrow screens */}
+      <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
         <Link
           to={`/beach/${id}`}
           className="px-3 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-sm"

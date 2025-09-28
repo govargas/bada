@@ -189,9 +189,9 @@ export default function FavoritesPage() {
   // --- Normal render
   return (
     <main className="max-w-screen-lg mx-auto p-6 space-y-6">
-      <div className="flex items-center justify-between gap-4">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         <h1 className="font-spectral text-2xl">Your favorite beaches</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
           <label className="text-sm">
             Sort by:{" "}
             <select
@@ -207,7 +207,7 @@ export default function FavoritesPage() {
               <option value="municipality">Municipality (A–Z)</option>
             </select>
           </label>
-          <Link to="/" className="underline text-accent">
+          <Link to="/" className="underline text-accent block">
             Browse all beaches
           </Link>
         </div>
@@ -234,7 +234,7 @@ export default function FavoritesPage() {
         onDragEnd={onDragEnd}
       >
         <SortableContext items={displayIds} strategy={rectSortingStrategy}>
-          <ul className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+          <ul className="grid gap-3 list-none sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
             {displayIds.map((id) => {
               const item = enriched.get(id);
               if (!item) return null;
