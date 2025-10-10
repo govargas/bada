@@ -1,4 +1,4 @@
-import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";

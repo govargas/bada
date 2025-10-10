@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useUI } from "../store/ui";
 import { useAuth } from "@/store/auth";
 import { useQueryClient } from "@tanstack/react-query";

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router";
 import Header from "./components/Header";
 import ProtectedRoute from "./routes/ProtectedRoute";
 

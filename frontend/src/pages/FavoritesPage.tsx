@@ -5,7 +5,7 @@ import {
   useReorderFavorites,
 } from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
-import { Link } from "react-router-dom";
+import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import {
   DndContext,
