@@ -159,7 +159,11 @@ export default function MapView({ points = [], focus, onMoveEnd, onFitBounds }: 
 
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([p.lon, p.lat])
-        .setPopup(new maplibregl.Popup({ closeButton: false }).setText(p.name))
+        .setPopup(
+          new maplibregl.Popup({ closeButton: false }).setHTML(
+            `<a href="/beach/${p.id}" style="text-decoration: none; color: inherit;">${p.name}</a>`
+          )
+        )
         .addTo(map);
 
       markersRef.current.push(marker);
