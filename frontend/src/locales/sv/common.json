@@ -122,16 +122,71 @@
   },
   "pages": {
     "about": {
-      "title": "Om BADA"
+      "title": "Om BADA",
+      "whatIsBADA": "Vad är BADA?",
+      "whatIsBADADesc": "BADA hjälper badgäster och familjer i Sverige att hitta säkra, EU-klassade badvatten med uppdateringar i realtid. Vi ersätter inaktuella eller tunga webbplatser med en ren, mobilanpassad upplevelse.",
+      "whatIsBADAMission": "Vårt uppdrag är att göra vattenkvalitetsinformation tillgänglig för alla, och hjälpa dig att fatta informerade beslut om var du ska simma och njuta av Sveriges vackra kustvatten.",
+      "dataSource": "Datakälla",
+      "dataSourceDesc": "BADA använder officiell data från Havs- och Vattenmyndigheten (HaV), som övervakar och klassar EU-badplatser över hela Sverige.",
+      "dataSourceDirective": "Vattenkvalitetsklassningar baseras på EU:s badvattendirektiv och uppdateras regelbundet under badsäsongen.",
+      "features": "Funktioner",
+      "featureMap": "🗺️ Interaktiv karta över alla EU-klassade badplatser i Sverige",
+      "featureLocation": "📍 Hitta närmaste badplats baserat på din nuvarande plats",
+      "featureQuality": "🔬 Se vattenkvalitet, klassning och senaste provresultat",
+      "featureFavorites": "❤️ Spara dina favoritbadplatser till din profil",
+      "featureDarkMode": "🌗 Mörkt läge och responsiv design",
+      "featureLang": "🌐 Flerspråkigt stöd (Svenska / Engelska)",
+      "builtWith": "Byggd med",
+      "builtWithDesc": "BADA är byggd med React, TypeScript, Node.js, Express och MongoDB. Kartor drivs av MapLibre och OpenStreetMap. Se vår",
+      "builtWithDesc2": "för mer information.",
+      "githubRepo": "GitHub-repository"
     },
     "whatIsEUBeach": {
-      "title": "Vad är en EU-badplats?"
+      "title": "Vad är en EU-badplats?",
+      "directive": "EU:s badvattendirektiv",
+      "directiveDesc": "En EU-badplats är en strand eller del av en kust där EU:s badvattendirektiv (2006/7/EG) gäller. Detta direktiv kräver att medlemsstaterna övervakar och regelbundet testar vattenkvaliteten vid utsedda badplatser.",
+      "directiveDesc2": "I Sverige övervakar Havs- och Vattenmyndigheten (HaV) dessa badplatser och klassar dem enligt vattenkvalitetsstandarder.",
+      "classifications": "Vattenkvalitetsklassningar",
+      "excellentDesc": "Bäst vattenkvalitet. Vattnet uppfyller de högsta standarderna med utmärkt mikrobiologisk kvalitet.",
+      "goodDesc": "Bra vattenkvalitet. Vattnet uppfyller standarderna med bra mikrobiologisk kvalitet.",
+      "sufficientDesc": "Tillfredsställande vattenkvalitet. Vattnet uppfyller minimistandarderna.",
+      "poorDesc": "Dålig vattenkvalitet. Simning rekommenderas inte. Vattnet uppfyller inte minimistandarderna.",
+      "monitoring": "Övervakning",
+      "monitoringDesc": "Vattenkvaliteten övervakas under hela badsäsongen (vanligtvis maj till september). Prover tas regelbundet och testas för bakterier och andra föroreningar som kan påverka människors hälsa.",
+      "monitoringDesc2": "Klassningen baseras på data från de senaste fyra badsäsongerna för att ge en stabil och tillförlitlig bedömning av vattenkvaliteten."
     },
     "terms": {
-      "title": "Användarvillkor"
+      "title": "Användarvillkor",
+      "acceptance": "Godkännande av villkor",
+      "acceptanceDesc": "Genom att använda BADA godkänner du dessa användarvillkor. Om du inte håller med om någon del av dessa villkor, vänligen använd inte vår tjänst.",
+      "service": "Tjänstebeskrivning",
+      "serviceDesc": "BADA tillhandahåller information om EU-klassade badvatten i Sverige. Vi samlar data från officiella källor och presenterar den i ett tillgängligt format.",
+      "disclaimer": "Villkor",
+      "disclaimerDesc": "Vattenkvalitetsinformationen som tillhandahålls av BADA baseras på officiella data från Havs- och Vattenmyndigheten. Även om vi strävar efter noggrannhet kan vi inte garantera fullständigheten eller aktuellheten av all information.",
+      "disclaimerDesc2": "BADA tillhandahålls \"som den är\" utan garantier av något slag. Användare bör använda sitt eget omdöme och diskretion när de använder denna information för att fatta beslut om simning eller andra vattenaktiviteter.",
+      "accounts": "Användarkonton",
+      "accountsDesc": "När du skapar ett konto är du ansvarig för att upprätthålla konfidentialiteten för din kontoinformation och ditt lösenord. Du godkänner att meddela oss omedelbart om obehörig användning av ditt konto.",
+      "ip": "Immateriella rättigheter",
+      "ipDesc": "BADA-applikationen och dess ursprungliga innehåll, funktioner och funktionalitet ägs av BADA-projektet och skyddas av internationella upphovsrätt, varumärke och andra immateriella lagar.",
+      "changes": "Ändringar av villkor",
+      "changesDesc": "Vi förbehåller oss rätten att ändra dessa villkor när som helst. Vi kommer att meddela användare om betydande ändringar genom att publicera de nya villkoren på denna sida.",
+      "contact": "Kontakt",
+      "contactDesc": "Om du har frågor om dessa villkor, vänligen",
+      "contactUs": "kontakta oss"
     },
     "contact": {
-      "title": "Kontakt"
+      "title": "Kontakt",
+      "getInTouch": "Hör av dig",
+      "getInTouchDesc": "Vi skulle gärna höra från dig! Om du har feedback, förslag, frågor eller hittat en bugg, tveka inte att kontakta oss.",
+      "github": "GitHub",
+      "githubDesc": "För buggrapporter, funktionsförfrågningar eller kodbidrag, besök vår",
+      "githubRepo": "GitHub-repository",
+      "feedback": "Problem & Feedback",
+      "feedbackDesc": "Om du stöter på några problem med applikationen eller har förslag på förbättringar, öppna gärna ett issue på GitHub. Din feedback hjälper oss att göra BADA bättre.",
+      "accuracy": "Datan noggrannhet",
+      "accuracyDesc": "Om du märker några felaktigheter i vattenkvalitetsdata eller badplatsinformation, låt oss veta. Vi förlitar oss på officiella källor, men fel kan uppstå och vi kommer att arbeta för att korrigera dem snabbt.",
+      "privacy": "Integritet",
+      "privacyDesc": "För frågor om integritet och datahantering, se våra användarvillkor eller kontakta oss via GitHub."
     },
     "profile": {
       "title": "Din profil"

@@ -8,58 +8,50 @@ export default function AboutPage() {
       <h1 className="font-spectral text-3xl">{t("pages.about.title")}</h1>
       
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">What is BADA?</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.about.whatIsBADA")}</h2>
         <p className="text-ink leading-relaxed">
-          BADA helps beachgoers and families in Sweden find safe, EU-classified bathing waters 
-          with real-time quality updates. We replace outdated or clunky websites with a clean, 
-          mobile-friendly experience.
+          {t("pages.about.whatIsBADADesc")}
         </p>
         <p className="text-ink leading-relaxed">
-          Our mission is to make water quality information accessible to everyone, helping you 
-          make informed decisions about where to swim and enjoy Sweden's beautiful coastal waters.
+          {t("pages.about.whatIsBADAMission")}
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">Data Source</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.about.dataSource")}</h2>
         <p className="text-ink leading-relaxed">
-          BADA uses official data from the Swedish Agency for Marine and Water Management 
-          (Havs- och Vattenmyndigheten, HaV), which monitors and classifies EU bathing waters 
-          across Sweden.
+          {t("pages.about.dataSourceDesc")}
         </p>
         <p className="text-ink leading-relaxed">
-          Water quality classifications are based on the European Bathing Water Directive and 
-          are updated regularly throughout the bathing season.
+          {t("pages.about.dataSourceDirective")}
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">Features</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.about.features")}</h2>
         <ul className="space-y-2 list-disc list-inside text-ink">
-          <li>🗺️ Interactive map of all EU-classified beaches in Sweden</li>
-          <li>📍 Find the nearest beach based on your current location</li>
-          <li>🔬 View water quality, classification, and recent test results</li>
-          <li>❤️ Save your favorite beaches to your profile</li>
-          <li>🌗 Dark mode and responsive design</li>
-          <li>🌐 Multi-language support (Swedish / English)</li>
+          <li>{t("pages.about.featureMap")}</li>
+          <li>{t("pages.about.featureLocation")}</li>
+          <li>{t("pages.about.featureQuality")}</li>
+          <li>{t("pages.about.featureFavorites")}</li>
+          <li>{t("pages.about.featureDarkMode")}</li>
+          <li>{t("pages.about.featureLang")}</li>
         </ul>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">Built With</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.about.builtWith")}</h2>
         <p className="text-ink">
-          BADA is built with React, TypeScript, Node.js, Express, and MongoDB. 
-          Maps are powered by MapLibre and OpenStreetMap. 
-          See our{" "}
+          {t("pages.about.builtWithDesc")}{" "}
           <a 
             href="https://github.com/govargas/bada" 
             target="_blank" 
             rel="noopener noreferrer"
             className="text-accent underline"
           >
-            GitHub repository
+            {t("pages.about.githubRepo")}
           </a>{" "}
-          for more details.
+          {t("pages.about.builtWithDesc2")}
         </p>
       </section>
 

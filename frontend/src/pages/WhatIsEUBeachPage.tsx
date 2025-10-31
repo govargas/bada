@@ -8,70 +8,64 @@ export default function WhatIsEUBeachPage() {
       <h1 className="font-spectral text-3xl">{t("pages.whatIsEUBeach.title")}</h1>
       
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">EU Bathing Water Directive</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.whatIsEUBeach.directive")}</h2>
         <p className="text-ink leading-relaxed">
-          An EU bathing water is a beach or section of a coastline where the European Union's 
-          Bathing Water Directive (2006/7/EC) applies. This directive requires member states 
-          to monitor and regularly test the water quality at designated bathing sites.
+          {t("pages.whatIsEUBeach.directiveDesc")}
         </p>
         <p className="text-ink leading-relaxed">
-          In Sweden, the Swedish Agency for Marine and Water Management (HaV) monitors these 
-          beaches and classifies them according to water quality standards.
+          {t("pages.whatIsEUBeach.directiveDesc2")}
         </p>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">Water Quality Classifications</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.whatIsEUBeach.classifications")}</h2>
         
         <div className="space-y-3">
           <div className="card p-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="badge kpi-excellent">Excellent</span>
+              <span className="badge kpi-excellent">{t("classification.excellent")}</span>
             </div>
             <p className="text-sm text-ink-muted">
-              Best water quality. The water meets the highest standards with excellent microbiological quality.
+              {t("pages.whatIsEUBeach.excellentDesc")}
             </p>
           </div>
 
           <div className="card p-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="badge kpi-good">Good</span>
+              <span className="badge kpi-good">{t("classification.good")}</span>
             </div>
             <p className="text-sm text-ink-muted">
-              Good water quality. The water meets the standards with good microbiological quality.
+              {t("pages.whatIsEUBeach.goodDesc")}
             </p>
           </div>
 
           <div className="card p-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="badge kpi-sufficient">Sufficient</span>
+              <span className="badge kpi-sufficient">{t("classification.sufficient")}</span>
             </div>
             <p className="text-sm text-ink-muted">
-              Sufficient water quality. The water meets the minimum standards.
+              {t("pages.whatIsEUBeach.sufficientDesc")}
             </p>
           </div>
 
           <div className="card p-4">
             <div className="flex items-center gap-3 mb-2">
-              <span className="badge kpi-poor">Poor</span>
+              <span className="badge kpi-poor">{t("classification.poor")}</span>
             </div>
             <p className="text-sm text-ink-muted">
-              Poor water quality. Swimming is not recommended. The water does not meet the minimum standards.
+              {t("pages.whatIsEUBeach.poorDesc")}
             </p>
           </div>
         </div>
       </section>
 
       <section className="space-y-4">
-        <h2 className="font-spectral text-2xl">Monitoring</h2>
+        <h2 className="font-spectral text-2xl">{t("pages.whatIsEUBeach.monitoring")}</h2>
         <p className="text-ink leading-relaxed">
-          Water quality is monitored throughout the bathing season (typically May to September). 
-          Samples are taken regularly and tested for bacteria and other contaminants that could 
-          affect human health.
+          {t("pages.whatIsEUBeach.monitoringDesc")}
         </p>
         <p className="text-ink leading-relaxed">
-          The classification is based on data from the last four bathing seasons to provide a 
-          stable and reliable assessment of water quality.
+          {t("pages.whatIsEUBeach.monitoringDesc2")}
         </p>
       </section>
 

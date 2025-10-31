@@ -211,7 +211,7 @@ export default function BeachesList() {
       </div>
 
       {/* List (keep to 50 for UX) */}
-      <ul className="space-y-3">
+      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
         {filtered.slice(0, 50).map((b) => (
           <li key={b.id}>
             <Link

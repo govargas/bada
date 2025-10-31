@@ -122,16 +122,71 @@
   },
   "pages": {
     "about": {
-      "title": "About BADA"
+      "title": "About BADA",
+      "whatIsBADA": "What is BADA?",
+      "whatIsBADADesc": "BADA helps beachgoers and families in Sweden find safe, EU-classified bathing waters with real-time quality updates. We replace outdated or clunky websites with a clean, mobile-friendly experience.",
+      "whatIsBADAMission": "Our mission is to make water quality information accessible to everyone, helping you make informed decisions about where to swim and enjoy Sweden's beautiful coastal waters.",
+      "dataSource": "Data Source",
+      "dataSourceDesc": "BADA uses official data from the Swedish Agency for Marine and Water Management (Havs- och Vattenmyndigheten, HaV), which monitors and classifies EU bathing waters across Sweden.",
+      "dataSourceDirective": "Water quality classifications are based on the European Bathing Water Directive and are updated regularly throughout the bathing season.",
+      "features": "Features",
+      "featureMap": "🗺️ Interactive map of all EU-classified beaches in Sweden",
+      "featureLocation": "📍 Find the nearest beach based on your current location",
+      "featureQuality": "🔬 View water quality, classification, and recent test results",
+      "featureFavorites": "❤️ Save your favorite beaches to your profile",
+      "featureDarkMode": "🌗 Dark mode and responsive design",
+      "featureLang": "🌐 Multi-language support (Swedish / English)",
+      "builtWith": "Built With",
+      "builtWithDesc": "BADA is built with React, TypeScript, Node.js, Express, and MongoDB. Maps are powered by MapLibre and OpenStreetMap. See our",
+      "builtWithDesc2": "for more details.",
+      "githubRepo": "GitHub repository"
     },
     "whatIsEUBeach": {
-      "title": "What is an EU Beach?"
+      "title": "What is an EU Beach?",
+      "directive": "EU Bathing Water Directive",
+      "directiveDesc": "An EU bathing water is a beach or section of a coastline where the European Union's Bathing Water Directive (2006/7/EC) applies. This directive requires member states to monitor and regularly test the water quality at designated bathing sites.",
+      "directiveDesc2": "In Sweden, the Swedish Agency for Marine and Water Management (HaV) monitors these beaches and classifies them according to water quality standards.",
+      "classifications": "Water Quality Classifications",
+      "excellentDesc": "Best water quality. The water meets the highest standards with excellent microbiological quality.",
+      "goodDesc": "Good water quality. The water meets the standards with good microbiological quality.",
+      "sufficientDesc": "Sufficient water quality. The water meets the minimum standards.",
+      "poorDesc": "Poor water quality. Swimming is not recommended. The water does not meet the minimum standards.",
+      "monitoring": "Monitoring",
+      "monitoringDesc": "Water quality is monitored throughout the bathing season (typically May to September). Samples are taken regularly and tested for bacteria and other contaminants that could affect human health.",
+      "monitoringDesc2": "The classification is based on data from the last four bathing seasons to provide a stable and reliable assessment of water quality."
     },
     "terms": {
-      "title": "Terms of Use"
+      "title": "Terms of Use",
+      "acceptance": "Acceptance of Terms",
+      "acceptanceDesc": "By using BADA, you agree to these terms of use. If you do not agree with any part of these terms, please do not use our service.",
+      "service": "Service Description",
+      "serviceDesc": "BADA provides information about EU-classified bathing waters in Sweden. We aggregate data from official sources and present it in an accessible format.",
+      "disclaimer": "Disclaimer",
+      "disclaimerDesc": "The water quality information provided by BADA is based on official data from the Swedish Agency for Marine and Water Management. While we strive for accuracy, we cannot guarantee the completeness or timeliness of all information.",
+      "disclaimerDesc2": "BADA is provided \"as is\" without warranty of any kind. Users should exercise their own judgment and discretion when using this information to make decisions about swimming or other water activities.",
+      "accounts": "User Accounts",
+      "accountsDesc": "When you create an account, you are responsible for maintaining the confidentiality of your account information and password. You agree to notify us immediately of any unauthorized use of your account.",
+      "ip": "Intellectual Property",
+      "ipDesc": "The BADA application and its original content, features, and functionality are owned by the BADA project and are protected by international copyright, trademark, and other intellectual property laws.",
+      "changes": "Changes to Terms",
+      "changesDesc": "We reserve the right to modify these terms at any time. We will notify users of any significant changes by posting the new terms on this page.",
+      "contact": "Contact",
+      "contactDesc": "If you have questions about these terms, please",
+      "contactUs": "contact us"
     },
     "contact": {
-      "title": "Contact"
+      "title": "Contact",
+      "getInTouch": "Get in Touch",
+      "getInTouchDesc": "We'd love to hear from you! Whether you have feedback, suggestions, questions, or found a bug, please don't hesitate to reach out.",
+      "github": "GitHub",
+      "githubDesc": "For bug reports, feature requests, or code contributions, please visit our",
+      "githubRepo": "GitHub repository",
+      "feedback": "Issues & Feedback",
+      "feedbackDesc": "If you encounter any issues with the application or have suggestions for improvement, please open an issue on GitHub. Your feedback helps us make BADA better.",
+      "accuracy": "Data Accuracy",
+      "accuracyDesc": "If you notice any inaccuracies in the water quality data or beach information, please let us know. We rely on official sources, but errors can occur and we'll work to correct them promptly.",
+      "privacy": "Privacy",
+      "privacyDesc": "For questions about privacy and data handling, please see our terms of use or contact us through GitHub."
     },
     "profile": {
       "title": "Your Profile"
