@@ -5,6 +5,7 @@ import {
   useReorderFavorites,
 } from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
+import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
 import {
@@ -18,7 +19,7 @@ import {
 import {
   SortableContext,
   arrayMove,
-  rectSortingStrategy,
+  verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableFavorite from "@/components/SortableFavorite";
 
@@ -42,6 +43,7 @@ const SORT_KEY = "favoritesSort"; // 'custom' | 'name' | 'municipality'
 const ORDER_KEY = "favoritesOrder:v1"; // stores array of beachIds
 
 export default function FavoritesPage() {
+  const { t } = useTranslation();
   const { data: favorites, isLoading, isError, error } = useFavorites();
   const ids = favorites?.map((f) => f.beachId);
   const details = useBeachDetails(ids);
@@ -104,11 +106,11 @@ export default function FavoritesPage() {
         name: info?.locationName ?? f.beachId,
         muni: info?.locationArea ?? "",
         classification: info?.classification ?? info?.classificationText,
-        classificationText: info?.classificationText ?? "Unknown",
+        classificationText: info?.classificationText ?? t("classification.unknown"),
       });
     }
     return map;
-  }, [favorites, details.byId]);
+  }, [favorites, details.byId, t]);
 
   // --- Items to render (IDs in display order)
   const displayIds = useMemo(() => {
@@ -161,7 +163,7 @@ export default function FavoritesPage() {
   if (isLoading) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
-        <h1 className="font-spectral text-2xl mb-4">Your favorite beaches</h1>
+        <h1 className="font-spectral text-2xl mb-4">{t("favorites.title")}</h1>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
             <div key={i} className="card p-4 animate-pulse">
@@ -178,9 +180,9 @@ export default function FavoritesPage() {
   if (isError) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
-        <h1 className="font-spectral text-2xl mb-4">Your favorite beaches</h1>
+        <h1 className="font-spectral text-2xl mb-4">{t("favorites.title")}</h1>
         <p className="text-red-600">
-          {(error as Error)?.message ?? "Could not load favorites"}
+          {(error as Error)?.message ?? t("loadError")}
         </p>
       </main>
     );
@@ -190,40 +192,40 @@ export default function FavoritesPage() {
   return (
     <main className="max-w-screen-lg mx-auto p-6 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <h1 className="font-spectral text-2xl">Your favorite beaches</h1>
+        <h1 className="font-spectral text-2xl">{t("favorites.title")}</h1>
         <div className="flex items-center gap-3 flex-wrap">
           <label className="text-sm">
-            Sort by:{" "}
+            {t("favorites.sortBy")}{" "}
             <select
               value={sortBy}
               onChange={(e) =>
                 setSortBy(e.target.value as "custom" | "name" | "municipality")
               }
               className="ml-1 border rounded px-2 py-1 text-sm"
-              aria-label="Sort favorites"
+              aria-label={t("favorites.sortBy")}
             >
-              <option value="custom">Custom (drag & drop)</option>
-              <option value="name">Name (A–Z)</option>
-              <option value="municipality">Municipality (A–Z)</option>
+              <option value="custom">{t("favorites.sortOptions.custom")}</option>
+              <option value="name">{t("favorites.sortOptions.name")}</option>
+              <option value="municipality">{t("favorites.sortOptions.municipality")}</option>
             </select>
           </label>
           <Link to="/" className="underline text-accent block">
-            Browse all beaches
+            {t("favorites.browseAll")}
           </Link>
         </div>
       </div>
 
       {favorites && favorites.length === 0 && (
         <div className="card p-6">
-          <h2 className="font-spectral text-lg mb-1">No favorites yet</h2>
+          <h2 className="font-spectral text-lg mb-1">{t("favorites.empty")}</h2>
           <p className="text-sm text-ink-muted mb-3">
-            Browse the map and tap “Save as favorite” on a beach you like.
+            {t("favorites.addFavorites")}
           </p>
           <Link
             to="/"
             className="inline-block px-3 py-2 rounded-2xl border border-border hover:bg-surface-muted"
           >
-            Go to map
+            {t("beachesList.modeDefault")}
           </Link>
         </div>
       )}
@@ -233,8 +235,8 @@ export default function FavoritesPage() {
         collisionDetection={closestCenter}
         onDragEnd={onDragEnd}
       >
-        <SortableContext items={displayIds} strategy={rectSortingStrategy}>
-          <ul className="grid gap-3 list-none sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4">
+        <SortableContext items={displayIds} strategy={verticalListSortingStrategy}>
+          <ul className="flex flex-col gap-3 list-none">
             {displayIds.map((id) => {
               const item = enriched.get(id);
               if (!item) return null;

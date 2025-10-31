@@ -2,6 +2,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import MapView from "./MapView";
 
 import { fetchBeaches } from "../api/beaches";
@@ -18,6 +19,7 @@ const NEARBY_RADIUS_KM = 5;
 type Mode = "default" | "nearby" | "viewport";
 
 export default function BeachesList() {
+  const { t } = useTranslation();
   const { data, isLoading, isError, error, refetch } = useQuery({
     queryKey: ["beaches"],
     queryFn: fetchBeaches,
@@ -144,15 +146,15 @@ export default function BeachesList() {
         role="alert"
         className="rounded-2xl border border-border bg-surface-muted p-4"
       >
-        <p className="font-spectral text-lg">Could not load beaches.</p>
+        <p className="font-spectral text-lg">{t("beachesList.loadError")}</p>
         <p className="text-sm text-ink-muted mt-1">
-          {(error as Error)?.message ?? "Please try again."}
+          {(error as Error)?.message ?? t("beachesList.pleaseRetry")}
         </p>
         <button
           onClick={() => refetch()}
           className="mt-3 w-full px-3 py-3 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
         >
-          Retry
+          {t("beachesList.retry")}
         </button>
       </div>
     );
@@ -161,9 +163,9 @@ export default function BeachesList() {
   if (!items.length) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">No beaches found.</p>
+        <p className="font-spectral text-lg">{t("beachesList.noBeachesFound")}</p>
         <p className="text-sm text-ink-muted mt-1">
-          Try refreshing or adjusting the filters.
+          {t("beachesList.emptyState")}
         </p>
       </div>
     );
@@ -172,11 +174,11 @@ export default function BeachesList() {
   if ((q || mode !== "default") && filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">No matches here.</p>
+        <p className="font-spectral text-lg">{t("beachesList.noMatches")}</p>
         <p className="text-sm text-ink-muted mt-1">
           {mode === "viewport"
-            ? "Pan or zoom to a different area."
-            : `Try widening the radius.`}
+            ? t("beachesList.panOrZoom")
+            : t("beachesList.widenRadius")}
         </p>
       </div>
     );
@@ -204,7 +206,7 @@ export default function BeachesList() {
           onClick={handleUseLocation}
           disabled={geoLoading}
         >
-          {geoLoading ? "Getting location…" : "Use current location"}
+          {geoLoading ? t("beachesList.gettingLocation") : t("beachesList.requestLocation")}
         </button>
       </div>
 

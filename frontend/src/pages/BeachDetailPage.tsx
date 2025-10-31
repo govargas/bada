@@ -1,5 +1,7 @@
 import { useParams, Link, useNavigate, useLocation } from "react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
+import toast from "react-hot-toast";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
 import {
@@ -7,7 +9,7 @@ import {
   useAddFavorite,
   useRemoveFavorite,
 } from "../api/favorites";
-import { useAuth } from "@/store/auth"; // NEW
+import { useAuth } from "@/store/auth";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -37,10 +39,11 @@ function qualityClass(q: number | string | undefined) {
 }
 
 export default function BeachDetailPage() {
+  const { t } = useTranslation();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useAuth(); // NEW
+  const { token } = useAuth();
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["beach", id],
@@ -74,25 +77,25 @@ export default function BeachDetailPage() {
     return (
       <section className="p-4">
         <div className="card p-4">
-          <p className="font-spectral text-lg">Could not load this beach.</p>
+          <p className="font-spectral text-lg">{t("loadError")}</p>
           <p className="text-sm text-ink-muted mt-1">
-            {(error as Error)?.message ?? "Please try again."}
+            {(error as Error)?.message ?? t("beachDetail.pleaseTryAgain")}
           </p>
           <Link
             to="/"
             className="inline-block mt-3 px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            ← Back to list
+            ← {t("back")}
           </Link>
         </div>
       </section>
     );
   }
 
-  const title = data.locationName ?? "Beach";
+  const title = data.locationName ?? t("beachDetail.beach");
   const muni = data.locationArea ?? "";
   const qualityNum = data.classification;
-  const qualityText = data.classificationText ?? "Okänd";
+  const qualityText = data.classificationText ?? t("classification.unknown");
   const pillClass = qualityClass(qualityNum ?? qualityText);
 
   const latestSampleLabel = data.latestSampleDate
@@ -101,21 +104,22 @@ export default function BeachDetailPage() {
 
   async function handleFavoriteClick() {
     if (!token) {
-      // Not logged in → route to login and return here after
       navigate("/login", { replace: false, state: { from: location } });
       return;
     }
     try {
       if (isFav) {
         await rmFav.mutateAsync({ id: existingFav?._id, beachId: id });
+        toast.success(t("favorites.removed"));
       } else {
-        await addFav.mutateAsync(id!); // mutation takes beachId string
+        await addFav.mutateAsync(id!);
+        toast.success(t("favorites.added"));
       }
-      // Optional: refresh favorites/beach queries
       queryClient.invalidateQueries({ queryKey: ["favorites", token] });
       queryClient.invalidateQueries({ queryKey: ["beach", id] });
     } catch (e: any) {
-      alert(e?.message ?? "Favorite action failed");
+      const errorMsg = e?.message ?? t("favorites.removed");
+      toast.error(errorMsg);
     }
   }
 
@@ -133,26 +137,26 @@ export default function BeachDetailPage() {
           {qualityText}{" "}
           {data.classificationYear ? `• ${data.classificationYear}` : ""}
         </span>
-        {data.euType && <span className="badge">EU-bad</span>}
+        {data.euType && <span className="badge">{t("beachDetail.euBad")}</span>}
       </div>
 
       {/* Meta card */}
       <div className="card p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="text-ink-muted">Latest sample</div>
+            <div className="text-ink-muted">{t("beachDetail.latestSampleDate")}</div>
             <div className="font-medium">{latestSampleLabel}</div>
           </div>
           <div>
-            <div className="text-ink-muted">Algal bloom</div>
+            <div className="text-ink-muted">{t("beachDetail.algalBloom")}</div>
             <div className="font-medium">{data.algalText ?? "—"}</div>
           </div>
           <div>
-            <div className="text-ink-muted">EU motive</div>
+            <div className="text-ink-muted">{t("beachDetail.euMotive")}</div>
             <div className="font-medium">{data.euMotive ?? "—"}</div>
           </div>
           <div>
-            <div className="text-ink-muted">NUTS code</div>
+            <div className="text-ink-muted">{t("beachDetail.nutsCode")}</div>
             <div className="font-medium">{data.nutsCode}</div>
           </div>
         </div>
@@ -164,14 +168,14 @@ export default function BeachDetailPage() {
             onClick={handleFavoriteClick}
             disabled={addFav.isPending || rmFav.isPending}
           >
-            {isFav ? "★ Remove favorite" : "☆ Save as favorite"}
+            {isFav ? `★ ${t("beachDetail.removeFavorite")}` : `☆ ${t("beachDetail.addFavorite")}`}
           </button>
 
           <Link
             to="/"
             className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
           >
-            ← Back
+            ← {t("back")}
           </Link>
         </div>
       </div>
@@ -179,7 +183,7 @@ export default function BeachDetailPage() {
       {/* Description */}
       {data.bathInformation && (
         <article className="card p-4">
-          <h2 className="font-spectral text-lg mb-1">About this beach</h2>
+          <h2 className="font-spectral text-lg mb-1">{t("beachDetail.bathInformation")}</h2>
           <p className="text-sm leading-relaxed whitespace-pre-line">
             {data.bathInformation}
           </p>
@@ -189,10 +193,10 @@ export default function BeachDetailPage() {
       {/* Contact */}
       {(data.contactMail || data.contactPhone || data.contactUrl) && (
         <div className="card p-4 space-y-1 text-sm">
-          <h3 className="font-spectral text-lg">Contact</h3>
+          <h3 className="font-spectral text-lg">{t("nav.contact")}</h3>
           {data.contactMail && (
             <div>
-              Mail:{" "}
+              {t("beachDetail.mail")}{" "}
               <a
                 href={`mailto:${data.contactMail}`}
                 className="underline text-accent"
@@ -201,10 +205,10 @@ export default function BeachDetailPage() {
               </a>
             </div>
           )}
-          {data.contactPhone && <div>Phone: {data.contactPhone}</div>}
+          {data.contactPhone && <div>{t("beachDetail.phone")} {data.contactPhone}</div>}
           {data.contactUrl && (
             <div>
-              Website:{" "}
+              {t("beachDetail.website")}{" "}
               <a
                 href={
                   data.contactUrl.startsWith("http")

@@ -100,6 +100,168 @@ Frontend runs on http://localhost:5173
 
 ---
 
+## 📚 API Documentation
+
+### Base URL
+
+- Production: `https://bada-backend.vercel.app/api`
+- Local: `http://localhost:3000/api`
+
+### Authentication
+
+Most endpoints require JWT authentication. Include the token in the Authorization header:
+
+```
+Authorization: Bearer <your-token>
+```
+
+### Endpoints
+
+#### Health Check
+
+- **GET** `/health`
+- **Description**: Check if the backend is running
+- **Auth**: Not required
+- **Response**: `{ status: "ok", timestamp: "..." }`
+
+#### Beaches
+
+**GET** `/beaches`
+
+- List all EU-classified beaches in Sweden
+- **Auth**: Not required
+- **Response**: GeoJSON FeatureCollection
+- **Example**:
+
+```json
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "properties": {
+        "NUTSKOD": "SE110006001",
+        "NAMN": "Folhem",
+        "KMN_NAMN": "Stockholm"
+      },
+      "geometry": {
+        "type": "Point",
+        "coordinates": [18.0555, 59.3326]
+      }
+    }
+  ]
+}
+```
+
+**GET** `/beaches/:id`
+
+- Get detailed information about a specific beach
+- **Auth**: Not required
+- **Response**: BeachDetail object
+- **Example**:
+
+```json
+{
+  "nutsCode": "SE110006001",
+  "locationName": "Folhem",
+  "locationArea": "Stockholm",
+  "classification": 1,
+  "classificationText": "Bra kvalitet",
+  "classificationYear": 2024,
+  "bathInformation": "Public beach with facilities",
+  "latestSampleDate": "2024-07-15"
+}
+```
+
+#### Authentication
+
+**POST** `/auth/register`
+
+- Register a new user
+- **Auth**: Not required
+- **Request body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword123"
+}
+```
+
+- **Response**: `{ message: "User created successfully" }`
+
+**POST** `/auth/login`
+
+- Login and get JWT token
+- **Auth**: Not required
+- **Request body**:
+
+```json
+{
+  "email": "user@example.com",
+  "password": "securepassword123"
+}
+```
+
+- **Response**: `{ token: "eyJhbGciOiJIUzI1NiIs..." }`
+
+#### Favorites
+
+**GET** `/favorites`
+
+- Get user's favorite beaches
+- **Auth**: Required
+- **Response**: Array of favorite objects
+- **Example**:
+
+```json
+[
+  {
+    "_id": "65abc123def456",
+    "userId": "user123",
+    "beachId": "SE110006001",
+    "order": 0,
+    "createdAt": "2024-01-15T10:00:00.000Z"
+  }
+]
+```
+
+**POST** `/favorites`
+
+- Add a beach to favorites
+- **Auth**: Required
+- **Request body**:
+
+```json
+{
+  "beachId": "SE110006001"
+}
+```
+
+- **Response**: Created favorite object
+
+**DELETE** `/favorites/:id`
+
+- Remove a beach from favorites
+- **Auth**: Required
+- **Response**: `{ message: "Favorite removed" }`
+
+**PUT** `/favorites/reorder`
+
+- Reorder favorite beaches (drag & drop)
+- **Auth**: Required
+- **Request body**:
+
+```json
+{
+  "order": ["SE110006001", "SE220015002", "SE330024003"]
+}
+```
+
+- **Response**: Updated order
+
+---
+
 ## 🔑 Environment Variables
 
 - See .env.example in both backend/ and frontend/.
@@ -128,26 +290,47 @@ This account already has some favourite beaches saved.
 
 ## ✅ Requirements Checklist
 
-- React frontend
-- Node.js + Express backend
-- MongoDB database
-- Authentication (JWT)
-- React Router navigation
-- Global state management (Zustand)
-- ≥2 external libraries (TanStack Query, MapLibre, react-hook-form, i18next)
-- Custom React hooks
-- Responsive (320px → 1600px+)
-- Accessibility & Lighthouse 100% (AA compliant)
-- Clean Code practices
+### Technical Requirements (Grade G)
+
+- ✅ React frontend
+- ✅ Node.js + Express backend
+- ✅ MongoDB database
+- ✅ Authentication (JWT)
+- ✅ React Router navigation
+- ✅ Global state management (Zustand)
+- ✅ ≥2 external libraries (TanStack Query, MapLibre, react-hook-form, i18next, react-hot-toast, @dnd-kit)
+- ✅ Custom React hooks (useGeolocation, useOutsideClose, useDarkMode)
+- ✅ Responsive (320px → 1600px+)
+- ✅ Accessibility features (ARIA labels, skip navigation, semantic HTML, form labels)
+- ✅ Clean Code practices
+
+### Visual Requirements
+
+- ✅ Clear structure using box model with consistent margins/paddings
+- ✅ Consistent typography across views and breakpoints
+- ✅ Cohesive color scheme
+- ✅ Mobile-first responsive design
+- ✅ Dark mode support
+- ✅ Multi-language support (Swedish/English)
+
+### Grade VG Enhancements
+
+- ✅ Error Boundaries
+- ✅ Toast notifications
+- ✅ Reduced motion support
+- ✅ Comprehensive documentation
+- ✅ Meta tags for SEO
 
 ---
 
 ## 🧭 Roadmap
 
-- Allow notes/tips per beach (e.g. “good for kids”)
+- ✅ Allow notes/tips per beach (e.g. "good for kids") - Planned for future
 - Integrate OpenWeatherMap for weather & water temperature
-- Accessibility extras (reduced motion, ARIA live regions)
-- Polish with animations and micro-interactions
+- ✅ Accessibility extras (reduced motion, ARIA live regions) - Implemented
+- ✅ Polish with animations and micro-interactions - Toast notifications added
+- Filter beaches by classification
+- Add user beach photos
 
 ---
 

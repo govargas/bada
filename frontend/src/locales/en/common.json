@@ -15,5 +15,139 @@
     "poor": "Poor",
     "unknown": "Unknown"
   },
-  "sourceTextNote": "Source text in Swedish"
+  "sourceTextNote": "Source text in Swedish",
+  "header": {
+    "menu": "Menu",
+    "language": "Language",
+    "searchPlaceholder": "Search beaches…",
+    "clear": "Clear",
+    "openMenu": "Open menu",
+    "userMenu": "User menu",
+    "skipToMain": "Skip to main content",
+    "euBeaches": "EU Beaches",
+    "inSweden": "in Sweden"
+  },
+  "nav": {
+    "whatIsEUBeach": "What is an EU Beach?",
+    "about": "About BADA",
+    "terms": "Terms of Use",
+    "contact": "Contact",
+    "favoriteBeaches": "Favourite beaches",
+    "profile": "Profile",
+    "settings": "Settings",
+    "logOut": "Log out",
+    "signIn": "Sign in",
+    "register": "Register",
+    "account": "ACCOUNT",
+    "user": "USER"
+  },
+  "auth": {
+    "signInTitle": "Sign in",
+    "registerTitle": "Register",
+    "email": "Email",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "signIn": "Sign in",
+    "signInProgress": "Signing in…",
+    "register": "Register",
+    "registerProgress": "Registering…",
+    "noAccount": "No account?",
+    "registerHere": "Register here",
+    "alreadyHaveAccount": "Already have an account?",
+    "signInHere": "Sign in here",
+    "signInSuccess": "Successfully signed in!",
+    "registerSuccess": "Registration successful! Please sign in.",
+    "signInFailed": "Login failed",
+    "registerFailed": "Registration failed",
+    "emailRequired": "Email is required",
+    "passwordRequired": "Password is required",
+    "passwordTooShort": "Password must be at least 8 characters",
+    "confirmPasswordRequired": "Confirm password is required",
+    "passwordsMustMatch": "Passwords must match",
+    "invalidEmail": "Invalid email address"
+  },
+  "favorites": {
+    "title": "Your favorite beaches",
+    "sortBy": "Sort by:",
+    "sortOptions": {
+      "custom": "Custom (drag & drop)",
+      "name": "Name (A–Z)",
+      "municipality": "Municipality (A–Z)"
+    },
+    "browseAll": "Browse all beaches",
+    "empty": "You have no favorite beaches yet",
+    "addFavorites": "Add favorites from the beach map",
+    "view": "View",
+    "remove": "Remove",
+    "dragToReorder": "Drag to reorder",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites"
+  },
+  "beachDetail": {
+    "addFavorite": "Add favorite",
+    "removeFavorite": "Remove favorite",
+    "added": "Added to favorites",
+    "removed": "Removed from favorites",
+    "bathInformation": "About this beach",
+    "latestSampleDate": "Latest sample",
+    "beach": "Beach",
+    "algalBloom": "Algal bloom",
+    "euMotive": "EU motive",
+    "nutsCode": "NUTS code",
+    "mail": "Mail:",
+    "phone": "Phone:",
+    "website": "Website:",
+    "pleaseTryAgain": "Please try again.",
+    "euBad": "EU Beach"
+  },
+  "beachesList": {
+    "modeDefault": "Show all",
+    "modeNearby": "Near me",
+    "modeViewport": "Show viewport",
+    "gettingLocation": "Getting location…",
+    "locationError": "Could not get your location",
+    "requestLocation": "Use current location",
+    "noBeachesFound": "No beaches found",
+    "emptyState": "Try adjusting your search filters",
+    "loadError": "Could not load beaches.",
+    "pleaseRetry": "Please try again.",
+    "retry": "Retry",
+    "noMatches": "No matches here.",
+    "panOrZoom": "Pan or zoom to a different area.",
+    "widenRadius": "Try widening the radius."
+  },
+  "theme": {
+    "darkOn": "Dark theme: on",
+    "darkOff": "Dark theme: off"
+  },
+  "pages": {
+    "about": {
+      "title": "About BADA"
+    },
+    "whatIsEUBeach": {
+      "title": "What is an EU Beach?"
+    },
+    "terms": {
+      "title": "Terms of Use"
+    },
+    "contact": {
+      "title": "Contact"
+    },
+    "profile": {
+      "title": "Your Profile"
+    },
+    "settings": {
+      "title": "Settings",
+      "language": "Language",
+      "languageDescription": "Select your language"
+    },
+    "backToMap": "← Back to map"
+  },
+  "errorBoundary": {
+    "title": "Oops! Something went wrong",
+    "message": "We encountered an unexpected error. Please try refreshing the page or return to the homepage.",
+    "technicalDetails": "Technical details",
+    "reloadPage": "Reload Page",
+    "goHome": "Go Home"
+  }
 }

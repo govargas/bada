@@ -15,5 +15,139 @@
     "poor": "Dålig kvalitet",
     "unknown": "Okänd"
   },
-  "sourceTextNote": "Källtext på svenska"
+  "sourceTextNote": "Källtext på svenska",
+  "header": {
+    "menu": "Meny",
+    "language": "Språk",
+    "searchPlaceholder": "Sök badplatser…",
+    "clear": "Rensa",
+    "openMenu": "Öppna meny",
+    "userMenu": "Användarmenyn",
+    "skipToMain": "Hoppa till huvudinnehållet",
+    "euBeaches": "EU-bad",
+    "inSweden": "i Sverige"
+  },
+  "nav": {
+    "whatIsEUBeach": "Vad är en EU-badplats?",
+    "about": "Om BADA",
+    "terms": "Användarvillkor",
+    "contact": "Kontakt",
+    "favoriteBeaches": "Favoritbadplatser",
+    "profile": "Profil",
+    "settings": "Inställningar",
+    "logOut": "Logga ut",
+    "signIn": "Logga in",
+    "register": "Registrera",
+    "account": "KONTO",
+    "user": "ANVÄNDARE"
+  },
+  "auth": {
+    "signInTitle": "Logga in",
+    "registerTitle": "Registrera",
+    "email": "E-post",
+    "password": "Lösenord",
+    "confirmPassword": "Bekräfta lösenord",
+    "signIn": "Logga in",
+    "signInProgress": "Loggar in…",
+    "register": "Registrera",
+    "registerProgress": "Registrerar…",
+    "noAccount": "Inget konto?",
+    "registerHere": "Registrera här",
+    "alreadyHaveAccount": "Har du redan ett konto?",
+    "signInHere": "Logga in här",
+    "signInSuccess": "Inloggad!",
+    "registerSuccess": "Registrering lyckades! Logga in.",
+    "signInFailed": "Inloggning misslyckades",
+    "registerFailed": "Registrering misslyckades",
+    "emailRequired": "E-post krävs",
+    "passwordRequired": "Lösenord krävs",
+    "passwordTooShort": "Lösenordet måste vara minst 8 tecken",
+    "confirmPasswordRequired": "Bekräftelse av lösenord krävs",
+    "passwordsMustMatch": "Lösenorden måste matcha",
+    "invalidEmail": "Ogiltig e-postadress"
+  },
+  "favorites": {
+    "title": "Dina favoritbadplatser",
+    "sortBy": "Sortera efter:",
+    "sortOptions": {
+      "custom": "Egen ordning (dra & släpp)",
+      "name": "Namn (A–Ö)",
+      "municipality": "Kommun (A–Ö)"
+    },
+    "browseAll": "Bläddra bland alla badplatser",
+    "empty": "Du har inga favoritbadplatser ännu",
+    "addFavorites": "Lägg till favoriter från badplatskartan",
+    "view": "Visa",
+    "remove": "Ta bort",
+    "dragToReorder": "Dra för att ändra ordning",
+    "added": "Tillagd som favorit",
+    "removed": "Borttagen från favoriter"
+  },
+  "beachDetail": {
+    "addFavorite": "Lägg till favorit",
+    "removeFavorite": "Ta bort favorit",
+    "added": "Tillagd som favorit",
+    "removed": "Borttagen från favoriter",
+    "bathInformation": "Om badplatsen",
+    "latestSampleDate": "Senaste provtagning",
+    "beach": "Badplats",
+    "algalBloom": "Algblomning",
+    "euMotive": "EU-motivering",
+    "nutsCode": "NUTS-kod",
+    "mail": "E-post:",
+    "phone": "Telefon:",
+    "website": "Webbplats:",
+    "pleaseTryAgain": "Vänligen försök igen.",
+    "euBad": "EU-bad"
+  },
+  "beachesList": {
+    "modeDefault": "Visa alla",
+    "modeNearby": "Nära mig",
+    "modeViewport": "Visa i fönster",
+    "gettingLocation": "Hämtar position…",
+    "locationError": "Kunde inte hitta din position",
+    "requestLocation": "Använd min position",
+    "noBeachesFound": "Inga badplatser hittades",
+    "emptyState": "Prova att ändra sökfilter",
+    "loadError": "Kunde inte ladda badplatser.",
+    "pleaseRetry": "Vänligen försök igen.",
+    "retry": "Försök igen",
+    "noMatches": "Inga träffar här.",
+    "panOrZoom": "Panorera eller zooma till ett annat område.",
+    "widenRadius": "Prova att öka sökradien."
+  },
+  "theme": {
+    "darkOn": "Mörkt tema: på",
+    "darkOff": "Mörkt tema: av"
+  },
+  "pages": {
+    "about": {
+      "title": "Om BADA"
+    },
+    "whatIsEUBeach": {
+      "title": "Vad är en EU-badplats?"
+    },
+    "terms": {
+      "title": "Användarvillkor"
+    },
+    "contact": {
+      "title": "Kontakt"
+    },
+    "profile": {
+      "title": "Din profil"
+    },
+    "settings": {
+      "title": "Inställningar",
+      "language": "Språk",
+      "languageDescription": "Välj ditt språk"
+    },
+    "backToMap": "← Tillbaka till kartan"
+  },
+  "errorBoundary": {
+    "title": "Hoppsan! Något gick fel",
+    "message": "Vi stötte på ett oväntat fel. Vänligen försök uppdatera sidan eller återvänd till startsidan.",
+    "technicalDetails": "Tekniska detaljer",
+    "reloadPage": "Ladda om sidan",
+    "goHome": "Gå till startsidan"
+  }
 }

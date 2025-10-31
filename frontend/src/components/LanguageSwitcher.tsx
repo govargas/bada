@@ -10,18 +10,26 @@ export default function LanguageSwitcher() {
   }
 
   return (
-    <div style={{ padding: 8, display: "flex", gap: 8 }}>
+    <div className="p-2 flex gap-2">
       <button
         onClick={() => setLang("sv")}
         aria-pressed={current === "sv"}
-        style={{ fontWeight: current === "sv" ? 700 : 400 }}
+        className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+          current === "sv"
+            ? "bg-accent text-white font-bold"
+            : "bg-surface-muted text-ink hover:bg-surface"
+        }`}
       >
         Svenska
       </button>
       <button
         onClick={() => setLang("en")}
         aria-pressed={current === "en"}
-        style={{ fontWeight: current === "en" ? 700 : 400 }}
+        className={`px-3 py-1 rounded-lg text-sm transition-colors ${
+          current === "en"
+            ? "bg-accent text-white font-bold"
+            : "bg-surface-muted text-ink hover:bg-surface"
+        }`}
       >
         English
       </button>

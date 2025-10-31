@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useUI } from "../store/ui";
 import { useAuth } from "@/store/auth";
 import { useQueryClient } from "@tanstack/react-query";
@@ -35,6 +36,7 @@ type HeaderProps = {
 };
 
 export default function Header({ languageSwitcher }: HeaderProps) {
+  const { t } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const menuRef = useOutsideClose<HTMLDivElement>(() => setMenuOpen(false));
@@ -55,12 +57,20 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   }
 
   return (
-    <header className="bg-surface sticky top-0 z-50 border-b border-border">
-      <div className="mx-auto max-w-screen-lg px-3 py-2 flex items-center justify-between gap-2">
-        {/* Left: Hamburger */}
-        <div className="relative" ref={menuRef}>
+    <>
+      {/* Skip navigation link for accessibility */}
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-accent focus:text-white focus:px-4 focus:py-2 focus:rounded focus:underline"
+      >
+        {t("header.skipToMain")}
+      </a>
+      <header className="bg-surface sticky top-0 z-50 border-b border-border" role="banner">
+        <div className="mx-auto max-w-screen-lg px-3 py-2 flex items-center justify-between gap-2">
+          {/* Left: Hamburger */}
+          <div className="relative" ref={menuRef}>
           <button
-            aria-label="Open menu"
+            aria-label={t("header.openMenu")}
             className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
             onClick={() => setMenuOpen((v) => !v)}
           >
@@ -72,18 +82,18 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               role="menu"
               className="absolute left-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2"
             >
-              <div className="px-2 py-1.5 text-xs text-ink-muted">Menu</div>
+              <div className="px-2 py-1.5 text-xs text-ink-muted">{t("header.menu")}</div>
               <div className="h-px bg-border my-1" />
               <div className="flex items-center justify-between px-2 py-1.5">
-                <span className="text-sm">Language</span>
+                <span className="text-sm">{t("header.language")}</span>
                 {languageSwitcher ?? (
                   <span className="text-xs text-ink-muted">SV / EN</span>
                 )}
               </div>
-              <MenuLink to="/what-is-eu-beach">What is an EU Beach?</MenuLink>
-              <MenuLink to="/about">About BADA</MenuLink>
-              <MenuLink to="/terms">Terms of Use</MenuLink>
-              <MenuLink to="/contact">Contact</MenuLink>
+              <MenuLink to="/what-is-eu-beach">{t("nav.whatIsEUBeach")}</MenuLink>
+              <MenuLink to="/about">{t("nav.about")}</MenuLink>
+              <MenuLink to="/terms">{t("nav.terms")}</MenuLink>
+              <MenuLink to="/contact">{t("nav.contact")}</MenuLink>
             </div>
           )}
         </div>
@@ -99,9 +109,9 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               BADA
             </Link>
             <div className="text-left text-sm text-ink-muted leading-[1.1] shrink-0">
-              EU Beaches
+              {t("header.euBeaches")}
               <br />
-              in Sweden
+              {t("header.inSweden")}
             </div>
           </div>
         </div>
@@ -109,7 +119,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
         {/* Right: User menu */}
         <div className="relative" ref={userRef}>
           <button
-            aria-label="User menu"
+            aria-label={t("header.userMenu")}
             className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
             onClick={() => setUserOpen((v) => !v)}
           >
@@ -122,25 +132,25 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               className="absolute right-0 mt-2 w-60 rounded-2xl border border-border bg-surface shadow p-2"
             >
               <div className="px-2 py-1.5 text-xs text-ink-muted">
-                {authed ? "KONTO / USER" : "USER"}
+                {authed ? t("nav.account") : t("nav.user")}
               </div>
               <div className="h-px bg-border my-1" />
               {!authed ? (
                 <>
-                  <MenuLink to="/login">Sign in</MenuLink>
-                  <MenuLink to="/register">Register</MenuLink>
+                  <MenuLink to="/login">{t("nav.signIn")}</MenuLink>
+                  <MenuLink to="/register">{t("nav.register")}</MenuLink>
                 </>
               ) : (
                 <>
-                  <MenuLink to="/favorites">Favourite beaches</MenuLink>
-                  <MenuLink to="/profile">Profile</MenuLink>
-                  <MenuLink to="/settings">Settings</MenuLink>
+                  <MenuLink to="/favorites">{t("nav.favoriteBeaches")}</MenuLink>
+                  <MenuLink to="/profile">{t("nav.profile")}</MenuLink>
+                  <MenuLink to="/settings">{t("nav.settings")}</MenuLink>
                   <div className="h-px bg-border my-1" />
                   <button
                     className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
                     onClick={handleLogout}
                   >
-                    Log out
+                    {t("nav.logOut")}
                   </button>
                 </>
               )}
@@ -148,7 +158,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                 className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
                 onClick={() => setIsDark(!isDark)}
               >
-                {isDark ? "Dark theme: on" : "Dark theme: off"}
+                {isDark ? t("theme.darkOn") : t("theme.darkOff")}
               </button>
             </div>
           )}
@@ -160,7 +170,8 @@ export default function Header({ languageSwitcher }: HeaderProps) {
         <div className="flex gap-2 items-center">
           <input
             type="search"
-            placeholder="Search beaches…"
+            placeholder={t("header.searchPlaceholder")}
+            aria-label={t("header.searchPlaceholder")}
             className="flex-1 rounded-2xl border border-border bg-surface-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/40"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
@@ -169,15 +180,16 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             <button
               className="rounded-2xl border border-border bg-surface px-3 py-2 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
               onClick={() => setSearch("")}
-              aria-label="Clear search"
-              title="Clear"
+              aria-label={t("header.clear")}
+              title={t("header.clear")}
             >
-              Clear
+              {t("header.clear")}
             </button>
           )}
         </div>
       </div>
     </header>
+    </>
   );
 }
 

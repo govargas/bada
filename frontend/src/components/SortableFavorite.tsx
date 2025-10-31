@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { useTranslation } from "react-i18next";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -21,6 +22,7 @@ export default function SortableFavorite({
   onRemove,
   disabled,
 }: Props) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -47,7 +49,7 @@ export default function SortableFavorite({
           {/* Drag handle */}
           {!disabled && (
             <button
-              aria-label="Drag to reorder"
+              aria-label={t("favorites.dragToReorder")}
               className="shrink-0 w-6 h-6 grid place-items-center cursor-grab active:cursor-grabbing rounded hover:bg-surface-muted"
               {...attributes}
               {...listeners}
@@ -86,14 +88,14 @@ export default function SortableFavorite({
           to={`/beach/${id}`}
           className="px-3 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-sm"
         >
-          View
+          {t("favorites.view")}
         </Link>
         <button
           className="px-3 py-1.5 rounded-lg border border-border hover:bg-surface-muted text-sm"
           onClick={onRemove}
-          aria-label={`Remove ${name} from favorites`}
+          aria-label={`${t("favorites.remove")} ${name}`}
         >
-          Remove
+          {t("favorites.remove")}
         </button>
       </div>
     </li>
