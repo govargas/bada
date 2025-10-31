@@ -76,8 +76,13 @@ export default function BeachesList() {
     });
   }, [items, q]);
 
-  // Radius or viewport filter
+  // Radius or viewport filter (skip if user is searching)
   const filtered = useMemo(() => {
+    // If user is searching, don't filter by map bounds
+    if (q) {
+      return filteredBySearch;
+    }
+    
     if (mode === "viewport" && bounds) {
       return filteredBySearch.filter(
         (b) =>
@@ -94,7 +99,7 @@ export default function BeachesList() {
       }
       return true;
     });
-  }, [filteredBySearch, mode, bounds, center, radiusKm]);
+  }, [filteredBySearch, mode, bounds, center, radiusKm, q]);
 
   // Initial fetch safeguard
   useEffect(() => {
@@ -124,7 +129,7 @@ export default function BeachesList() {
   };
 
   const mapFocus =
-    mode === "viewport"
+    mode === "viewport" || q
       ? undefined
       : { center: { lon: center.lon, lat: center.lat }, radiusKm };
 
@@ -176,7 +181,9 @@ export default function BeachesList() {
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
         <p className="font-spectral text-lg">{t("beachesList.noMatches")}</p>
         <p className="text-sm text-ink-muted mt-1">
-          {mode === "viewport"
+          {q
+            ? t("beachesList.emptyState")
+            : mode === "viewport"
             ? t("beachesList.panOrZoom")
             : t("beachesList.widenRadius")}
         </p>
