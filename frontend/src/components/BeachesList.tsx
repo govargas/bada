@@ -111,15 +111,28 @@ export default function BeachesList() {
     if (!coords) return;
     setCenter({ lat: coords.lat, lon: coords.lon });
     setRadiusKm(NEARBY_RADIUS_KM);
+    setBounds(null); // Clear bounds when switching to nearby mode
     setMode("nearby");
   }, [coords]);
 
   const handleUseLocation = async () => {
+    // Reset mode to trigger map fit
+    setMode("default");
     await request(); // coords effect handles the rest
   };
 
   // Map move → viewport mode
   const handleMoveEnd = (e: {
+    bounds: { west: number; south: number; east: number; north: number };
+    center: { lon: number; lat: number };
+    zoom: number;
+  }) => {
+    setBounds(e.bounds);
+    setMode("viewport");
+  };
+
+  // Programmatic fit → viewport mode
+  const handleFitBounds = (e: {
     bounds: { west: number; south: number; east: number; north: number };
     center: { lon: number; lat: number };
     zoom: number;
@@ -204,6 +217,7 @@ export default function BeachesList() {
         }))}
         focus={mapFocus}
         onMoveEnd={handleMoveEnd}
+        onFitBounds={handleFitBounds}
       />
 
       {/* Use current location — full width, now under the map */}

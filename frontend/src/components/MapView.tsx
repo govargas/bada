@@ -14,6 +14,12 @@ type Props = {
     center: { lon: number; lat: number };
     zoom: number;
   }) => void;
+  /** Fires after programmatic fits */
+  onFitBounds?: (args: {
+    bounds: { west: number; south: number; east: number; north: number };
+    center: { lon: number; lat: number };
+    zoom: number;
+  }) => void;
 };
 
 const STYLE_LIGHT =
@@ -52,12 +58,14 @@ function circleBounds(
   ];
 }
 
-export default function MapView({ points = [], focus, onMoveEnd }: Props) {
+export default function MapView({ points = [], focus, onMoveEnd, onFitBounds }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
   const onMoveEndRef = useRef(onMoveEnd);
   onMoveEndRef.current = onMoveEnd; // keep latest callback without re-binding listeners
+  const onFitBoundsRef = useRef(onFitBounds);
+  onFitBoundsRef.current = onFitBounds;
 
   // Init map ONCE
   useEffect(() => {
@@ -99,11 +107,9 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
       userMoving = !!(e as any).originalEvent; // programmatic fits won't set this
     });
     map.on("moveend", () => {
-      if (!userMoving || !onMoveEndRef.current) return;
-      userMoving = false;
       const b = map.getBounds();
       const c = map.getCenter();
-      onMoveEndRef.current({
+      const boundsObj = {
         bounds: {
           west: b.getWest(),
           south: b.getSouth(),
@@ -112,7 +118,18 @@ export default function MapView({ points = [], focus, onMoveEnd }: Props) {
         },
         center: { lon: c.lng, lat: c.lat },
         zoom: map.getZoom(),
-      });
+      };
+      
+      if (userMoving) {
+        // User-initiated move
+        userMoving = false;
+        if (onMoveEndRef.current) {
+          onMoveEndRef.current(boundsObj);
+        }
+      } else if (onFitBoundsRef.current) {
+        // Programmatic fit
+        onFitBoundsRef.current(boundsObj);
+      }
     });
 
     return () => {
