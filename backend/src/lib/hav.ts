@@ -75,6 +75,10 @@ export async function havV2Get<T>(
 
 /** Pull latest sample date (ISO string) from /bathing-waters/{id}/results */
 export async function getLatestSampleDate(id: string): Promise<string | null> {
+  const k = key(`v2:results:${id}`);
+  const cached = cache.get<string | null>(k);
+  if (cached !== undefined) return cached;
+
   type MonitoringResult = { takenAt?: string | null };
   type Results = { results?: MonitoringResult[] };
 
@@ -88,5 +92,6 @@ export async function getLatestSampleDate(id: string): Promise<string | null> {
       .filter((d): d is string => !!d)
       .sort((a, b) => (a < b ? 1 : a > b ? -1 : 0))[0] ?? null;
 
+  cache.set(k, latest, 5 * 60 * 1000);
   return latest;
 }
