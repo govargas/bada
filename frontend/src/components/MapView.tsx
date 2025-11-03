@@ -82,7 +82,7 @@ export default function MapView({
       center: [15, 62],
       zoom: 4.3,
       minZoom: 3,
-      maxZoom: 14,
+      maxZoom: 18, // Increased to allow more detailed zoom
       dragRotate: false,
       pitchWithRotate: false,
       attributionControl: { compact: true },
@@ -184,8 +184,8 @@ export default function MapView({
       type: "geojson",
       data: geojson,
       cluster: true,
-      clusterMaxZoom: 14, // Max zoom to cluster points on
-      clusterRadius: 50, // Radius of each cluster when clustering points
+      clusterMaxZoom: 17, // Max zoom to cluster points on (increased for better separation)
+      clusterRadius: 40, // Radius of each cluster (reduced for tighter clustering)
     });
 
     // Add cluster circle layer
@@ -255,23 +255,45 @@ export default function MapView({
       },
     });
 
-    // Click handler for clusters - zoom in
+    // Click handler for clusters - zoom in or show list if can't expand
     map.on("click", "clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, {
         layers: ["clusters"],
       });
-      if (!features.length) return;
+      if (!features.length || !features[0].geometry || features[0].geometry.type !== "Point") return;
 
       const clusterId = features[0].properties?.cluster_id;
+      const pointCount = features[0].properties?.point_count;
+      const coordinates = features[0].geometry.coordinates.slice() as [number, number];
       const source = map.getSource("beaches") as maplibregl.GeoJSONSource;
       
       source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-        if (err || !features[0].geometry || features[0].geometry.type !== "Point") return;
+        if (err) return;
 
-        map.easeTo({
-          center: features[0].geometry.coordinates as [number, number],
-          zoom: zoom ?? map.getZoom() + 2,
-        });
+        // If cluster can't expand further (at max zoom), show popup with all beaches
+        if (zoom >= map.getMaxZoom() || zoom === map.getZoom()) {
+          source.getClusterLeaves(clusterId, pointCount || 100, 0, (error, leaves) => {
+            if (error || !leaves) return;
+
+            const beachList = leaves
+              .map((leaf: any) => {
+                const props = leaf.properties;
+                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: inherit; font-weight: 500; border-bottom: 1px solid rgba(128,128,128,0.2);">${props.name}</a>`;
+              })
+              .join("");
+
+            new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
+              .setLngLat(coordinates)
+              .setHTML(`<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`)
+              .addTo(map);
+          });
+        } else {
+          // Otherwise, zoom in
+          map.easeTo({
+            center: coordinates,
+            zoom: zoom ?? map.getZoom() + 2,
+          });
+        }
       });
     });
 
@@ -324,13 +346,13 @@ export default function MapView({
       const r = focus.radiusKm;
 
       // 🔧 TIGHTEN the fit for small radii
-      // - Shrink the radius a bit so bounds aren’t too wide
+      // - Shrink the radius a bit so bounds aren't too wide
       // - Reduce padding so more of the view is the actual area of interest
       // - Let the map zoom in a bit more
-      const isSmall = r <= 5; // the 5 km “nearby” case
+      const isSmall = r <= 5; // the 5 km "nearby" case
       const effective = isSmall ? r * 0.65 : r; // <— tighten bounds
       const padding = isSmall ? 12 : 24; // less padding on small areas
-      const maxZoom = isSmall ? 16 : 12; // allow closer zoom on small areas
+      const maxZoom = isSmall ? 17 : 14; // allow closer zoom on small areas (updated for new max)
 
       const b = circleBounds(focus.center, effective);
       map.fitBounds(b, { padding, maxZoom });
