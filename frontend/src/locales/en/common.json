@@ -13,7 +13,9 @@
     "good": "Good",
     "sufficient": "Sufficient",
     "poor": "Poor",
-    "unknown": "Unknown"
+    "unknown": "Unknown",
+    "inProgress": "Classification in progress",
+    "notClassified": "Not classified"
   },
   "sourceTextNote": "Source text in Swedish",
   "header": {

@@ -5,6 +5,7 @@ import {
   useReorderFavorites,
 } from "@/api/favorites";
 import { useBeachDetails } from "@/api/useBeachDetails";
+import { getClassificationKey } from "@/utils/quality";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router";
 import { useState, useMemo, useEffect } from "react";
@@ -101,12 +102,15 @@ export default function FavoritesPage() {
 
     for (const f of favorites) {
       const info = details.byId.get(f.beachId);
+      const rawClassification = info?.classification ?? info?.classificationText;
+      const classificationKey = getClassificationKey(rawClassification);
+      
       map.set(f.beachId, {
         fav: f,
         name: info?.locationName ?? f.beachId,
         muni: info?.locationArea ?? "",
-        classification: info?.classification ?? info?.classificationText,
-        classificationText: info?.classificationText ?? t("classification.unknown"),
+        classification: rawClassification,
+        classificationText: t(classificationKey),
       });
     }
     return map;

@@ -4,6 +4,7 @@ import { useTranslation } from "react-i18next";
 import toast from "react-hot-toast";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
+import { getClassificationKey } from "../utils/quality";
 import {
   useFavorites,
   useAddFavorite,
@@ -95,8 +96,9 @@ export default function BeachDetailPage() {
   const title = data.locationName ?? t("beachDetail.beach");
   const muni = data.locationArea ?? "";
   const qualityNum = data.classification;
-  const qualityText = data.classificationText ?? t("classification.unknown");
-  const pillClass = qualityClass(qualityNum ?? qualityText);
+  const classificationKey = getClassificationKey(qualityNum ?? data.classificationText);
+  const qualityText = t(classificationKey);
+  const pillClass = qualityClass(qualityNum ?? data.classificationText);
 
   const latestSampleLabel = data.latestSampleDate
     ? formatDate(data.latestSampleDate, "short")
@@ -154,10 +156,6 @@ export default function BeachDetailPage() {
           <div>
             <div className="text-ink-muted">{t("beachDetail.euMotive")}</div>
             <div className="font-medium">{data.euMotive ?? "—"}</div>
-          </div>
-          <div>
-            <div className="text-ink-muted">{t("beachDetail.nutsCode")}</div>
-            <div className="font-medium">{data.nutsCode}</div>
           </div>
         </div>
 

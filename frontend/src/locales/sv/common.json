@@ -13,7 +13,9 @@
     "good": "Bra kvalitet",
     "sufficient": "Tillfredsställande kvalitet",
     "poor": "Dålig kvalitet",
-    "unknown": "Okänd"
+    "unknown": "Okänd",
+    "inProgress": "Klassificering pågår",
+    "notClassified": "Ej klassificerad"
   },
   "sourceTextNote": "Källtext på svenska",
   "header": {

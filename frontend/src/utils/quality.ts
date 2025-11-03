@@ -43,3 +43,59 @@ export function deriveClassificationCode(detail: {
       return "unknown";
   }
 }
+
+/**
+ * Maps classification text (Swedish from API or numeric) to i18n translation key.
+ * This ensures classification badges are displayed in the user's selected language.
+ */
+export function getClassificationKey(
+  classification?: number | string
+): string {
+  // Handle numeric classification
+  if (typeof classification === "number") {
+    switch (classification) {
+      case 1:
+        return "classification.excellent";
+      case 2:
+        return "classification.good";
+      case 3:
+        return "classification.sufficient";
+      case 4:
+        return "classification.poor";
+      default:
+        return "classification.unknown";
+    }
+  }
+
+  // Handle text classification (Swedish from API)
+  if (typeof classification === "string") {
+    const text = classification.toLowerCase().trim();
+    
+    // Excellent
+    if (text.includes("utmärkt")) {
+      return "classification.excellent";
+    }
+    // Good
+    if (text.includes("bra")) {
+      return "classification.good";
+    }
+    // Sufficient
+    if (text.includes("tillfreds")) {
+      return "classification.sufficient";
+    }
+    // Poor
+    if (text.includes("dålig")) {
+      return "classification.poor";
+    }
+    // Classification in progress
+    if (text.includes("klassificering") && text.includes("pågår")) {
+      return "classification.inProgress";
+    }
+    // Not classified
+    if (text.includes("ej klassificerad") || text.includes("inte klassificerad")) {
+      return "classification.notClassified";
+    }
+  }
+
+  return "classification.unknown";
+}
