@@ -58,7 +58,12 @@ function circleBounds(
   ];
 }
 
-export default function MapView({ points = [], focus, onMoveEnd, onFitBounds }: Props) {
+export default function MapView({
+  points = [],
+  focus,
+  onMoveEnd,
+  onFitBounds,
+}: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
   const markersRef = useRef<maplibregl.Marker[]>([]);
@@ -119,7 +124,7 @@ export default function MapView({ points = [], focus, onMoveEnd, onFitBounds }: 
         center: { lon: c.lng, lat: c.lat },
         zoom: map.getZoom(),
       };
-      
+
       if (userMoving) {
         // User-initiated move
         userMoving = false;
@@ -156,6 +161,19 @@ export default function MapView({ points = [], focus, onMoveEnd, onFitBounds }: 
         "w-3 h-3 rounded-full shadow " +
         (isDark() ? "ring-2 ring-black/60" : "ring-2 ring-white/85");
       el.style.background = accent;
+
+      // Add proper accessibility attributes
+      el.setAttribute("role", "button");
+      el.setAttribute("aria-label", p.name);
+      el.setAttribute("tabindex", "0");
+
+      // Add keyboard support for accessibility
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          el.click(); // Trigger the popup
+        }
+      });
 
       const marker = new maplibregl.Marker({ element: el })
         .setLngLat([p.lon, p.lat])
