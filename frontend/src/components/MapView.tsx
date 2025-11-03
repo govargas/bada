@@ -39,6 +39,14 @@ function getAccent() {
 function styleForTheme() {
   return isDark() ? STYLE_DARK : STYLE_LIGHT;
 }
+function getPopupStyles() {
+  const dark = isDark();
+  return {
+    background: dark ? "#1f2937" : "#ffffff", // gray-800 : white
+    color: dark ? "#f9fafb" : "#111827", // gray-50 : gray-900
+    borderColor: dark ? "#374151" : "#e5e7eb", // gray-700 : gray-200
+  };
+}
 
 // compute bounds from center + radius (km)
 function circleBounds(
@@ -277,17 +285,28 @@ export default function MapView({
           source.getClusterLeaves(clusterId, pointCount || 100, 0, (error, leaves) => {
             if (error || !leaves) return;
 
+            const styles = getPopupStyles();
             const beachList = leaves
               .map((leaf: any) => {
                 const props = leaf.properties;
-                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: inherit; font-weight: 500; border-bottom: 1px solid rgba(128,128,128,0.2);">${props.name}</a>`;
+                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
               })
               .join("");
 
-            new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
+            const popup = new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
               .setLngLat(coordinates)
               .setHTML(`<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`)
               .addTo(map);
+            
+            // Apply dark mode styles to popup container
+            const popupEl = popup.getElement();
+            if (popupEl) {
+              const content = popupEl.querySelector(".maplibregl-popup-content");
+              if (content) {
+                (content as HTMLElement).style.backgroundColor = styles.background;
+                (content as HTMLElement).style.color = styles.color;
+              }
+            }
           });
         } else {
           // Otherwise, zoom in
@@ -313,12 +332,23 @@ export default function MapView({
         coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
       }
 
-      new maplibregl.Popup({ closeButton: false })
+      const styles = getPopupStyles();
+      const popup = new maplibregl.Popup({ closeButton: false })
         .setLngLat(coordinates)
         .setHTML(
-          `<a href="/beach/${id}" style="text-decoration: none; color: inherit; font-weight: 500;">${name}</a>`
+          `<a href="/beach/${id}" style="text-decoration: none; color: ${styles.color}; font-weight: 500;">${name}</a>`
         )
         .addTo(map);
+
+      // Apply dark mode styles to popup container
+      const popupEl = popup.getElement();
+      if (popupEl) {
+        const content = popupEl.querySelector(".maplibregl-popup-content");
+        if (content) {
+          (content as HTMLElement).style.backgroundColor = styles.background;
+          (content as HTMLElement).style.color = styles.color;
+        }
+      }
     });
 
     // Change cursor on hover
