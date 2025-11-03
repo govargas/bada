@@ -145,47 +145,172 @@ export default function MapView({
     };
   }, []); // ← no dependencies (don’t recreate the map)
 
-  // Update markers when points change (NO map re-init, NO auto-fit here)
+  // Update markers with clustering support
   useEffect(() => {
     const map = mapRef.current;
-    if (!map) return;
+    if (!map || !map.isStyleLoaded()) return;
 
     const accent = getAccent();
-    // clear old
+    
+    // Remove old markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
 
-    points.forEach((p) => {
-      const el = document.createElement("div");
-      el.className =
-        "w-3 h-3 rounded-full shadow " +
-        (isDark() ? "ring-2 ring-black/60" : "ring-2 ring-white/85");
-      el.style.background = accent;
+    // Remove old layers and sources if they exist
+    if (map.getLayer("clusters")) map.removeLayer("clusters");
+    if (map.getLayer("cluster-count")) map.removeLayer("cluster-count");
+    if (map.getLayer("unclustered-point-visual")) map.removeLayer("unclustered-point-visual");
+    if (map.getLayer("unclustered-point")) map.removeLayer("unclustered-point");
+    if (map.getSource("beaches")) map.removeSource("beaches");
 
-      // Add proper accessibility attributes
-      el.setAttribute("role", "button");
-      el.setAttribute("aria-label", p.name);
-      el.setAttribute("tabindex", "0");
+    // Create GeoJSON from points
+    const geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
+      type: "FeatureCollection",
+      features: points.map((p) => ({
+        type: "Feature",
+        geometry: {
+          type: "Point",
+          coordinates: [p.lon, p.lat],
+        },
+        properties: {
+          id: p.id,
+          name: p.name,
+        },
+      })),
+    };
 
-      // Add keyboard support for accessibility
-      el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          el.click(); // Trigger the popup
-        }
+    // Add source with clustering enabled
+    map.addSource("beaches", {
+      type: "geojson",
+      data: geojson,
+      cluster: true,
+      clusterMaxZoom: 14, // Max zoom to cluster points on
+      clusterRadius: 50, // Radius of each cluster when clustering points
+    });
+
+    // Add cluster circle layer
+    map.addLayer({
+      id: "clusters",
+      type: "circle",
+      source: "beaches",
+      filter: ["has", "point_count"],
+      paint: {
+        "circle-color": accent,
+        "circle-radius": [
+          "step",
+          ["get", "point_count"],
+          15, // radius for clusters with < 10 points
+          10, 20, // radius for clusters with 10-99 points
+          30, 25, // radius for clusters with 100+ points
+        ],
+        "circle-stroke-width": 2,
+        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+      },
+    });
+
+    // Add cluster count label
+    map.addLayer({
+      id: "cluster-count",
+      type: "symbol",
+      source: "beaches",
+      filter: ["has", "point_count"],
+      layout: {
+        "text-field": "{point_count_abbreviated}",
+        "text-font": ["Noto Sans Regular"],
+        "text-size": 12,
+      },
+      paint: {
+        "text-color": isDark() ? "#ffffff" : "#000000",
+      },
+    });
+
+    // Add individual point layer (unclustered)
+    // Using 22px radius (44px diameter) for proper touch targets
+    map.addLayer({
+      id: "unclustered-point",
+      type: "circle",
+      source: "beaches",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": accent,
+        "circle-radius": 22, // 44px diameter for proper touch target (WCAG compliance)
+        "circle-stroke-width": 2,
+        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+        "circle-opacity": 0.2, // Make it mostly transparent
+        "circle-stroke-opacity": 1,
+      },
+    });
+
+    // Add visual marker layer on top (smaller, fully visible)
+    map.addLayer({
+      id: "unclustered-point-visual",
+      type: "circle",
+      source: "beaches",
+      filter: ["!", ["has", "point_count"]],
+      paint: {
+        "circle-color": accent,
+        "circle-radius": 8, // Visual size (16px diameter)
+        "circle-stroke-width": 2,
+        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+      },
+    });
+
+    // Click handler for clusters - zoom in
+    map.on("click", "clusters", (e) => {
+      const features = map.queryRenderedFeatures(e.point, {
+        layers: ["clusters"],
       });
+      if (!features.length) return;
 
-      const marker = new maplibregl.Marker({ element: el })
-        .setLngLat([p.lon, p.lat])
-        .setPopup(
-          new maplibregl.Popup({ closeButton: false }).setHTML(
-            `<a href="/beach/${p.id}" style="text-decoration: none; color: inherit;">${p.name}</a>`
-          )
+      const clusterId = features[0].properties?.cluster_id;
+      const source = map.getSource("beaches") as maplibregl.GeoJSONSource;
+      
+      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
+        if (err || !features[0].geometry || features[0].geometry.type !== "Point") return;
+
+        map.easeTo({
+          center: features[0].geometry.coordinates as [number, number],
+          zoom: zoom ?? map.getZoom() + 2,
+        });
+      });
+    });
+
+    // Click handler for individual points - show popup
+    map.on("click", "unclustered-point", (e) => {
+      if (!e.features?.length || !e.features[0].geometry || e.features[0].geometry.type !== "Point") return;
+      
+      const coordinates = e.features[0].geometry.coordinates.slice() as [number, number];
+      const { name, id } = e.features[0].properties as { name: string; id: string };
+
+      // Ensure that if the map is zoomed out such that multiple
+      // copies of the feature are visible, the popup appears
+      // over the copy being pointed to.
+      while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+        coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+      }
+
+      new maplibregl.Popup({ closeButton: false })
+        .setLngLat(coordinates)
+        .setHTML(
+          `<a href="/beach/${id}" style="text-decoration: none; color: inherit; font-weight: 500;">${name}</a>`
         )
         .addTo(map);
-
-      markersRef.current.push(marker);
     });
+
+    // Change cursor on hover
+    map.on("mouseenter", "clusters", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "clusters", () => {
+      map.getCanvas().style.cursor = "";
+    });
+    map.on("mouseenter", "unclustered-point", () => {
+      map.getCanvas().style.cursor = "pointer";
+    });
+    map.on("mouseleave", "unclustered-point", () => {
+      map.getCanvas().style.cursor = "";
+    });
+
   }, [points]);
 
   // Fit to focus (center + radius) without flashing; allow closer zoom for small radii
