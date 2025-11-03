@@ -217,10 +217,12 @@ export default function MapView({
       layout: {
         "text-field": "{point_count_abbreviated}",
         "text-font": ["Noto Sans Regular"],
-        "text-size": 12,
+        "text-size": 13,
       },
       paint: {
-        "text-color": isDark() ? "#ffffff" : "#000000",
+        "text-color": "#ffffff", // White text for good contrast on accent color in both themes
+        "text-halo-color": "rgba(0, 0, 0, 0.3)", // Subtle dark halo for extra contrast
+        "text-halo-width": 1,
       },
     });
 
