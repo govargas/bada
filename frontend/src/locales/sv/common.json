@@ -103,6 +103,19 @@
     "pleaseTryAgain": "Vänligen försök igen.",
     "euBad": "EU-bad"
   },
+  "algalStatus": {
+    "ingenBlomning": "Ingen blomning",
+    "blomning": "Blomning",
+    "kraftigBlomning": "Kraftig blomning",
+    "mattligBlomning": "Måttlig blomning",
+    "lindrigBlomning": "Lindrig blomning"
+  },
+  "euMotive": {
+    "storBadbelastning": "Stor badbelastning",
+    "badbelastning": "Badbelastning",
+    "tradition": "Tradition",
+    "turistattraktion": "Turistattraktion"
+  },
   "beachesList": {
     "modeDefault": "Visa alla",
     "modeNearby": "Nära mig",

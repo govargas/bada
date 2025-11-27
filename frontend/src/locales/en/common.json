@@ -103,6 +103,19 @@
     "pleaseTryAgain": "Please try again.",
     "euBad": "EU Beach"
   },
+  "algalStatus": {
+    "ingenBlomning": "No blooming",
+    "blomning": "Blooming",
+    "kraftigBlomning": "Heavy blooming",
+    "mattligBlomning": "Moderate blooming",
+    "lindrigBlomning": "Mild blooming"
+  },
+  "euMotive": {
+    "storBadbelastning": "High bathing load",
+    "badbelastning": "Bathing load",
+    "tradition": "Traditional bathing site",
+    "turistattraktion": "Tourist attraction"
+  },
   "beachesList": {
     "modeDefault": "Show all",
     "modeNearby": "Near me",

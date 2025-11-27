@@ -126,12 +126,13 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                   {t("header.menu")}
                 </div>
                 <div className="h-px bg-border my-1" />
-                <div className="flex items-center justify-between px-2 py-1.5">
-                  <span className="text-sm">{t("header.language")}</span>
+                <div className="flex items-center justify-between px-2 py-1.5 gap-3">
+                  <span className="text-sm text-ink-muted">{t("header.language")}</span>
                   {languageSwitcher ?? (
                     <span className="text-xs text-ink-muted">SV / EN</span>
                   )}
                 </div>
+                <div className="h-px bg-border my-1" />
                 <MenuLink to="/what-is-eu-beach" onClick={() => setMenuOpen(false)}>
                   {t("nav.whatIsEUBeach")}
                 </MenuLink>

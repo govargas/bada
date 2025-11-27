@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
 import { getClassificationKey } from "../utils/quality";
+import { getAlgalStatusKey, getEuMotiveKey } from "../utils/algal";
 import {
   useFavorites,
   useAddFavorite,
@@ -103,6 +104,14 @@ export default function BeachDetailPage() {
   const latestSampleLabel = data.latestSampleDate
     ? formatDate(data.latestSampleDate, "short")
     : "—";
+  
+  // Translate algal status
+  const algalKey = getAlgalStatusKey(data.algalText);
+  const algalDisplay = algalKey ? t(algalKey) : (data.algalText ?? "—");
+  
+  // Translate EU motive
+  const euMotiveKey = getEuMotiveKey(data.euMotive);
+  const euMotiveDisplay = euMotiveKey ? t(euMotiveKey) : (data.euMotive ?? "—");
 
   async function handleFavoriteClick() {
     if (!token) {
@@ -151,11 +160,11 @@ export default function BeachDetailPage() {
           </div>
           <div>
             <div className="text-ink-muted">{t("beachDetail.algalBloom")}</div>
-            <div className="font-medium">{data.algalText ?? "—"}</div>
+            <div className="font-medium">{algalDisplay}</div>
           </div>
           <div>
             <div className="text-ink-muted">{t("beachDetail.euMotive")}</div>
-            <div className="font-medium">{data.euMotive ?? "—"}</div>
+            <div className="font-medium">{euMotiveDisplay}</div>
           </div>
         </div>
 
