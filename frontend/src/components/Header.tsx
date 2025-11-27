@@ -120,7 +120,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute left-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2"
+                className="absolute left-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2 z-50"
               >
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {t("header.menu")}
@@ -132,12 +132,12 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                     <span className="text-xs text-ink-muted">SV / EN</span>
                   )}
                 </div>
-                <MenuLink to="/what-is-eu-beach">
+                <MenuLink to="/what-is-eu-beach" onClick={() => setMenuOpen(false)}>
                   {t("nav.whatIsEUBeach")}
                 </MenuLink>
-                <MenuLink to="/about">{t("nav.about")}</MenuLink>
-                <MenuLink to="/terms">{t("nav.terms")}</MenuLink>
-                <MenuLink to="/contact">{t("nav.contact")}</MenuLink>
+                <MenuLink to="/about" onClick={() => setMenuOpen(false)}>{t("nav.about")}</MenuLink>
+                <MenuLink to="/terms" onClick={() => setMenuOpen(false)}>{t("nav.terms")}</MenuLink>
+                <MenuLink to="/contact" onClick={() => setMenuOpen(false)}>{t("nav.contact")}</MenuLink>
               </div>
             )}
           </div>
@@ -167,13 +167,13 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
               onClick={() => setUserOpen((v) => !v)}
             >
-              <UserIcon width={40} height={40} aria-hidden="true" />
+              <UserIcon width={30} height={30} aria-hidden="true" />
             </button>
 
             {userOpen && (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-60 rounded-2xl border border-border bg-surface shadow p-2"
+                className="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2 z-50"
               >
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {authed ? t("nav.account") : t("nav.user")}
@@ -288,12 +288,13 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   );
 }
 
-function MenuLink({ to, children }: { to: string; children: React.ReactNode }) {
+function MenuLink({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) {
   return (
     <Link
       to={to}
       className="block px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
       role="menuitem"
+      onClick={onClick}
     >
       {children}
     </Link>

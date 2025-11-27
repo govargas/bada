@@ -17,7 +17,7 @@
   --color-quality-good: #2b8a3e;
   --color-quality-sufficient: #b08900;
   --color-quality-poor: #c0392b;
-  --color-quality-unknown: #6b7280;
+  --color-quality-unknown: #374151;
 
   /* Fonts */
   --font-spectral: "Spectral", serif;
