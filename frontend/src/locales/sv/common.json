@@ -17,6 +17,13 @@
     "inProgress": "Klassificering pågår",
     "notClassified": "Ej klassificerad"
   },
+  "classificationTooltip": {
+    "excellent": "Högsta vattenkvalitetsstandard med utmärkt mikrobiologisk kvalitet.",
+    "good": "Bra vattenkvalitet som uppfyller standarderna.",
+    "sufficient": "Vattnet uppfyller minimikvalitetsstandarderna.",
+    "poor": "Dålig vattenkvalitet. Simning rekommenderas ej.",
+    "unknown": "Klassificering saknas. Provtagning sker vanligtvis maj–september."
+  },
   "sourceTextNote": "Källtext på svenska",
   "header": {
     "menu": "Meny",
@@ -167,6 +174,7 @@
       "goodDesc": "Bra vattenkvalitet. Vattnet uppfyller standarderna med bra mikrobiologisk kvalitet.",
       "sufficientDesc": "Tillfredsställande vattenkvalitet. Vattnet uppfyller minimistandarderna.",
       "poorDesc": "Dålig vattenkvalitet. Simning rekommenderas inte. Vattnet uppfyller inte minimistandarderna.",
+      "unknownDesc": "Vattenkvalitetsstatus är okänd eller inte klassificerad. Observera att de flesta badplatser genomför vattenprovtagningar mellan maj och september. Därför kan du se \"Okänd\" utanför dessa månader eller för nyutnämnda badplatser.",
       "monitoring": "Övervakning",
       "monitoringDesc": "Vattenkvaliteten övervakas under hela badsäsongen (vanligtvis maj till september). Prover tas regelbundet och testas för bakterier och andra föroreningar som kan påverka människors hälsa.",
       "monitoringDesc2": "Klassningen baseras på data från de senaste fyra badsäsongerna för att ge en stabil och tillförlitlig bedömning av vattenkvaliteten."

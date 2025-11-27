@@ -17,6 +17,13 @@
     "inProgress": "Classification in progress",
     "notClassified": "Not classified"
   },
+  "classificationTooltip": {
+    "excellent": "Highest water quality standards with excellent microbiological quality.",
+    "good": "Good water quality meeting required standards.",
+    "sufficient": "Water meets minimum quality standards.",
+    "poor": "Poor water quality. Swimming not recommended.",
+    "unknown": "Classification unavailable. Testing typically occurs May–September."
+  },
   "sourceTextNote": "Source text in Swedish",
   "header": {
     "menu": "Menu",
@@ -167,6 +174,7 @@
       "goodDesc": "Good water quality. The water meets the standards with good microbiological quality.",
       "sufficientDesc": "Sufficient water quality. The water meets the minimum standards.",
       "poorDesc": "Poor water quality. Swimming is not recommended. The water does not meet the minimum standards.",
+      "unknownDesc": "Water quality status is unknown or not classified. Note that most beaches conduct water tests between May and September. Therefore, you may see \"Unknown\" outside those months or for newly designated beaches.",
       "monitoring": "Monitoring",
       "monitoringDesc": "Water quality is monitored throughout the bathing season (typically May to September). Samples are taken regularly and tested for bacteria and other contaminants that could affect human health.",
       "monitoringDesc2": "The classification is based on data from the last four bathing seasons to provide a stable and reliable assessment of water quality."

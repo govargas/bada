@@ -33,6 +33,9 @@
   --color-border: #40383a;
   --color-accent: #5ea5d2;
   --color-badge: #302a2c;
+
+  /* Quality colors for dark mode - need lighter shades for contrast */
+  --color-quality-unknown: #d1d5db;
 }
 
 /* Base defaults */
@@ -93,7 +96,7 @@
   .aspect-square {
     aspect-ratio: 1 / 1;
   }
-  
+
   /* Screen reader only */
   .sr-only {
     position: absolute;
@@ -106,7 +109,7 @@
     white-space: nowrap;
     border-width: 0;
   }
-  
+
   /* Show on focus */
   .sr-only:focus {
     position: static;

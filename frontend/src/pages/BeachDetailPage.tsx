@@ -12,6 +12,7 @@ import {
   useRemoveFavorite,
 } from "../api/favorites";
 import { useAuth } from "@/store/auth";
+import Tooltip from "../components/Tooltip";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -97,21 +98,30 @@ export default function BeachDetailPage() {
   const title = data.locationName ?? t("beachDetail.beach");
   const muni = data.locationArea ?? "";
   const qualityNum = data.classification;
-  const classificationKey = getClassificationKey(qualityNum ?? data.classificationText);
+  const classificationKey = getClassificationKey(
+    qualityNum ?? data.classificationText
+  );
   const qualityText = t(classificationKey);
   const pillClass = qualityClass(qualityNum ?? data.classificationText);
+
+  // Get the short description for tooltip
+  const classificationTooltipKey = classificationKey.replace(
+    "classification.",
+    "classificationTooltip."
+  );
+  const qualityTooltip = t(classificationTooltipKey);
 
   const latestSampleLabel = data.latestSampleDate
     ? formatDate(data.latestSampleDate, "short")
     : "—";
-  
+
   // Translate algal status
   const algalKey = getAlgalStatusKey(data.algalText);
-  const algalDisplay = algalKey ? t(algalKey) : (data.algalText ?? "—");
-  
+  const algalDisplay = algalKey ? t(algalKey) : data.algalText ?? "—";
+
   // Translate EU motive
   const euMotiveKey = getEuMotiveKey(data.euMotive);
-  const euMotiveDisplay = euMotiveKey ? t(euMotiveKey) : (data.euMotive ?? "—");
+  const euMotiveDisplay = euMotiveKey ? t(euMotiveKey) : data.euMotive ?? "—";
 
   async function handleFavoriteClick() {
     if (!token) {
@@ -144,10 +154,12 @@ export default function BeachDetailPage() {
 
       {/* KPI row */}
       <div className="flex items-center gap-2">
-        <span className={`badge ${pillClass}`}>
-          {qualityText}{" "}
-          {data.classificationYear ? `• ${data.classificationYear}` : ""}
-        </span>
+        <Tooltip content={qualityTooltip}>
+          <span className={`badge ${pillClass} cursor-help`} tabIndex={0}>
+            {qualityText}{" "}
+            {data.classificationYear ? `• ${data.classificationYear}` : ""}
+          </span>
+        </Tooltip>
         {data.euType && <span className="badge">{t("beachDetail.euBad")}</span>}
       </div>
 
@@ -155,7 +167,9 @@ export default function BeachDetailPage() {
       <div className="card p-4 space-y-3">
         <div className="grid grid-cols-2 gap-3 text-sm">
           <div>
-            <div className="text-ink-muted">{t("beachDetail.latestSampleDate")}</div>
+            <div className="text-ink-muted">
+              {t("beachDetail.latestSampleDate")}
+            </div>
             <div className="font-medium">{latestSampleLabel}</div>
           </div>
           <div>
@@ -175,7 +189,9 @@ export default function BeachDetailPage() {
             onClick={handleFavoriteClick}
             disabled={addFav.isPending || rmFav.isPending}
           >
-            {isFav ? `★ ${t("beachDetail.removeFavorite")}` : `☆ ${t("beachDetail.addFavorite")}`}
+            {isFav
+              ? `★ ${t("beachDetail.removeFavorite")}`
+              : `☆ ${t("beachDetail.addFavorite")}`}
           </button>
 
           <Link
@@ -190,7 +206,9 @@ export default function BeachDetailPage() {
       {/* Description */}
       {data.bathInformation && (
         <article className="card p-4">
-          <h2 className="font-spectral text-lg mb-1">{t("beachDetail.bathInformation")}</h2>
+          <h2 className="font-spectral text-lg mb-1">
+            {t("beachDetail.bathInformation")}
+          </h2>
           <p className="text-sm leading-relaxed whitespace-pre-line">
             {data.bathInformation}
           </p>
@@ -212,7 +230,11 @@ export default function BeachDetailPage() {
               </a>
             </div>
           )}
-          {data.contactPhone && <div>{t("beachDetail.phone")} {data.contactPhone}</div>}
+          {data.contactPhone && (
+            <div>
+              {t("beachDetail.phone")} {data.contactPhone}
+            </div>
+          )}
           {data.contactUrl && (
             <div>
               {t("beachDetail.website")}{" "}

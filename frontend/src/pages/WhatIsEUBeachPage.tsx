@@ -56,6 +56,15 @@ export default function WhatIsEUBeachPage() {
               {t("pages.whatIsEUBeach.poorDesc")}
             </p>
           </div>
+
+          <div className="card p-4">
+            <div className="flex items-center gap-3 mb-2">
+              <span className="badge kpi-unknown">{t("classification.unknown")}</span>
+            </div>
+            <p className="text-sm text-ink-muted">
+              {t("pages.whatIsEUBeach.unknownDesc")}
+            </p>
+          </div>
         </div>
       </section>
 
