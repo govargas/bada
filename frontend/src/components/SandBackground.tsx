@@ -13,7 +13,7 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
         uTime: { value: 0 },
         uResolution: { value: new THREE.Vector2(1, 1) },
         // Warmer, more golden/beige sand
-        uSandColor: { value: new THREE.Color("#E0CDA8") },
+        uSandColor: { value: new THREE.Color("#efebe4") },
         // Clearer, subtle blue tint (less teal/green)
         uWaterTint: { value: new THREE.Color("#B0D4E8") },
       },
@@ -65,7 +65,7 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             vec2 uv = vUv * vec2(aspect, 1.0);
             
             // --- Water Simulation (Organic / Droppy) ---
-            float speed = 0.1;
+            float speed = 0.05; // Slower speed
             float flowTime = uTime * speed;
             
             // Domain warping for organic feel
@@ -74,16 +74,16 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             q.y = snoise(uv + vec2(1.0, flowTime));
             
             vec2 r = vec2(0.);
-            r.x = snoise(uv + 1.0*q + vec2(1.7, 9.2) + 0.15*uTime);
-            r.y = snoise(uv + 1.0*q + vec2(8.3, 2.8) + 0.126*uTime);
+            r.x = snoise(uv + 1.0*q + vec2(1.7, 9.2) + 0.05*uTime);
+            r.y = snoise(uv + 1.0*q + vec2(8.3, 2.8) + 0.04*uTime);
             
             float f = snoise(uv + r);
             
             // "Droppy" ripples: Combine sine waves with warped noise
             // Moving upwards mainly
-            float wavePhase = uv.y * 10.0 - uTime * 0.8;
+            float wavePhase = uv.y * 8.0 - uTime * 0.3; // Slower wave phase
             // Distort the phase with the noise
-            wavePhase += f * 2.0;
+            wavePhase += f * 1.5;
             
             float wave = sin(wavePhase);
             
@@ -94,17 +94,17 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             caustic = pow(caustic, 4.0); // Sharpen
             
             // Secondary smaller ripples for detail
-            float smallRipples = snoise(uv * 20.0 + uTime * 0.5);
+            float smallRipples = snoise(uv * 15.0 + uTime * 0.2); // Slower small ripples
             float causticDetail = smoothstep(0.4, 0.8, smallRipples);
             
             // Combine
-            float totalCaustic = caustic * 0.7 + causticDetail * 0.3;
+            float totalCaustic = caustic * 0.6 + causticDetail * 0.2; // Reduced intensity
             
             // --- Refraction ---
             // Stronger distortion for "droppy" look
             vec2 distort = vec2(
-                cos(wavePhase) * 0.01,
-                sin(wavePhase) * 0.01
+                cos(wavePhase) * 0.005,
+                sin(wavePhase) * 0.005
             );
             vec2 sandUv = uv + distort;
             
@@ -135,10 +135,10 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             finalColor += totalCaustic * highlightColor * 0.5;
             
             // Specular Sparkles (Sun reflection)
-            // High frequency noise threshold
-            float sparkleNoise = snoise(uv * 60.0 + uTime * 1.5);
-            float sparkle = smoothstep(0.6, 1.0, sparkleNoise) * smoothstep(0.4, 0.6, depth); 
-            finalColor += sparkle * vec3(1.0, 1.0, 1.0) * 0.8;
+            // High frequency noise threshold - significantly reduced
+            float sparkleNoise = snoise(uv * 40.0 + uTime * 0.5);
+            float sparkle = smoothstep(0.8, 1.0, sparkleNoise) * smoothstep(0.4, 0.6, depth); 
+            finalColor += sparkle * vec3(1.0, 1.0, 1.0) * 0.3; // Much subtler sparkles
 
             // Vignette for depth
             float vignette = smoothstep(0.0, 0.2, vUv.y); // Darker at bottom
@@ -167,7 +167,10 @@ function BeachScene() {
   useFrame(({ clock, size }) => {
     if (materialRef.current) {
       materialRef.current.uniforms.uTime.value = clock.getElapsedTime();
-      materialRef.current.uniforms.uResolution.value.set(size.width, size.height);
+      materialRef.current.uniforms.uResolution.value.set(
+        size.width,
+        size.height
+      );
     }
   });
 
@@ -187,7 +190,7 @@ export default function SandBackground() {
         gl={{ antialias: true, alpha: false }}
         dpr={[1, 2]}
       >
-        <color attach="background" args={["#E0CDA8"]} />
+        <color attach="background" args={["#efebe4"]} />
         <BeachScene />
       </Canvas>
     </div>
