@@ -223,11 +223,11 @@ export default function BeachesList() {
       {/* Use current location — full width, now under the map */}
       <div className="px-0">
         <button
-          className="w-full px-3 py-2 rounded-2xl border border-border bg-surface-muted hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+          className="card w-full px-3 py-2 hover:brightness-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-center font-medium flex items-center justify-center gap-2"
           onClick={handleUseLocation}
           disabled={geoLoading}
         >
-          {geoLoading ? t("beachesList.gettingLocation") : t("beachesList.requestLocation")}
+          {geoLoading ? t("beachesList.gettingLocation") : `📍 ${t("beachesList.requestLocation")}`}
         </button>
       </div>
 
@@ -237,7 +237,7 @@ export default function BeachesList() {
           <li key={b.id}>
             <Link
               to={`/beach/${b.id}`}
-              className="block rounded-2xl border border-border bg-surface-muted p-3 hover:bg-surface transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+              className="card block p-3 hover:brightness-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">

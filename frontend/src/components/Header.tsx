@@ -102,16 +102,13 @@ export default function Header({ languageSwitcher }: HeaderProps) {
       >
         {t("header.skipToMain")}
       </a>
-      <header
-        className="bg-surface sticky top-0 z-50 border-b border-border"
-        role="banner"
-      >
+      <header className="glass-header sticky top-0 z-50" role="banner">
         <div className="mx-auto max-w-screen-lg px-3 py-2 flex items-center justify-between gap-2">
           {/* Left: Hamburger */}
           <div className="relative" ref={menuRef}>
             <button
               aria-label={t("header.openMenu")}
-              className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
+              className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setMenuOpen((v) => !v)}
             >
               <MenuIcon width={30} height={30} aria-hidden="true" />
@@ -120,25 +117,36 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             {menuOpen && (
               <div
                 role="menu"
-                className="absolute left-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2 z-50"
+                className="absolute left-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50"
               >
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {t("header.menu")}
                 </div>
                 <div className="h-px bg-border my-1" />
                 <div className="flex items-center justify-between px-2 py-1.5 gap-3">
-                  <span className="text-sm text-ink-muted">{t("header.language")}</span>
+                  <span className="text-sm text-ink-muted">
+                    {t("header.language")}
+                  </span>
                   {languageSwitcher ?? (
                     <span className="text-xs text-ink-muted">SV / EN</span>
                   )}
                 </div>
                 <div className="h-px bg-border my-1" />
-                <MenuLink to="/what-is-eu-beach" onClick={() => setMenuOpen(false)}>
+                <MenuLink
+                  to="/what-is-eu-beach"
+                  onClick={() => setMenuOpen(false)}
+                >
                   {t("nav.whatIsEUBeach")}
                 </MenuLink>
-                <MenuLink to="/about" onClick={() => setMenuOpen(false)}>{t("nav.about")}</MenuLink>
-                <MenuLink to="/terms" onClick={() => setMenuOpen(false)}>{t("nav.terms")}</MenuLink>
-                <MenuLink to="/contact" onClick={() => setMenuOpen(false)}>{t("nav.contact")}</MenuLink>
+                <MenuLink to="/about" onClick={() => setMenuOpen(false)}>
+                  {t("nav.about")}
+                </MenuLink>
+                <MenuLink to="/terms" onClick={() => setMenuOpen(false)}>
+                  {t("nav.terms")}
+                </MenuLink>
+                <MenuLink to="/contact" onClick={() => setMenuOpen(false)}>
+                  {t("nav.contact")}
+                </MenuLink>
               </div>
             )}
           </div>
@@ -165,7 +173,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
           <div className="relative" ref={userRef}>
             <button
               aria-label={t("header.userMenu")}
-              className="p-2 rounded-full hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/50 text-ink"
+              className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setUserOpen((v) => !v)}
             >
               <UserIcon width={30} height={30} aria-hidden="true" />
@@ -174,7 +182,8 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             {userOpen && (
               <div
                 role="menu"
-                className="absolute right-0 mt-2 w-56 rounded-2xl border border-border bg-surface shadow p-2 z-50"
+                // Changed bg-[var(--color-glass)] to bg-surface/95 and kept backdrop-blur-xl
+                className="absolute right-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50"
               >
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {authed ? t("nav.account") : t("nav.user")}
@@ -220,14 +229,14 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                 type="search"
                 placeholder={t("header.searchPlaceholder")}
                 aria-label={t("header.searchPlaceholder")}
-                className="flex-1 rounded-2xl border border-border bg-surface-muted px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent/40"
+                className="card flex-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent/50 placeholder:text-ink-muted/70"
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onFocus={() => search && setSearchOpen(true)}
               />
               {search && (
                 <button
-                  className="rounded-2xl border border-border bg-surface px-3 py-2 hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
+                  className="card px-3 py-2 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   onClick={() => {
                     setSearch("");
                     setSearchOpen(false);
@@ -242,7 +251,8 @@ export default function Header({ languageSwitcher }: HeaderProps) {
 
             {/* Search results dropdown */}
             {searchOpen && search && (
-              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border bg-surface shadow-lg max-h-96 overflow-y-auto z-50">
+              // Changed bg-[var(--color-glass)] to bg-surface/95 and kept backdrop-blur-xl
+              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50">
                 {filteredBeaches.length > 0 ? (
                   <ul className="py-2">
                     {filteredBeaches.map((beach) => (
@@ -289,7 +299,15 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   );
 }
 
-function MenuLink({ to, children, onClick }: { to: string; children: React.ReactNode; onClick?: () => void }) {
+function MenuLink({
+  to,
+  children,
+  onClick,
+}: {
+  to: string;
+  children: React.ReactNode;
+  onClick?: () => void;
+}) {
   return (
     <Link
       to={to}

@@ -12,6 +12,10 @@
   --color-accent: #0a5a82;
   --color-badge: #e6e4dc;
 
+  /* Glassmorphism - Light theme */
+  --color-glass: rgba(239, 235, 228, 0.2);
+  --color-glass-border: rgba(205, 200, 192, 0.3);
+
   /* Quality colors */
   --color-quality-excellent: #1f6fb2;
   --color-quality-good: #2b8a3e;
@@ -26,16 +30,20 @@
 
 /* Dark theme overrides */
 .dark {
-  --color-surface: #161011;
-  --color-surface-muted: #1e1819;
-  --color-ink: #f0ede6;
-  --color-ink-muted: #b8b2aa;
-  --color-border: #40383a;
-  --color-accent: #5ea5d2;
-  --color-badge: #302a2c;
+  --color-surface: #122c3e;
+  --color-surface-muted: #1a3a4f;
+  --color-ink: #f8fafc;
+  --color-ink-muted: #cbd5e1;
+  --color-border: #2c5c7a;
+  --color-accent: #38bdf8;
+  --color-badge: #1e4057;
+
+  /* Glassmorphism - Dark theme (ocean-tinted) */
+  --color-glass: rgba(20, 60, 90, 0.4);
+  --color-glass-border: rgba(56, 189, 248, 0.2);
 
   /* Quality colors for dark mode - need lighter shades for contrast */
-  --color-quality-unknown: #d1d5db;
+  --color-quality-unknown: #9ca3af;
 }
 
 /* Base defaults */
@@ -47,7 +55,7 @@
   }
 
   body {
-    @apply bg-surface text-ink antialiased font-inter;
+    @apply text-ink antialiased font-inter;
   }
 
   h1,
@@ -67,11 +75,39 @@
 /* Reusable bits */
 @layer components {
   .card {
-    @apply bg-surface-muted rounded-2xl shadow border border-border;
+    @apply rounded-2xl shadow border border-border/60;
+    background: var(--color-glass);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
   }
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full
            text-xs font-medium bg-badge text-ink;
+  }
+
+  /* Glassmorphism header with gradient fade */
+  .glass-header {
+    background: var(--color-glass);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--color-glass-border);
+    position: relative;
+  }
+
+  .glass-header::after {
+    content: "";
+    position: absolute;
+    bottom: -24px;
+    left: 0;
+    right: 0;
+    height: 24px;
+    background: linear-gradient(
+      to bottom,
+      var(--color-glass) 0%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 40;
   }
 
   .kpi-excellent {
@@ -123,6 +159,98 @@
   }
 }
 
+/* ============================================
+   AMBIENT BACKGROUNDS
+   ============================================ */
+
+/* Light mode: Sand texture with subtle grain */
+.ambient-bg {
+  background: 
+    /* Subtle noise texture overlay */
+    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    /* Warm sand gradient */
+    linear-gradient(
+      180deg,
+      #f6f2ec 0%,
+      #efebe4 30%,
+      #e8e2d8 70%,
+      #dfd8cc 100%
+    );
+  background-size: 200px 200px, 100% 100%;
+  animation: sand-drift 45s ease-in-out infinite;
+}
+
+@keyframes sand-drift {
+  0%, 100% {
+    background-position: 0 0, 0 0;
+  }
+  50% {
+    background-position: 50px 25px, 0 0;
+  }
+}
+
+/* Dark mode: Animated water/ocean waves */
+.dark .ambient-bg {
+  background: 
+    /* Deep wave layer 1 */
+    radial-gradient(
+      ellipse 150% 80% at 50% 120%,
+      rgba(30, 90, 140, 0.4) 0%,
+      transparent 60%
+    ),
+    /* Wave layer 2 */
+    radial-gradient(
+      ellipse 120% 60% at 30% 100%,
+      rgba(40, 100, 160, 0.35) 0%,
+      transparent 50%
+    ),
+    /* Wave layer 3 */
+    radial-gradient(
+      ellipse 100% 50% at 70% 110%,
+      rgba(50, 110, 170, 0.3) 0%,
+      transparent 40%
+    ),
+    /* Base deep ocean gradient */
+    linear-gradient(
+      180deg,
+      #2A6F97 0%,
+      #357CA5 25%,
+      #468FAF 50%,
+      #539BB8 75%,
+      #61A5C2 100%
+    );
+  background-size: 
+    200% 100%,
+    180% 100%,
+    160% 100%,
+    100% 100%;
+  animation: ocean-waves 20s ease-in-out infinite;
+}
+
+@keyframes ocean-waves {
+  0%, 100% {
+    background-position: 
+      0% 0%,
+      100% 0%,
+      50% 0%,
+      0% 0%;
+  }
+  33% {
+    background-position: 
+      50% 0%,
+      0% 0%,
+      100% 0%,
+      0% 0%;
+  }
+  66% {
+    background-position: 
+      100% 0%,
+      50% 0%,
+      0% 0%,
+      0% 0%;
+  }
+}
+
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
   *,
@@ -131,5 +259,16 @@
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
+  }
+
+  /* Static backgrounds for reduced motion preference */
+  .ambient-bg {
+    animation: none !important;
+    background-position: 0 0, 0 0 !important;
+  }
+
+  .dark .ambient-bg {
+    animation: none !important;
+    background-position: 50% 0%, 50% 0%, 50% 0%, 0% 0% !important;
   }
 }

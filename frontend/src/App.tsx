@@ -3,6 +3,7 @@ import Header from "./components/Header";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import ErrorBoundary from "./components/ErrorBoundary";
 import ProtectedRoute from "./routes/ProtectedRoute";
+import AmbientBackground from "./components/AmbientBackground";
 
 import HomePage from "./pages/HomePage";
 import BeachDetailPage from "./pages/BeachDetailPage";
@@ -19,7 +20,10 @@ import SettingsPage from "./pages/SettingsPage";
 export default function App() {
   return (
     <ErrorBoundary>
-      <div className="min-h-screen">
+      {/* Three.js ambient background (water/sand) */}
+      <AmbientBackground />
+      
+      <div className="min-h-screen relative">
         <Header languageSwitcher={<LanguageSwitcher />} />
         <main id="main-content" className="p-4">
           <Routes>
