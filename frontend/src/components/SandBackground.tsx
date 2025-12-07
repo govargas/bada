@@ -13,7 +13,7 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
         uTime: { value: 0 },
         uResolution: { value: new THREE.Vector2(1, 1) },
         // Warmer, more golden/beige sand
-        uSandColor: { value: new THREE.Color("#efebe4") },
+        uSandColor: { value: new THREE.Color("#ede2ce") },
         // Clearer, subtle blue tint (less teal/green)
         uWaterTint: { value: new THREE.Color("#B0D4E8") },
       },
