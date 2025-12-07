@@ -3,9 +3,6 @@ import { Canvas, useFrame, extend } from "@react-three/fiber";
 import * as THREE from "three";
 
 // Procedural Beach Texture Shader
-// Improved based on feedback:
-// - Warmer sand colors, clearer blue water (less green)
-// - "Droppy" / Organic water ripple texture using layered noise and domain warping
 class BeachTextureMaterial extends THREE.ShaderMaterial {
   constructor() {
     super({
@@ -59,90 +56,101 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
           return 130.0 * dot(m, g);
         }
 
+        // --- Drops Function ---
+        // (Deleted)
+
         void main() {
             // Adjust UV for aspect ratio
             float aspect = uResolution.x / uResolution.y;
             vec2 uv = vUv * vec2(aspect, 1.0);
             
-            // --- Water Simulation (Organic / Droppy) ---
-            float speed = 0.05; // Slower speed
-            float flowTime = uTime * speed;
+            // --- Sand Generation (with Stones/Debris) ---
             
-            // Domain warping for organic feel
-            vec2 q = vec2(0.);
-            q.x = snoise(uv + vec2(0.0, flowTime));
-            q.y = snoise(uv + vec2(1.0, flowTime));
+            // 1. Base Sand
+            float grain = snoise(uv * 300.0); 
+            vec3 sandBase = uSandColor + vec3(grain * 0.04);
             
-            vec2 r = vec2(0.);
-            r.x = snoise(uv + 1.0*q + vec2(1.7, 9.2) + 0.05*uTime);
-            r.y = snoise(uv + 1.0*q + vec2(8.3, 2.8) + 0.04*uTime);
+            // 2. Small Stones / Debris (Disabled)
+            // float debrisNoise = snoise(uv * 25.0 + vec2(15.0, 5.0)); 
+            // float stones = smoothstep(0.95, 0.95, debrisNoise); 
             
-            float f = snoise(uv + r);
+            // Darker brownish/grey color for stones
+            // vec3 stoneColor = vec3(0.45, 0.4, 0.35);
+            // Mix stones in
+            // sandBase = mix(sandBase, stoneColor, stones * 0.5);
+
+            // --- Shadows (Leaves/Log) ---
+            // Large, slow moving shadows from above
+            float shadowTime = uTime * 0.05;
+            float shadowN = snoise(uv * 1.5 + vec2(shadowTime, 0.0));
+            float shadowMask = smoothstep(0.2, 0.6, shadowN); // Soft shadows
             
-            // "Droppy" ripples: Combine sine waves with warped noise
-            // Moving upwards mainly
-            float wavePhase = uv.y * 8.0 - uTime * 0.3; // Slower wave phase
-            // Distort the phase with the noise
-            wavePhase += f * 1.5;
+            // Darken sand where there are shadows
+            sandBase = mix(sandBase, sandBase * 0.75, shadowMask);
+
+            // --- Water Hybrid (Silk + Caustics) ---
+            // Hybrid approach: 
+            // - "Silk" comes from domain warping (distorting the coordinates)
+            // - "Caustics" comes from the ridge noise (1.0 - abs(noise))
             
-            float wave = sin(wavePhase);
+            float t = uTime * 0.10; // Slightly slower for relaxed feel
             
-            // Create caustic network pattern
-            // Absolute value creates sharp ridges -> "caustics"
-            float caustic = abs(wave);
-            caustic = 1.0 - caustic; // Invert so crests are 1.0
-            caustic = pow(caustic, 4.0); // Sharpen
+            // 1. Domain Warping (The "Silk" Part)
+            // We warp the coordinate space slightly before sampling the ripple noise.
+            // This curves the straight lines of the caustics.
+            vec2 warp = vec2(
+                snoise(uv * 2.0 + vec2(0.0, t)),
+                snoise(uv * 2.0 + vec2(5.2, t + 1.3))
+            ) * 0.15; // Strength of the warp
             
-            // Secondary smaller ripples for detail
-            float smallRipples = snoise(uv * 15.0 + uTime * 0.2); // Slower small ripples
-            float causticDetail = smoothstep(0.4, 0.8, smallRipples);
+            vec2 flowUV = uv + warp;
             
-            // Combine
-            float totalCaustic = caustic * 0.6 + causticDetail * 0.2; // Reduced intensity
+            // 2. Caustic Ripples (The "Water" Part) - Moving Up
+            vec2 flow1 = vec2(0.0, -t);
+            float n1 = snoise(flowUV * 6.0 + flow1);
+            
+            vec2 flow2 = vec2(0.05, -t * 1.4);
+            float n2 = snoise(flowUV * 10.0 + flow2 + vec2(3.2, 1.5));
+            
+            // Combine using "ridge" function
+            float ridges = (
+                (1.0 - abs(n1)) * 0.6 + 
+                (1.0 - abs(n2)) * 0.4
+            );
+            
+            // 3. Hybrid Softening
+            // Lower power than pure caustics (was 5.0) to make it softer/silkier
+            // but keep enough definition to look like water
+            float caustic = pow(ridges, 4.0); 
+
+            // Reduced intensity to avoid "burning" white look (was 0.6)
+            float totalLight = caustic * 0.2;
             
             // --- Refraction ---
-            // Stronger distortion for "droppy" look
-            vec2 distort = vec2(
-                cos(wavePhase) * 0.005,
-                sin(wavePhase) * 0.005
-            );
-            vec2 sandUv = uv + distort;
+            // Distort sand based on water pattern
+            vec2 waterGrad = vec2(n1, n2) * 0.005;
+            float refractedGrain = snoise((uv + waterGrad) * 300.0);
             
-            // --- Sand Generation ---
-            // Warm, granular sand
-            float grain = snoise(sandUv * 500.0); 
-            float patches = snoise(sandUv * 5.0);
+            // Refracted stones
+            // float refractedDebris = snoise((uv + waterGrad) * 25.0 + vec2(15.0, 5.0));
+            // float refractedStones = smoothstep(0.75, 0.85, refractedDebris);
             
-            vec3 sandColor = uSandColor;
-            // Variation based on wetness/depth
-            sandColor *= 0.9 + 0.1 * patches;
+            // Refracted Shadows
+            float refractedShadowN = snoise((uv + waterGrad) * 1.5 + vec2(shadowTime, 0.0));
+            float refractedShadowMask = smoothstep(0.2, 0.6, refractedShadowN);
             
-            // Add grain
-            sandColor += vec3(grain * 0.04);
+            // Re-compose sand with refraction
+            vec3 finalSand = uSandColor + vec3(refractedGrain * 0.04);
+            // finalSand = mix(finalSand, stoneColor, refractedStones * 0.5);
+            finalSand = mix(finalSand, finalSand * 0.75, refractedShadowMask);
             
             // --- Composition ---
-            vec3 finalColor = sandColor;
+            vec3 finalColor = mix(finalSand, uWaterTint, 0.15);
+            finalColor += vec3(1.0, 1.0, 0.95) * totalLight;
             
-            // Water Tint
-            // Clear blue, more opaque in deeper parts (low wave height)
-            float depth = 0.5 + 0.5 * sin(wavePhase); // 0..1
-            vec3 waterColor = uWaterTint;
-            // Apply tint more where water is "deep" or just generally
-            finalColor = mix(finalColor, waterColor, 0.15);
-            
-            // Add Caustics (Light focusing)
-            vec3 highlightColor = vec3(1.0, 1.0, 0.95);
-            finalColor += totalCaustic * highlightColor * 0.5;
-            
-            // Specular Sparkles (Sun reflection)
-            // High frequency noise threshold - significantly reduced
-            float sparkleNoise = snoise(uv * 40.0 + uTime * 0.5);
-            float sparkle = smoothstep(0.8, 1.0, sparkleNoise) * smoothstep(0.4, 0.6, depth); 
-            finalColor += sparkle * vec3(1.0, 1.0, 1.0) * 0.3; // Much subtler sparkles
-
-            // Vignette for depth
-            float vignette = smoothstep(0.0, 0.2, vUv.y); // Darker at bottom
-            finalColor = mix(finalColor * 0.8, finalColor, vignette);
+            // Vignette
+            float vignette = smoothstep(0.0, 0.15, vUv.y);
+            finalColor = mix(finalColor * 0.9, finalColor, vignette);
 
             gl_FragColor = vec4(finalColor, 1.0);
         }
