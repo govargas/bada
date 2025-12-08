@@ -222,22 +222,22 @@
 /* Light mode: Sand texture with subtle grain */
 .ambient-bg {
   background: 
-    /* Subtle noise texture overlay */
-    url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
+    /* Subtle noise texture overlay */ url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
     /* Warm sand gradient */
-    linear-gradient(
-      180deg,
-      #f6f2ec 0%,
-      #efebe4 30%,
-      #e8e2d8 70%,
-      #dfd8cc 100%
-    );
+      linear-gradient(
+        180deg,
+        #f6f2ec 0%,
+        #efebe4 30%,
+        #e8e2d8 70%,
+        #dfd8cc 100%
+      );
   background-size: 200px 200px, 100% 100%;
   animation: sand-drift 45s ease-in-out infinite;
 }
 
 @keyframes sand-drift {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0 0, 0 0;
   }
   50% {
@@ -248,62 +248,46 @@
 /* Dark mode: Animated water/ocean waves */
 .dark .ambient-bg {
   background: 
-    /* Deep wave layer 1 */
-    radial-gradient(
+    /* Deep wave layer 1 */ radial-gradient(
       ellipse 150% 80% at 50% 120%,
       rgba(30, 90, 140, 0.4) 0%,
       transparent 60%
     ),
     /* Wave layer 2 */
-    radial-gradient(
-      ellipse 120% 60% at 30% 100%,
-      rgba(40, 100, 160, 0.35) 0%,
-      transparent 50%
-    ),
+      radial-gradient(
+        ellipse 120% 60% at 30% 100%,
+        rgba(40, 100, 160, 0.35) 0%,
+        transparent 50%
+      ),
     /* Wave layer 3 */
-    radial-gradient(
-      ellipse 100% 50% at 70% 110%,
-      rgba(50, 110, 170, 0.3) 0%,
-      transparent 40%
-    ),
+      radial-gradient(
+        ellipse 100% 50% at 70% 110%,
+        rgba(50, 110, 170, 0.3) 0%,
+        transparent 40%
+      ),
     /* Base deep ocean gradient */
-    linear-gradient(
-      180deg,
-      #2A6F97 0%,
-      #357CA5 25%,
-      #468FAF 50%,
-      #539BB8 75%,
-      #61A5C2 100%
-    );
-  background-size: 
-    200% 100%,
-    180% 100%,
-    160% 100%,
-    100% 100%;
+      linear-gradient(
+        180deg,
+        #2a6f97 0%,
+        #357ca5 25%,
+        #468faf 50%,
+        #539bb8 75%,
+        #61a5c2 100%
+      );
+  background-size: 200% 100%, 180% 100%, 160% 100%, 100% 100%;
   animation: ocean-waves 20s ease-in-out infinite;
 }
 
 @keyframes ocean-waves {
-  0%, 100% {
-    background-position: 
-      0% 0%,
-      100% 0%,
-      50% 0%,
-      0% 0%;
+  0%,
+  100% {
+    background-position: 0% 0%, 100% 0%, 50% 0%, 0% 0%;
   }
   33% {
-    background-position: 
-      50% 0%,
-      0% 0%,
-      100% 0%,
-      0% 0%;
+    background-position: 50% 0%, 0% 0%, 100% 0%, 0% 0%;
   }
   66% {
-    background-position: 
-      100% 0%,
-      50% 0%,
-      0% 0%,
-      0% 0%;
+    background-position: 100% 0%, 50% 0%, 0% 0%, 0% 0%;
   }
 }
 
