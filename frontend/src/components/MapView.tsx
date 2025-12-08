@@ -159,7 +159,7 @@ export default function MapView({
     if (!map || !map.isStyleLoaded()) return;
 
     const accent = getAccent();
-    
+
     // Remove old markers
     markersRef.current.forEach((m) => m.remove());
     markersRef.current = [];
@@ -167,7 +167,8 @@ export default function MapView({
     // Remove old layers and sources if they exist
     if (map.getLayer("clusters")) map.removeLayer("clusters");
     if (map.getLayer("cluster-count")) map.removeLayer("cluster-count");
-    if (map.getLayer("unclustered-point-visual")) map.removeLayer("unclustered-point-visual");
+    if (map.getLayer("unclustered-point-visual"))
+      map.removeLayer("unclustered-point-visual");
     if (map.getLayer("unclustered-point")) map.removeLayer("unclustered-point");
     if (map.getSource("beaches")) map.removeSource("beaches");
 
@@ -208,11 +209,15 @@ export default function MapView({
           "step",
           ["get", "point_count"],
           15, // radius for clusters with < 10 points
-          10, 20, // radius for clusters with 10-99 points
-          30, 25, // radius for clusters with 100+ points
+          10,
+          20, // radius for clusters with 10-99 points
+          30,
+          25, // radius for clusters with 100+ points
         ],
         "circle-stroke-width": 2,
-        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+        "circle-stroke-color": isDark()
+          ? "rgba(0, 0, 0, 0.6)"
+          : "rgba(255, 255, 255, 0.85)",
       },
     });
 
@@ -224,7 +229,7 @@ export default function MapView({
       filter: ["has", "point_count"],
       layout: {
         "text-field": "{point_count_abbreviated}",
-        "text-font": ["Noto Sans Regular"],
+        "text-font": ["Noto Sans Bold", "Noto Sans"],
         "text-size": 13,
       },
       paint: {
@@ -245,7 +250,9 @@ export default function MapView({
         "circle-color": accent,
         "circle-radius": 22, // 44px diameter for proper touch target (WCAG compliance)
         "circle-stroke-width": 2,
-        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+        "circle-stroke-color": isDark()
+          ? "rgba(0, 0, 0, 0.6)"
+          : "rgba(255, 255, 255, 0.85)",
         "circle-opacity": 0.2, // Make it mostly transparent
         "circle-stroke-opacity": 1,
       },
@@ -261,7 +268,9 @@ export default function MapView({
         "circle-color": accent,
         "circle-radius": 8, // Visual size (16px diameter)
         "circle-stroke-width": 2,
-        "circle-stroke-color": isDark() ? "rgba(0, 0, 0, 0.6)" : "rgba(255, 255, 255, 0.85)",
+        "circle-stroke-color": isDark()
+          ? "rgba(0, 0, 0, 0.6)"
+          : "rgba(255, 255, 255, 0.85)",
       },
     });
 
@@ -270,44 +279,65 @@ export default function MapView({
       const features = map.queryRenderedFeatures(e.point, {
         layers: ["clusters"],
       });
-      if (!features.length || !features[0].geometry || features[0].geometry.type !== "Point") return;
+      if (
+        !features.length ||
+        !features[0].geometry ||
+        features[0].geometry.type !== "Point"
+      )
+        return;
 
       const clusterId = features[0].properties?.cluster_id;
       const pointCount = features[0].properties?.point_count;
-      const coordinates = features[0].geometry.coordinates.slice() as [number, number];
+      const coordinates = features[0].geometry.coordinates.slice() as [
+        number,
+        number
+      ];
       const source = map.getSource("beaches") as maplibregl.GeoJSONSource;
-      
+
       source.getClusterExpansionZoom(clusterId, (err, zoom) => {
         if (err) return;
 
         // If cluster can't expand further (at max zoom), show popup with all beaches
         if (zoom >= map.getMaxZoom() || zoom === map.getZoom()) {
-          source.getClusterLeaves(clusterId, pointCount || 100, 0, (error, leaves) => {
-            if (error || !leaves) return;
+          source.getClusterLeaves(
+            clusterId,
+            pointCount || 100,
+            0,
+            (error, leaves) => {
+              if (error || !leaves) return;
 
-            const styles = getPopupStyles();
-            const beachList = leaves
-              .map((leaf: any) => {
-                const props = leaf.properties;
-                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
+              const styles = getPopupStyles();
+              const beachList = leaves
+                .map((leaf: any) => {
+                  const props = leaf.properties;
+                  return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
+                })
+                .join("");
+
+              const popup = new maplibregl.Popup({
+                closeButton: true,
+                maxWidth: "300px",
               })
-              .join("");
+                .setLngLat(coordinates)
+                .setHTML(
+                  `<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`
+                )
+                .addTo(map);
 
-            const popup = new maplibregl.Popup({ closeButton: true, maxWidth: "300px" })
-              .setLngLat(coordinates)
-              .setHTML(`<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`)
-              .addTo(map);
-            
-            // Apply dark mode styles to popup container
-            const popupEl = popup.getElement();
-            if (popupEl) {
-              const content = popupEl.querySelector(".maplibregl-popup-content");
-              if (content) {
-                (content as HTMLElement).style.backgroundColor = styles.background;
-                (content as HTMLElement).style.color = styles.color;
+              // Apply dark mode styles to popup container
+              const popupEl = popup.getElement();
+              if (popupEl) {
+                const content = popupEl.querySelector(
+                  ".maplibregl-popup-content"
+                );
+                if (content) {
+                  (content as HTMLElement).style.backgroundColor =
+                    styles.background;
+                  (content as HTMLElement).style.color = styles.color;
+                }
               }
             }
-          });
+          );
         } else {
           // Otherwise, zoom in
           map.easeTo({
@@ -320,10 +350,21 @@ export default function MapView({
 
     // Click handler for individual points - show popup
     map.on("click", "unclustered-point", (e) => {
-      if (!e.features?.length || !e.features[0].geometry || e.features[0].geometry.type !== "Point") return;
-      
-      const coordinates = e.features[0].geometry.coordinates.slice() as [number, number];
-      const { name, id } = e.features[0].properties as { name: string; id: string };
+      if (
+        !e.features?.length ||
+        !e.features[0].geometry ||
+        e.features[0].geometry.type !== "Point"
+      )
+        return;
+
+      const coordinates = e.features[0].geometry.coordinates.slice() as [
+        number,
+        number
+      ];
+      const { name, id } = e.features[0].properties as {
+        name: string;
+        id: string;
+      };
 
       // Ensure that if the map is zoomed out such that multiple
       // copies of the feature are visible, the popup appears
@@ -364,7 +405,6 @@ export default function MapView({
     map.on("mouseleave", "unclustered-point", () => {
       map.getCanvas().style.cursor = "";
     });
-
   }, [points]);
 
   // Fit to focus (center + radius) without flashing; allow closer zoom for small radii
