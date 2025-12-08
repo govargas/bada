@@ -82,7 +82,7 @@ export default function BeachesList() {
     if (q) {
       return filteredBySearch;
     }
-    
+
     if (mode === "viewport" && bounds) {
       return filteredBySearch.filter(
         (b) =>
@@ -181,7 +181,9 @@ export default function BeachesList() {
   if (!items.length) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">{t("beachesList.noBeachesFound")}</p>
+        <p className="font-spectral text-lg">
+          {t("beachesList.noBeachesFound")}
+        </p>
         <p className="text-sm text-ink-muted mt-1">
           {t("beachesList.emptyState")}
         </p>
@@ -227,7 +229,9 @@ export default function BeachesList() {
           onClick={handleUseLocation}
           disabled={geoLoading}
         >
-          {geoLoading ? t("beachesList.gettingLocation") : `📍 ${t("beachesList.requestLocation")}`}
+          {geoLoading
+            ? t("beachesList.gettingLocation")
+            : `${t("beachesList.requestLocation")}`}
         </button>
       </div>
 
