@@ -66,7 +66,7 @@ export default function SortableFavorite({
 
           <Link
             to={`/beach/${id}`}
-            className="font-medium hover:underline block truncate max-w-[200px] sm:max-w-none"
+            className="font-beach hover:underline block truncate max-w-[200px] sm:max-w-none"
             title={name}
           >
             {name}

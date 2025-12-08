@@ -241,7 +241,7 @@ export default function BeachesList() {
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
-                  <h3 className="font-spectral text-lg leading-tight truncate">
+                  <h3 className="font-beach text-lg leading-tight truncate">
                     {b.name}
                   </h3>
                   <p className="text-ink-muted text-sm">

@@ -156,7 +156,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             <div className="flex items-center justify-center gap-2">
               <Link
                 to="/"
-                className="font-title text-3xl leading-none text-ink shrink-0"
+                className="font-title text-4xl leading-none text-ink shrink-0"
                 aria-label="BADA – home"
               >
                 BADA

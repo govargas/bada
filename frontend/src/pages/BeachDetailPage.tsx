@@ -148,7 +148,7 @@ export default function BeachDetailPage() {
     <section className="p-4 space-y-4">
       {/* Heading block */}
       <header className="space-y-1">
-        <h1 className="font-spectral text-2xl leading-tight">{title}</h1>
+        <h1 className="font-beach text-2xl leading-tight">{title}</h1>
         <p className="text-ink-muted">{muni || "—"}</p>
       </header>
 

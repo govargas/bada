@@ -27,6 +27,7 @@
   --font-spectral: "Spectral", serif;
   --font-inter: "Inter", system-ui, sans-serif;
   --font-title: "Special Gothic Expanded One", sans-serif;
+  --font-beach: "Zalando Sans SemiExpanded", sans-serif;
 }
 
 /* Dark theme overrides */
@@ -68,6 +69,10 @@
 
   .font-title {
     font-family: var(--font-title);
+  }
+
+  .font-beach {
+    font-family: var(--font-beach);
   }
 
   a {
