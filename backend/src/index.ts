@@ -10,6 +10,7 @@ import { authRouter } from "./routes/auth.js";
 import { requireAuth } from "./middleware/auth.js";
 import { favoritesRouter } from "./routes/favorites.js";
 import { beachesRouter } from "./routes/beaches.js";
+import { swaggerRouter } from "./swagger.js";
 
 const app = express();
 
@@ -36,6 +37,9 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+
+/** ── API Documentation (Swagger UI) ───────────────────────────────────────── */
+app.use("/api", swaggerRouter);
 
 /** ── TEMP DIAG: env presence (put this BEFORE the 404) ───────────────────── */
 app.get("/api/debug/env", (_req, res) => {

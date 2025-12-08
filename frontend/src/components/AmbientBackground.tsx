@@ -1,8 +1,27 @@
-import { useState, useEffect, lazy, Suspense, useCallback } from "react";
+import { useState, useEffect, lazy, Suspense } from "react";
 
 // Lazy load the 3D backgrounds to improve initial load time
-const WaterBackground = lazy(() => import("./WaterBackground"));
-const SandBackground = lazy(() => import("./SandBackground"));
+// Use dynamic import with a small delay to prioritize main content rendering
+const WaterBackground = lazy(() => 
+  new Promise<typeof import("./WaterBackground")>(resolve => {
+    // Wait for idle callback or timeout to ensure first paint completes
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => resolve(import("./WaterBackground")), { timeout: 2000 });
+    } else {
+      setTimeout(() => resolve(import("./WaterBackground")), 100);
+    }
+  })
+);
+
+const SandBackground = lazy(() => 
+  new Promise<typeof import("./SandBackground")>(resolve => {
+    if ("requestIdleCallback" in window) {
+      requestIdleCallback(() => resolve(import("./SandBackground")), { timeout: 2000 });
+    } else {
+      setTimeout(() => resolve(import("./SandBackground")), 100);
+    }
+  })
+);
 
 // Check if user prefers reduced motion
 function usePrefersReducedMotion() {
@@ -75,14 +94,26 @@ export default function AmbientBackground() {
   const isDark = useDarkMode();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [renderKey, setRenderKey] = useState(0);
+  const [isReady, setIsReady] = useState(false);
+
+  // Delay Three.js loading until after first paint to prioritize main content
+  useEffect(() => {
+    // Use requestAnimationFrame to wait for first paint
+    const rafId = requestAnimationFrame(() => {
+      // Then use a small timeout to ensure content is interactive
+      const timerId = setTimeout(() => setIsReady(true), 50);
+      return () => clearTimeout(timerId);
+    });
+    return () => cancelAnimationFrame(rafId);
+  }, []);
 
   // Force re-render when theme changes to reset WebGL context
   useEffect(() => {
     setRenderKey((k) => k + 1);
   }, [isDark]);
 
-  // Use static fallback if user prefers reduced motion
-  if (prefersReducedMotion) {
+  // Use static fallback if user prefers reduced motion or not ready yet
+  if (prefersReducedMotion || !isReady) {
     return <FallbackBackground isDark={isDark} />;
   }
 

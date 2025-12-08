@@ -38,14 +38,27 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
                 primary: "var(--color-accent)",
                 secondary: "var(--color-surface-muted)",
               },
+              ariaProps: {
+                role: "status",
+                "aria-live": "polite",
+              },
             },
             error: {
               iconTheme: {
                 primary: "var(--color-quality-poor)",
                 secondary: "var(--color-surface-muted)",
               },
+              ariaProps: {
+                role: "alert",
+                "aria-live": "assertive",
+              },
             },
           }}
+          containerStyle={{
+            top: 80, // Below header
+          }}
+          // Ensure toasts are announced to screen readers
+          containerAriaLabel="Notifications"
         />
       </BrowserRouter>
     </QueryClientProvider>

@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useMemo } from "react";
+import { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import { useTranslation } from "react-i18next";
 import { useUI } from "../store/ui";
@@ -8,15 +8,22 @@ import { fetchBeaches } from "../api/beaches";
 import MenuIcon from "../assets/menu_icon.svg?react";
 import UserIcon from "../assets/user_icon.svg?react";
 
-// Close popovers when clicking outside
+// Close popovers when clicking outside or pressing Escape
 function useOutsideClose<T extends HTMLElement>(onClose: () => void) {
   const ref = useRef<T | null>(null);
   useEffect(() => {
-    function handler(e: MouseEvent) {
+    function handleClickOutside(e: MouseEvent) {
       if (ref.current && !ref.current.contains(e.target as Node)) onClose();
     }
-    document.addEventListener("mousedown", handler);
-    return () => document.removeEventListener("mousedown", handler);
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") onClose();
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscape);
+    };
   }, [onClose]);
   return ref;
 }
@@ -43,8 +50,24 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const menuRef = useOutsideClose<HTMLDivElement>(() => setMenuOpen(false));
-  const userRef = useOutsideClose<HTMLDivElement>(() => setUserOpen(false));
+  
+  // Refs for trigger buttons to return focus when menu closes
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const userButtonRef = useRef<HTMLButtonElement>(null);
+  
+  // Close handlers that return focus to trigger buttons
+  const closeMenu = useCallback(() => {
+    setMenuOpen(false);
+    menuButtonRef.current?.focus();
+  }, []);
+  
+  const closeUser = useCallback(() => {
+    setUserOpen(false);
+    userButtonRef.current?.focus();
+  }, []);
+  
+  const menuRef = useOutsideClose<HTMLDivElement>(closeMenu);
+  const userRef = useOutsideClose<HTMLDivElement>(closeUser);
   const searchRef = useOutsideClose<HTMLDivElement>(() => setSearchOpen(false));
   const { isDark, setIsDark } = useDarkMode();
 
@@ -107,7 +130,10 @@ export default function Header({ languageSwitcher }: HeaderProps) {
           {/* Left: Hamburger */}
           <div className="relative" ref={menuRef}>
             <button
+              ref={menuButtonRef}
               aria-label={t("header.openMenu")}
+              aria-expanded={menuOpen}
+              aria-haspopup="menu"
               className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setMenuOpen((v) => !v)}
             >
@@ -172,7 +198,10 @@ export default function Header({ languageSwitcher }: HeaderProps) {
           {/* Right: User menu */}
           <div className="relative" ref={userRef}>
             <button
+              ref={userButtonRef}
               aria-label={t("header.userMenu")}
+              aria-expanded={userOpen}
+              aria-haspopup="menu"
               className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setUserOpen((v) => !v)}
             >
@@ -252,11 +281,21 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             {/* Search results dropdown */}
             {searchOpen && search && (
               // Changed bg-[var(--color-glass)] to bg-surface/95 and kept backdrop-blur-xl
-              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50">
+              <div 
+                className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50"
+                role="listbox"
+                aria-label={t("header.searchPlaceholder")}
+              >
+                {/* Screen reader announcement for search results */}
+                <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+                  {filteredBeaches.length > 0 
+                    ? `${filteredBeaches.length} ${t("beaches")}` 
+                    : t("beachesList.noMatches")}
+                </div>
                 {filteredBeaches.length > 0 ? (
-                  <ul className="py-2">
+                  <ul className="py-2" role="group">
                     {filteredBeaches.map((beach) => (
-                      <li key={beach.id}>
+                      <li key={beach.id} role="option">
                         <button
                           onClick={() => handleBeachSelect(beach.id)}
                           className="w-full text-left px-4 py-2 hover:bg-surface-muted focus:bg-surface-muted focus:outline-none transition-colors"

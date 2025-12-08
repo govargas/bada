@@ -149,7 +149,8 @@ export default function BeachesList() {
   /* ---------- STATES ---------- */
   if (isLoading) {
     return (
-      <div className="space-y-3">
+      <div className="space-y-3" aria-busy="true" aria-live="polite">
+        <span className="sr-only">{t("loadingBeaches")}</span>
         <div className="h-9 w-40 rounded-2xl bg-surface-muted animate-pulse" />
         <CardSkeleton />
         <CardSkeleton />
@@ -235,8 +236,13 @@ export default function BeachesList() {
         </button>
       </div>
 
+      {/* Screen reader announcement for filtered results */}
+      <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
+        {filtered.length} {t("beaches")}
+      </div>
+
       {/* List (keep to 50 for UX) */}
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3">
+      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" aria-label={t("beaches")}>
         {filtered.slice(0, 50).map((b) => (
           <li key={b.id}>
             <Link
