@@ -85,29 +85,80 @@
            text-xs font-medium bg-badge text-ink;
   }
 
-  /* Glassmorphism header with gradient fade */
+  /* Glassmorphism header with smooth crossfade into background */
   .glass-header {
-    background: var(--color-glass);
-    backdrop-filter: blur(16px);
-    -webkit-backdrop-filter: blur(16px);
-    border-bottom: 1px solid var(--color-glass-border);
     position: relative;
+    padding-bottom: 12px;
   }
 
-  .glass-header::after {
+  /* Background layer with blur and fade - separate from content */
+  .glass-header::before {
     content: "";
     position: absolute;
-    bottom: -24px;
-    left: 0;
-    right: 0;
-    height: 24px;
+    inset: 0;
     background: linear-gradient(
       to bottom,
       var(--color-glass) 0%,
+      var(--color-glass) 50%,
+      rgba(239, 235, 228, 0.12) 80%,
+      transparent 100%
+    );
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    /* Mask fades out the blur smoothly */
+    mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 60%,
+      rgba(0, 0, 0, 0.5) 80%,
+      transparent 100%
+    );
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      black 0%,
+      black 60%,
+      rgba(0, 0, 0, 0.5) 80%,
+      transparent 100%
+    );
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .dark .glass-header::before {
+    background: linear-gradient(
+      to bottom,
+      var(--color-glass) 0%,
+      var(--color-glass) 50%,
+      rgba(20, 60, 90, 0.2) 80%,
+      transparent 100%
+    );
+  }
+
+  /* Soft glow/shadow beneath header for depth */
+  .glass-header::after {
+    content: "";
+    position: absolute;
+    bottom: -32px;
+    left: 0;
+    right: 0;
+    height: 32px;
+    background: linear-gradient(
+      to bottom,
+      rgba(239, 235, 228, 0.15) 0%,
+      rgba(239, 235, 228, 0.05) 40%,
       transparent 100%
     );
     pointer-events: none;
-    z-index: 40;
+    z-index: -1;
+  }
+
+  .dark .glass-header::after {
+    background: linear-gradient(
+      to bottom,
+      rgba(20, 60, 90, 0.2) 0%,
+      rgba(20, 60, 90, 0.05) 40%,
+      transparent 100%
+    );
   }
 
   .kpi-excellent {
