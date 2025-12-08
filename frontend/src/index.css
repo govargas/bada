@@ -26,6 +26,7 @@
   /* Fonts */
   --font-spectral: "Spectral", serif;
   --font-inter: "Inter", system-ui, sans-serif;
+  --font-title: "Special Gothic Expanded One", sans-serif;
 }
 
 /* Dark theme overrides */
@@ -63,6 +64,10 @@
   h3,
   h4 {
     @apply font-spectral text-ink;
+  }
+
+  .font-title {
+    font-family: var(--font-title);
   }
 
   a {
