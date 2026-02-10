@@ -294,58 +294,60 @@ export default function MapView({
       ];
       const source = map.getSource("beaches") as maplibregl.GeoJSONSource;
 
-      source.getClusterExpansionZoom(clusterId, (err, zoom) => {
-        if (err) return;
+      const openCluster = async () => {
+        try {
+          const zoom = await source.getClusterExpansionZoom(clusterId);
 
-        // If cluster can't expand further (at max zoom), show popup with all beaches
-        if (zoom >= map.getMaxZoom() || zoom === map.getZoom()) {
-          source.getClusterLeaves(
-            clusterId,
-            pointCount || 100,
-            0,
-            (error, leaves) => {
-              if (error || !leaves) return;
+          // If cluster can't expand further (at max zoom), show popup with all beaches
+          if (zoom >= map.getMaxZoom() || zoom === map.getZoom()) {
+            const leaves = await source.getClusterLeaves(
+              clusterId,
+              pointCount || 100,
+              0
+            );
+            if (!leaves) return;
 
-              const styles = getPopupStyles();
-              const beachList = leaves
-                .map((leaf: any) => {
-                  const props = leaf.properties;
-                  return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
-                })
-                .join("");
-
-              const popup = new maplibregl.Popup({
-                closeButton: true,
-                maxWidth: "300px",
+            const styles = getPopupStyles();
+            const beachList = leaves
+              .map((leaf: any) => {
+                const props = leaf.properties;
+                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
               })
-                .setLngLat(coordinates)
-                .setHTML(
-                  `<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`
-                )
-                .addTo(map);
+              .join("");
 
-              // Apply dark mode styles to popup container
-              const popupEl = popup.getElement();
-              if (popupEl) {
-                const content = popupEl.querySelector(
-                  ".maplibregl-popup-content"
-                );
-                if (content) {
-                  (content as HTMLElement).style.backgroundColor =
-                    styles.background;
-                  (content as HTMLElement).style.color = styles.color;
-                }
+            const popup = new maplibregl.Popup({
+              closeButton: true,
+              maxWidth: "300px",
+            })
+              .setLngLat(coordinates)
+              .setHTML(
+                `<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`
+              )
+              .addTo(map);
+
+            // Apply dark mode styles to popup container
+            const popupEl = popup.getElement();
+            if (popupEl) {
+              const content = popupEl.querySelector(".maplibregl-popup-content");
+              if (content) {
+                (content as HTMLElement).style.backgroundColor =
+                  styles.background;
+                (content as HTMLElement).style.color = styles.color;
               }
             }
-          );
-        } else {
-          // Otherwise, zoom in
-          map.easeTo({
-            center: coordinates,
-            zoom: zoom ?? map.getZoom() + 2,
-          });
+          } else {
+            // Otherwise, zoom in
+            map.easeTo({
+              center: coordinates,
+              zoom: zoom ?? map.getZoom() + 2,
+            });
+          }
+        } catch {
+          // Ignore cluster expansion errors
         }
-      });
+      };
+
+      void openCluster();
     });
 
     // Click handler for individual points - show popup

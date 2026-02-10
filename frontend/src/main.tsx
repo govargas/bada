@@ -57,8 +57,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
           containerStyle={{
             top: 80, // Below header
           }}
-          // Ensure toasts are announced to screen readers
-          containerAriaLabel="Notifications"
         />
       </BrowserRouter>
     </QueryClientProvider>
