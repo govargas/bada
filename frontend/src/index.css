@@ -13,8 +13,8 @@
   --color-badge: #e6e4dc;
 
   /* Glassmorphism - Light theme */
-  --color-glass: rgba(239, 235, 228, 0.2);
-  --color-glass-border: rgba(205, 200, 192, 0.3);
+  --color-glass: rgba(239, 235, 228, 0.72);
+  --color-glass-border: rgba(205, 200, 192, 0.5);
 
   /* Quality colors */
   --color-quality-excellent: #1f6fb2;
@@ -41,8 +41,8 @@
   --color-badge: #1e4057;
 
   /* Glassmorphism - Dark theme (ocean-tinted) */
-  --color-glass: rgba(20, 60, 90, 0.4);
-  --color-glass-border: rgba(56, 189, 248, 0.2);
+  --color-glass: rgba(20, 60, 90, 0.78);
+  --color-glass-border: rgba(56, 189, 248, 0.25);
 
   /* Quality colors for dark mode - need lighter shades for contrast */
   --color-quality-unknown: #9ca3af;

@@ -86,7 +86,7 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             float shadowMask = smoothstep(0.2, 0.6, shadowN); // Soft shadows
             
             // Darken sand where there are shadows
-            sandBase = mix(sandBase, sandBase * 0.75, shadowMask);
+            sandBase = mix(sandBase, sandBase * 0.88, shadowMask);
 
             // --- Water Hybrid (Silk + Caustics) ---
             // Hybrid approach: 
@@ -123,8 +123,8 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             // but keep enough definition to look like water
             float caustic = pow(ridges, 4.0); 
 
-            // Reduced intensity to avoid "burning" white look (was 0.6)
-            float totalLight = caustic * 0.2;
+            // Reduced intensity to avoid "burning" white look (was 0.2)
+            float totalLight = caustic * 0.07;
             
             // --- Refraction ---
             // Distort sand based on water pattern
@@ -142,7 +142,7 @@ class BeachTextureMaterial extends THREE.ShaderMaterial {
             // Re-compose sand with refraction
             vec3 finalSand = uSandColor + vec3(refractedGrain * 0.04);
             // finalSand = mix(finalSand, stoneColor, refractedStones * 0.5);
-            finalSand = mix(finalSand, finalSand * 0.75, refractedShadowMask);
+            finalSand = mix(finalSand, finalSand * 0.88, refractedShadowMask);
             
             // --- Composition ---
             vec3 finalColor = mix(finalSand, uWaterTint, 0.15);

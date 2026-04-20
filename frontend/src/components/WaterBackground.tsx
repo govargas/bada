@@ -146,11 +146,11 @@ class WaterMaterial extends THREE.ShaderMaterial {
           float spec = pow(max(dot(vNormal, halfDir), 0.0), 100.0);
           
           // Add specular highlight
-          color += uColorHighlight * spec * 0.5;
-          
+          color += uColorHighlight * spec * 0.18;
+
           // Fresnel-ish effect (lighter at edges/angles)
           float fresnel = pow(1.0 - dot(vNormal, viewDir), 3.0);
-          color = mix(color, uColorShallow, fresnel * 0.4);
+          color = mix(color, uColorShallow, fresnel * 0.2);
 
           gl_FragColor = vec4(color, 1.0);
         }
@@ -195,8 +195,8 @@ export default function WaterBackground() {
         dpr={[1, 2]}
       >
         <color attach="background" args={["#2A6F97"]} />
-        <ambientLight intensity={1.4} />
-        <directionalLight position={[2, 5, 2]} intensity={2.0} />
+        <ambientLight intensity={1.0} />
+        <directionalLight position={[2, 5, 2]} intensity={1.2} />
         <Water />
       </Canvas>
     </div>
