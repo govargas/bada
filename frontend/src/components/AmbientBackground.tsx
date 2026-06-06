@@ -1,4 +1,6 @@
-import { useState, useEffect, lazy, Suspense } from "react";
+import { lazy, Suspense, useState, useEffect } from "react";
+import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
+import { useDarkModeObserver } from "../hooks/useDarkModeObserver";
 
 // Lazy load the 3D backgrounds to improve initial load time
 // Use dynamic import with a small delay to prioritize main content rendering
@@ -23,57 +25,6 @@ const SandBackground = lazy(() =>
   })
 );
 
-// Check if user prefers reduced motion
-function usePrefersReducedMotion() {
-  const [prefersReducedMotion, setPrefersReducedMotion] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  });
-
-  useEffect(() => {
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const handler = (e: MediaQueryListEvent) => {
-      setPrefersReducedMotion(e.matches);
-    };
-
-    mediaQuery.addEventListener("change", handler);
-    return () => mediaQuery.removeEventListener("change", handler);
-  }, []);
-
-  return prefersReducedMotion;
-}
-
-// Watch for dark mode changes with debounce to prevent rapid re-renders
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(() => {
-    if (typeof document === "undefined") return false;
-    return document.documentElement.classList.contains("dark");
-  });
-
-  useEffect(() => {
-    let timeoutId: ReturnType<typeof setTimeout>;
-    
-    const observer = new MutationObserver(() => {
-      // Debounce to prevent rapid switching
-      clearTimeout(timeoutId);
-      timeoutId = setTimeout(() => {
-        setIsDark(document.documentElement.classList.contains("dark"));
-      }, 50);
-    });
-
-    observer.observe(document.documentElement, {
-      attributes: true,
-      attributeFilter: ["class"],
-    });
-
-    return () => {
-      observer.disconnect();
-      clearTimeout(timeoutId);
-    };
-  }, []);
-
-  return isDark;
-}
 
 // Fallback gradient backgrounds (CSS-only) for reduced motion or loading
 function FallbackBackground({ isDark }: { isDark: boolean }) {
@@ -91,7 +42,7 @@ function FallbackBackground({ isDark }: { isDark: boolean }) {
 }
 
 export default function AmbientBackground() {
-  const isDark = useDarkMode();
+  const isDark = useDarkModeObserver();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [renderKey, setRenderKey] = useState(0);
   const [isReady, setIsReady] = useState(false);

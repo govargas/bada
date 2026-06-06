@@ -7,37 +7,8 @@ import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { fetchBeaches } from "../api/beaches";
 import MenuIcon from "../assets/menu_icon.svg?react";
 import UserIcon from "../assets/user_icon.svg?react";
-
-// Close popovers when clicking outside or pressing Escape
-function useOutsideClose<T extends HTMLElement>(onClose: () => void) {
-  const ref = useRef<T | null>(null);
-  useEffect(() => {
-    function handleClickOutside(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) onClose();
-    }
-    function handleEscape(e: KeyboardEvent) {
-      if (e.key === "Escape") onClose();
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    document.addEventListener("keydown", handleEscape);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-      document.removeEventListener("keydown", handleEscape);
-    };
-  }, [onClose]);
-  return ref;
-}
-
-// Toggle the .dark class on <html>
-function useDarkMode() {
-  const [isDark, setIsDark] = useState(() =>
-    document.documentElement.classList.contains("dark")
-  );
-  useEffect(() => {
-    document.documentElement.classList.toggle("dark", isDark);
-  }, [isDark]);
-  return { isDark, setIsDark };
-}
+import { useOutsideClose } from "../hooks/useOutsideClose";
+import { useToggleDarkMode } from "../hooks/useToggleDarkMode";
 
 type HeaderProps = {
   languageSwitcher?: React.ReactNode;
@@ -69,7 +40,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   const menuRef = useOutsideClose<HTMLDivElement>(closeMenu);
   const userRef = useOutsideClose<HTMLDivElement>(closeUser);
   const searchRef = useOutsideClose<HTMLDivElement>(() => setSearchOpen(false));
-  const { isDark, setIsDark } = useDarkMode();
+  const { isDark, setIsDark } = useToggleDarkMode();
 
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
