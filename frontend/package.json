@@ -1,6 +1,6 @@
 {
-  "name": "project-final-backend",
-  "description": "Client part of final project",
+  "name": "bada-frontend",
+  "description": "Frontend for BADA – find safe beaches in Sweden",
   "version": "1.0.0",
   "type": "module",
   "scripts": {
@@ -41,8 +41,6 @@
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.3",
     "postcss": "^8.5.6",
-    "react-router": "^7.9.1",
-    "react-router-dom": "^7.9.1",
     "tailwindcss": "^4.1.13",
     "typescript": "^5.9.2",
     "vite": "^6.3.6",
