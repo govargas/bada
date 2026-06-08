@@ -40,9 +40,38 @@ function uvLabelKey(uv: number): string {
   return 'weather.uvExtreme';
 }
 
+// Returns whole-hour marks (every 6h for long days, every 3h for short)
+// that fall within [barStart, barEnd], expressed as { pct, label }.
+function buildHourMarks(barStart: number, barEnd: number) {
+  const spanHours = (barEnd - barStart) / 3_600_000;
+  const step = spanHours > 16 ? 6 : spanHours > 10 ? 3 : 2;
+  const fmt = new Intl.DateTimeFormat('en-US', {
+    timeZone: 'Europe/Stockholm',
+    hour: 'numeric',
+    hour12: false,
+  });
+
+  const marks: { pct: number; label: string }[] = [];
+  // Iterate every UTC hour in the window; keep those whose Stockholm hour
+  // is a multiple of `step` and falls comfortably inside the bar.
+  const startH = Math.floor(barStart / 3_600_000);
+  const endH = Math.ceil(barEnd / 3_600_000);
+  for (let h = startH; h <= endH; h++) {
+    const ms = h * 3_600_000;
+    const seHour = Number(fmt.format(new Date(ms))) % 24; // guard against "24"
+    if (seHour % step === 0) {
+      const p = ((ms - barStart) / (barEnd - barStart)) * 100;
+      if (p > 3 && p < 97) {
+        marks.push({ pct: p, label: String(seHour).padStart(2, '0') });
+      }
+    }
+  }
+  return marks;
+}
+
 // --- Sun arc bar ---
-// Shows a gradient strip from civil twilight begin → end, with
-// golden-hour zones highlighted and a "now" marker.
+// Gradient strip from civil twilight begin → end with golden-hour zones,
+// fixed hour-reference ticks, and a live "now" dot.
 function SunArc({ sun }: { sun: SunTimes }) {
   const barStart = sun.civilTwilightBegin.getTime();
   const barEnd = sun.civilTwilightEnd.getTime();
@@ -72,42 +101,64 @@ function SunArc({ sun }: { sun: SunTimes }) {
     #334155 100%
   )`;
 
+  const hourMarks = buildHourMarks(barStart, barEnd);
+
+  // Clamp sunrise/sunset labels away from card edges so text doesn't clip
+  const srLabel = Math.max(5, Math.min(95, srPct));
+  const ssLabel = Math.max(5, Math.min(95, ssPct));
+
   return (
     <div className="mt-1 mb-3">
+      {/* Gradient bar */}
       <div
         className="relative h-5 rounded-full overflow-hidden"
         style={{ background: gradient }}
         aria-hidden="true"
       >
-        {/* Sunrise tick */}
-        <div
-          className="absolute top-0 h-full w-px bg-white/50"
-          style={{ left: `${srPct}%` }}
-        />
-        {/* Sunset tick */}
-        <div
-          className="absolute top-0 h-full w-px bg-white/50"
-          style={{ left: `${ssPct}%` }}
-        />
+        {/* Hour reference ticks — short lines at the bottom of the bar */}
+        {hourMarks.map(({ pct: p }) => (
+          <div
+            key={p}
+            className="absolute bottom-0 w-px h-2 bg-white/25"
+            style={{ left: `${p}%` }}
+          />
+        ))}
+        {/* Sunrise / sunset full-height ticks */}
+        <div className="absolute top-0 h-full w-px bg-white/50" style={{ left: `${srPct}%` }} />
+        <div className="absolute top-0 h-full w-px bg-white/50" style={{ left: `${ssPct}%` }} />
         {/* Now marker */}
         {isNow && (
           <div
-            className="absolute top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full bg-white shadow border border-white/80"
-            style={{ left: `${nowPct}%`, transform: 'translate(-50%, -50%)' }}
+            className="absolute w-2.5 h-2.5 rounded-full bg-white shadow border border-white/80"
+            style={{ left: `${nowPct}%`, top: '50%', transform: 'translate(-50%, -50%)' }}
           />
         )}
       </div>
-      {/* Time labels below the bar */}
+
+      {/* Hour reference labels */}
+      <div className="relative h-3.5 mt-0.5" aria-hidden="true">
+        {hourMarks.map(({ pct: p, label }) => (
+          <span
+            key={p}
+            className="absolute text-[9px] text-ink-muted/60 -translate-x-1/2 leading-none"
+            style={{ left: `${p}%` }}
+          >
+            {label}
+          </span>
+        ))}
+      </div>
+
+      {/* Sunrise / sunset time labels — clamped from edges */}
       <div className="relative h-4 mt-0.5">
         <span
           className="absolute text-[10px] text-ink-muted -translate-x-1/2"
-          style={{ left: `${srPct}%` }}
+          style={{ left: `${srLabel}%` }}
         >
           {formatTime(sun.sunrise)}
         </span>
         <span
           className="absolute text-[10px] text-ink-muted -translate-x-1/2"
-          style={{ left: `${ssPct}%` }}
+          style={{ left: `${ssLabel}%` }}
         >
           {formatTime(sun.sunset)}
         </span>
@@ -170,7 +221,7 @@ function SunCard({ sun, t }: { sun: SunTimes; t: (k: string) => string }) {
 
       {/* Golden hour */}
       <div className="rounded-xl border border-amber-300/50 bg-amber-50/60 dark:bg-amber-900/15 dark:border-amber-700/30 px-3 py-2">
-        <div className="text-[11px] font-medium text-amber-700 dark:text-amber-400 uppercase tracking-wide mb-1.5">
+        <div className="text-[11px] font-medium text-amber-900 dark:text-amber-400 uppercase tracking-wide mb-1.5">
           {t('sun.goldenHour')}
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
