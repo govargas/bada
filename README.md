@@ -28,6 +28,7 @@ It replaces outdated or clunky websites with a **clean, mobile-friendly experien
 - 🔀 **Drag-and-drop sorting for favorites**
 - 🌊 **3D animated backgrounds** (WebGL water simulation in dark mode, sand texture in light mode)
 - 🎨 **Glassmorphism UI** with backdrop blur effects
+- 🌤️ **Weather & sun times panel** on each beach — air temp, feels like, UV index, water temperature, and a visual sun arc with golden hour, sunrise/sunset, and twilight phases
 - 🌗 **Dark mode** and responsive design (mobile → desktop)
 - 🌐 **Multi-language support** (Swedish / English)
 - 📚 **API Documentation** (Swagger UI at `/api/docs`)
@@ -54,9 +55,12 @@ It replaces outdated or clunky websites with a **clean, mobile-friendly experien
 
 - `useGeolocation` – Device location access
 - `useOutsideClose` – Close popovers on outside click/Escape key
-- `useDarkMode` – Theme toggle with persistence
+- `useToggleDarkMode` – Writes the `.dark` class (used in Header)
+- `useDarkModeObserver` – Reads/observes `.dark` class via MutationObserver (used in AmbientBackground)
 - `usePrefersReducedMotion` – Respect user's motion preferences
 - `useBeaches` – Beach data fetching
+- `useWeather` – Weather data with 30-min stale time
+- `useSunTimes` – Sun times keyed by date with 12-hr stale time
 
 **Backend**
 
@@ -71,6 +75,8 @@ It replaces outdated or clunky websites with a **clean, mobile-friendly experien
 
 - [HaV Bathing Waters API](https://badplatsen.havochvatten.se/) (official Swedish Agency for Marine and Water Management)
 - [MapTiler](https://www.maptiler.com/) (map styles)
+- [Open-Meteo](https://open-meteo.com/) (weather forecast + marine/water temperature)
+- [sunrise-sunset.org](https://sunrise-sunset.org/api) (sunrise, sunset, golden hour, and twilight times)
 
 ---
 
@@ -170,7 +176,7 @@ This account already has some favourite beaches saved.
 - ✅ React Router navigation
 - ✅ Global state management (Zustand)
 - ✅ ≥2 external libraries (TanStack Query, MapLibre, Three.js, react-hook-form, i18next, react-hot-toast, @dnd-kit)
-- ✅ Custom React hooks (useGeolocation, useOutsideClose, useDarkMode, usePrefersReducedMotion, useBeaches)
+- ✅ Custom React hooks (useGeolocation, useOutsideClose, useToggleDarkMode, useDarkModeObserver, usePrefersReducedMotion, useBeaches, useWeather, useSunTimes)
 - ✅ Responsive (320px → 1600px+)
 - ✅ Accessibility features (comprehensive a11y implementation)
 - ✅ Clean Code practices
@@ -208,10 +214,10 @@ This account already has some favourite beaches saved.
 - ✅ API documentation with Swagger
 - ✅ Performance optimization (deferred 3D loading)
 - ✅ Focus management and keyboard navigation
+- ✅ Weather & sun times panel (Open-Meteo + sunrise-sunset.org) with visual sun arc, golden hour zones, and water temperature
 
 ### Planned
 
-- 🔄 Integrate OpenWeatherMap for weather & water temperature
 - 🔄 Filter beaches by classification
 - 🔄 Add user beach photos
 - 🔄 Allow notes/tips per beach (e.g. "good for kids")
