@@ -13,6 +13,7 @@ import {
 } from "../api/favorites";
 import { useAuth } from "@/store/auth";
 import Tooltip from "../components/Tooltip";
+import BeachWeatherPanel from "../components/BeachWeatherPanel";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -202,6 +203,9 @@ export default function BeachDetailPage() {
           </Link>
         </div>
       </div>
+
+      {/* Weather & sun times */}
+      {id && <BeachWeatherPanel beachId={id} />}
 
       {/* Description */}
       {data.bathInformation && (

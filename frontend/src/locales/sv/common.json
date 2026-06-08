@@ -222,6 +222,36 @@
     },
     "backToMap": "← Tillbaka till kartan"
   },
+  "weather": {
+    "title": "Väder",
+    "temperature": "Temperatur",
+    "feelsLike": "Känns som",
+    "waterTemp": "Vattentemperatur",
+    "uvIndex": "UV-index",
+    "uvLow": "Lågt",
+    "uvModerate": "Måttligt",
+    "uvHigh": "Högt",
+    "uvVeryHigh": "Mycket högt",
+    "uvExtreme": "Extremt",
+    "notAvailable": "Ej tillgänglig",
+    "error": "Väderdata ej tillgänglig"
+  },
+  "sun": {
+    "title": "Soltider",
+    "sunrise": "Soluppgång",
+    "sunset": "Solnedgång",
+    "goldenHour": "Gyllene timmen",
+    "morning": "Morgon",
+    "evening": "Kväll",
+    "civilTwilightBegin": "Gryning",
+    "civilTwilightEnd": "Skymning",
+    "nauticalTwilightBegin": "Nautisk gryning",
+    "nauticalTwilightEnd": "Nautisk skymning",
+    "dayLength": "Daglängd",
+    "hourShort": "t",
+    "minuteShort": "m",
+    "error": "Soltider ej tillgängliga"
+  },
   "errorBoundary": {
     "title": "Hoppsan! Något gick fel",
     "message": "Vi stötte på ett oväntat fel. Vänligen försök uppdatera sidan eller återvänd till startsidan.",

@@ -222,6 +222,36 @@
     },
     "backToMap": "← Back to map"
   },
+  "weather": {
+    "title": "Weather",
+    "temperature": "Temperature",
+    "feelsLike": "Feels like",
+    "waterTemp": "Water temperature",
+    "uvIndex": "UV index",
+    "uvLow": "Low",
+    "uvModerate": "Moderate",
+    "uvHigh": "High",
+    "uvVeryHigh": "Very high",
+    "uvExtreme": "Extreme",
+    "notAvailable": "N/A",
+    "error": "Weather data unavailable"
+  },
+  "sun": {
+    "title": "Sun times",
+    "sunrise": "Sunrise",
+    "sunset": "Sunset",
+    "goldenHour": "Golden hour",
+    "morning": "Morning",
+    "evening": "Evening",
+    "civilTwilightBegin": "Dawn",
+    "civilTwilightEnd": "Dusk",
+    "nauticalTwilightBegin": "Nautical dawn",
+    "nauticalTwilightEnd": "Nautical dusk",
+    "dayLength": "Day length",
+    "hourShort": "h",
+    "minuteShort": "m",
+    "error": "Sun times unavailable"
+  },
   "errorBoundary": {
     "title": "Oops! Something went wrong",
     "message": "We encountered an unexpected error. Please try refreshing the page or return to the homepage.",
