@@ -221,7 +221,7 @@ function SunCard({ sun, t }: { sun: SunTimes; t: (k: string) => string }) {
 
       {/* Golden hour */}
       <div className="rounded-xl border border-amber-300/50 bg-amber-50/60 dark:bg-amber-900/15 dark:border-amber-700/30 px-3 py-2">
-        <div className="text-[11px] font-medium text-amber-900 dark:text-amber-400 uppercase tracking-wide mb-1.5">
+        <div className="text-[11px] font-medium text-amber-950 dark:text-amber-400 uppercase tracking-wide mb-1.5">
           {t('sun.goldenHour')}
         </div>
         <div className="grid grid-cols-2 gap-2 text-sm">
