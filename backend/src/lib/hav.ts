@@ -5,6 +5,10 @@ const HAV_USER_AGENT = process.env.HAV_USER_AGENT || "BADA/1.0";
 const HAV_V2_BASE =
   process.env.HAV_V2_BASE ?? "https://api.havochvatten.se/bathingwaters/v2";
 
+/** Abort upstream HaV calls that hang, so a slow HaV can't pin a serverless
+ *  function open until the platform timeout. */
+const HAV_TIMEOUT_MS = 5_000;
+
 function key(path: string) {
   return `hav:${path}`;
 }
@@ -26,6 +30,7 @@ export async function havGet(path: string, ttlMs = 5 * 60 * 1000) {
       "User-Agent": HAV_USER_AGENT,
       Accept: "application/json",
     },
+    signal: AbortSignal.timeout(HAV_TIMEOUT_MS),
   });
 
   if (!res.ok) {
@@ -56,6 +61,7 @@ export async function havV2Get<T>(
 
   const res = await fetch(url, {
     headers: { Accept: "application/json" },
+    signal: AbortSignal.timeout(HAV_TIMEOUT_MS),
     ...init,
   });
 

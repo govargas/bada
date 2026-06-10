@@ -1,0 +1,38 @@
+name: Refresh beaches snapshot
+
+# The beach list changes only a few times a year, so a daily refresh of the
+# static snapshot (frontend/public/beaches.json) is plenty. Runs on a schedule
+# and on demand; commits only when the data actually changed.
+
+on:
+  schedule:
+    - cron: "0 4 * * *" # daily at 04:00 UTC
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Build snapshot
+        run: node scripts/build-beaches.mjs
+
+      - name: Commit if changed
+        run: |
+          if [[ -n "$(git status --porcelain frontend/public/beaches.json)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git add frontend/public/beaches.json
+            git commit -m "chore: refresh beaches snapshot"
+            git push
+          else
+            echo "Snapshot unchanged — nothing to commit."
+          fi

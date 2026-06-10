@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/store/auth";
 import Tooltip from "../components/Tooltip";
 import BeachWeatherPanel from "../components/BeachWeatherPanel";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -55,6 +56,8 @@ export default function BeachDetailPage() {
     queryFn: () => fetchBeach(id!),
     staleTime: 5 * 60 * 1000,
   });
+
+  useDocumentTitle(data?.locationName);
 
   // --- FAVORITES HOOKS ---
   const queryClient = useQueryClient();
@@ -163,6 +166,23 @@ export default function BeachDetailPage() {
         </Tooltip>
         {data.euType && <span className="badge">{t("beachDetail.euBad")}</span>}
       </div>
+
+      {/* Swimming advisory — surfaced prominently because it is safety data */}
+      {data.dissuasion && data.dissuasion.length > 0 && (
+        <div
+          role="alert"
+          className="rounded-2xl border border-[var(--color-quality-poor)]/50 bg-[var(--color-quality-poor)]/10 p-4"
+        >
+          <h2 className="font-spectral text-lg text-[var(--color-quality-poor)]">
+            ⚠ {t("beachDetail.dissuasion")}
+          </h2>
+          <ul className="mt-1 text-sm list-disc list-inside space-y-0.5">
+            {data.dissuasion.map((d, i) => (
+              <li key={i}>{d}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Meta card */}
       <div className="card p-4 space-y-3">

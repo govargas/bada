@@ -9,7 +9,9 @@ export const beachesRouter = Router();
  */
 beachesRouter.get("/beaches", async (_req, res, next) => {
   try {
-    const data = await havGet("/feature/?format=json", 5 * 60 * 1000); // cache 5 min
+    // The beach list (locations + names) changes a few times a year, so cache
+    // it for an hour rather than re-hitting HaV every 5 minutes.
+    const data = await havGet("/feature/?format=json", 60 * 60 * 1000);
     res.json(data);
   } catch (err) {
     next(err);

@@ -108,7 +108,8 @@
     "phone": "Phone:",
     "website": "Website:",
     "pleaseTryAgain": "Please try again.",
-    "euBad": "EU Beach"
+    "euBad": "EU Beach",
+    "dissuasion": "Swimming advisory"
   },
   "algalStatus": {
     "ingenBlomning": "No blooming",
@@ -234,7 +235,9 @@
     "uvVeryHigh": "Very high",
     "uvExtreme": "Extreme",
     "notAvailable": "N/A",
-    "error": "Weather data unavailable"
+    "error": "Weather data unavailable",
+    "forecast": "5-day forecast",
+    "today": "Today"
   },
   "sun": {
     "title": "Sun times",

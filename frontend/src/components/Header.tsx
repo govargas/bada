@@ -21,6 +21,8 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [userOpen, setUserOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  // Index of the keyboard-focused option in the combobox (-1 = none)
+  const [activeIndex, setActiveIndex] = useState(-1);
   
   // Refs for trigger buttons to return focus when menu closes
   const menuButtonRef = useRef<HTMLButtonElement>(null);
@@ -78,14 +80,54 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   function handleSearchChange(value: string) {
     setSearch(value);
     setSearchOpen(!!value); // Show dropdown when there's input
+    setActiveIndex(-1); // reset keyboard selection on new input
   }
 
   // Handle beach selection from dropdown
   function handleBeachSelect(beachId: string) {
     setSearch(""); // Clear search
     setSearchOpen(false);
+    setActiveIndex(-1);
     navigate(`/beach/${beachId}`);
   }
+
+  // ARIA combobox keyboard interaction (APG combobox-with-listbox pattern)
+  function handleSearchKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    const count = filteredBeaches.length;
+    switch (e.key) {
+      case "ArrowDown":
+        if (count === 0) return;
+        e.preventDefault();
+        setSearchOpen(true);
+        setActiveIndex((i) => (i + 1) % count);
+        break;
+      case "ArrowUp":
+        if (count === 0) return;
+        e.preventDefault();
+        setSearchOpen(true);
+        setActiveIndex((i) => (i <= 0 ? count - 1 : i - 1));
+        break;
+      case "Enter":
+        if (searchOpen && activeIndex >= 0 && activeIndex < count) {
+          e.preventDefault();
+          handleBeachSelect(filteredBeaches[activeIndex].id);
+        }
+        break;
+      case "Escape":
+        if (searchOpen) {
+          e.preventDefault();
+          setSearchOpen(false);
+          setActiveIndex(-1);
+        }
+        break;
+    }
+  }
+
+  const listboxId = "beach-search-listbox";
+  const activeOptionId =
+    searchOpen && activeIndex >= 0 && activeIndex < filteredBeaches.length
+      ? `beach-search-option-${filteredBeaches[activeIndex].id}`
+      : undefined;
 
   return (
     <>
@@ -104,7 +146,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               ref={menuButtonRef}
               aria-label={t("header.openMenu")}
               aria-expanded={menuOpen}
-              aria-haspopup="menu"
+              aria-haspopup="true"
               className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setMenuOpen((v) => !v)}
             >
@@ -112,10 +154,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             </button>
 
             {menuOpen && (
-              <div
-                role="menu"
-                className="absolute left-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50"
-              >
+              <div className="absolute left-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50">
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {t("header.menu")}
                 </div>
@@ -172,7 +211,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               ref={userButtonRef}
               aria-label={t("header.userMenu")}
               aria-expanded={userOpen}
-              aria-haspopup="menu"
+              aria-haspopup="true"
               className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setUserOpen((v) => !v)}
             >
@@ -180,11 +219,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             </button>
 
             {userOpen && (
-              <div
-                role="menu"
-                // Changed bg-[var(--color-glass)] to bg-surface/95 and kept backdrop-blur-xl
-                className="absolute right-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50"
-              >
+              <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50">
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {authed ? t("nav.account") : t("nav.user")}
                 </div>
@@ -226,13 +261,19 @@ export default function Header({ languageSwitcher }: HeaderProps) {
           <div className="relative" ref={searchRef}>
             <div className="flex gap-2 items-center">
               <input
-                type="search"
+                type="text"
+                role="combobox"
+                aria-expanded={searchOpen && filteredBeaches.length > 0}
+                aria-controls={listboxId}
+                aria-autocomplete="list"
+                aria-activedescendant={activeOptionId}
                 placeholder={t("header.searchPlaceholder")}
                 aria-label={t("header.searchPlaceholder")}
                 className="card flex-1 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-accent focus:border-accent/50 placeholder:text-ink-muted/70"
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 onFocus={() => search && setSearchOpen(true)}
+                onKeyDown={handleSearchKeyDown}
               />
               {search && (
                 <button
@@ -251,31 +292,36 @@ export default function Header({ languageSwitcher }: HeaderProps) {
 
             {/* Search results dropdown */}
             {searchOpen && search && (
-              // Changed bg-[var(--color-glass)] to bg-surface/95 and kept backdrop-blur-xl
-              <div 
-                className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50"
-                role="listbox"
-                aria-label={t("header.searchPlaceholder")}
-              >
+              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50">
                 {/* Screen reader announcement for search results */}
                 <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
-                  {filteredBeaches.length > 0 
-                    ? `${filteredBeaches.length} ${t("beaches")}` 
+                  {filteredBeaches.length > 0
+                    ? `${filteredBeaches.length} ${t("beaches")}`
                     : t("beachesList.noMatches")}
                 </div>
                 {filteredBeaches.length > 0 ? (
-                  <ul className="py-2" role="group">
-                    {filteredBeaches.map((beach) => (
-                      <li key={beach.id} role="option">
-                        <button
-                          onClick={() => handleBeachSelect(beach.id)}
-                          className="w-full text-left px-4 py-2 hover:bg-surface-muted focus:bg-surface-muted focus:outline-none transition-colors"
-                        >
-                          <div className="font-medium">{beach.name}</div>
-                          <div className="text-sm text-ink-muted">
-                            {beach.municipality ?? "—"}
-                          </div>
-                        </button>
+                  <ul
+                    id={listboxId}
+                    className="py-2"
+                    role="listbox"
+                    aria-label={t("header.searchPlaceholder")}
+                  >
+                    {filteredBeaches.map((beach, i) => (
+                      <li
+                        key={beach.id}
+                        id={`beach-search-option-${beach.id}`}
+                        role="option"
+                        aria-selected={i === activeIndex}
+                        onClick={() => handleBeachSelect(beach.id)}
+                        onMouseEnter={() => setActiveIndex(i)}
+                        className={`cursor-pointer px-4 py-2 transition-colors ${
+                          i === activeIndex ? "bg-surface-muted" : ""
+                        }`}
+                      >
+                        <div className="font-medium">{beach.name}</div>
+                        <div className="text-sm text-ink-muted">
+                          {beach.municipality || "—"}
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -285,15 +331,14 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                   </div>
                 )}
 
-                {/* View all results link */}
+                {/* View all results link — sits outside the listbox so the
+                    listbox contains only options */}
                 {filteredBeaches.length > 0 && (
                   <>
                     <div className="h-px bg-border" />
                     <Link
                       to="/"
-                      onClick={() => {
-                        setSearchOpen(false);
-                      }}
+                      onClick={() => setSearchOpen(false)}
                       className="block px-4 py-2 text-sm text-accent hover:bg-surface-muted text-center"
                     >
                       {t("header.viewAllResults")}
@@ -322,7 +367,6 @@ function MenuLink({
     <Link
       to={to}
       className="block px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
-      role="menuitem"
       onClick={onClick}
     >
       {children}

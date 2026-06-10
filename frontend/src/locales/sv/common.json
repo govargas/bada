@@ -108,7 +108,8 @@
     "phone": "Telefon:",
     "website": "Webbplats:",
     "pleaseTryAgain": "Vänligen försök igen.",
-    "euBad": "EU-bad"
+    "euBad": "EU-bad",
+    "dissuasion": "Avrådan från bad"
   },
   "algalStatus": {
     "ingenBlomning": "Ingen blomning",
@@ -234,7 +235,9 @@
     "uvVeryHigh": "Mycket högt",
     "uvExtreme": "Extremt",
     "notAvailable": "Ej tillgänglig",
-    "error": "Väderdata ej tillgänglig"
+    "error": "Väderdata ej tillgänglig",
+    "forecast": "5-dygnsprognos",
+    "today": "Idag"
   },
   "sun": {
     "title": "Soltider",

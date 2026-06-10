@@ -88,7 +88,7 @@ BADA is built with accessibility in mind:
 - **ARIA labels** – Proper labeling of interactive elements
 - **ARIA live regions** – Screen reader announcements for dynamic content
 - **ARIA busy states** – Loading indicators for assistive technology
-- **Keyboard navigation** – Full keyboard support with focus management
+- **Keyboard navigation** – Search is an ARIA combobox (arrow keys / Enter / Escape); menus and dialogs are keyboard-operable with focus management
 - **Escape key handling** – Close menus and return focus to trigger
 - **Focus visible rings** – Clear focus indicators
 - **Reduced motion support** – Respects `prefers-reduced-motion` (both CSS and JS)
@@ -200,6 +200,19 @@ This account already has some favourite beaches saved.
 - ✅ Meta tags for SEO (Open Graph, Twitter Cards)
 - ✅ API Documentation (Swagger UI)
 - ✅ Performance optimizations (lazy-loaded 3D backgrounds)
+
+---
+
+## ⚠️ Known Limitations
+
+These are conscious trade-offs for an MVP, documented rather than hidden:
+
+- **Backend cache is per-instance.** The HaV proxy cache is an in-memory `Map`. On Vercel serverless it does not survive cold starts or span instances, so it mainly de-dupes bursts within a warm instance. The beach _list_ sidesteps this entirely via a static CDN snapshot (`frontend/public/beaches.json`, refreshed daily by a GitHub Action); only per-beach detail still hits the proxy.
+- **Data is seasonal.** HaV samples bathing waters roughly June–August. Outside the season `latestSampleDate` and classification reflect the previous year.
+- **Golden hour is approximate.** It is computed as sunrise + 1h / sunset − 1h, and the sun arc degrades north of the Arctic Circle during the midnight sun (sunrise-sunset.org returns degenerate times there).
+- **Third-party APIs called from the client.** Open-Meteo and sunrise-sunset.org are called directly from the browser with no SLA — acceptable for an MVP, not for production traffic.
+- **Auth token in `localStorage`.** Simple and fine for a no-sensitive-data MVP, but XSS-exposed; an httpOnly cookie would be the production choice.
+- **No SSR.** SEO is limited to per-route `<title>`, a generated `sitemap.xml`, and site-wide Open Graph tags. Per-beach Open Graph previews would require prerendering.
 
 ---
 
