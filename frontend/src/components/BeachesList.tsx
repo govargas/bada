@@ -250,8 +250,7 @@ export default function BeachesList() {
                     {b.name}
                   </h3>
                   <p className="text-ink-muted text-sm">
-                    {b.municipality ?? "—"} • {b.lat.toFixed(4)},{" "}
-                    {b.lon.toFixed(4)}
+                    {b.municipality || "—"}
                   </p>
                 </div>
                 {typeof b._distanceKm === "number" && (
