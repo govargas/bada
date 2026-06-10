@@ -119,13 +119,23 @@ export default function BeachDetailPage() {
     ? formatDate(data.latestSampleDate, "short")
     : "—";
 
+  // HaV sometimes sends "false"/"true"/empty for unset text fields. Treat
+  // those as no-data so we never print a raw "false" to the user.
+  const cleanText = (v: unknown): string => {
+    const s = String(v ?? "").trim();
+    const lower = s.toLowerCase();
+    return s === "" || lower === "false" || lower === "true" ? "" : s;
+  };
+
   // Translate algal status
   const algalKey = getAlgalStatusKey(data.algalText);
-  const algalDisplay = algalKey ? t(algalKey) : data.algalText ?? "—";
+  const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "—";
 
   // Translate EU motive
   const euMotiveKey = getEuMotiveKey(data.euMotive);
-  const euMotiveDisplay = euMotiveKey ? t(euMotiveKey) : data.euMotive ?? "—";
+  const euMotiveDisplay = euMotiveKey
+    ? t(euMotiveKey)
+    : cleanText(data.euMotive) || "—";
 
   async function handleFavoriteClick() {
     if (!token) {
