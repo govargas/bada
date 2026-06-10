@@ -234,7 +234,9 @@
     "uvVeryHigh": "Very high",
     "uvExtreme": "Extreme",
     "notAvailable": "N/A",
-    "error": "Weather data unavailable"
+    "error": "Weather data unavailable",
+    "forecast": "5-day forecast",
+    "today": "Today"
   },
   "sun": {
     "title": "Sun times",

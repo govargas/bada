@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { useBeaches } from '../hooks/useBeaches';
 import { useWeather } from '../hooks/useWeather';
 import { useSunTimes } from '../hooks/useSunTimes';
-import type { SunTimes, WeatherData } from '../types/weather';
+import type { SunTimes, WeatherData, DailyForecast } from '../types/weather';
 
 // The API signals "does not occur" with a 1970 epoch date (Nordic midnight sun)
 function occurs(d: Date): boolean {
@@ -167,8 +167,63 @@ function SunArc({ sun }: { sun: SunTimes }) {
   );
 }
 
+// --- 5-day forecast strip ---
+function ForecastStrip({
+  forecast,
+  lang,
+  t,
+}: {
+  forecast: DailyForecast[];
+  lang: string;
+  t: (k: string) => string;
+}) {
+  if (!forecast.length) return null;
+  const weekdayFmt = new Intl.DateTimeFormat(lang === 'en' ? 'en-GB' : 'sv-SE', {
+    weekday: 'short',
+    timeZone: 'Europe/Stockholm',
+  });
+
+  return (
+    <div className="pt-1 border-t border-border/40">
+      <div className="text-xs text-ink-muted mb-2">{t('weather.forecast')}</div>
+      <ul className="grid grid-cols-5 gap-1 text-center">
+        {forecast.slice(0, 5).map((d, i) => {
+          // Parse as local date; append noon to avoid TZ day-shift
+          const day = new Date(`${d.date}T12:00:00`);
+          return (
+            <li key={d.date} className="space-y-0.5">
+              <div className="text-[11px] text-ink-muted capitalize">
+                {i === 0 ? t('weather.today') : weekdayFmt.format(day)}
+              </div>
+              <div className="text-sm font-medium tabular-nums">
+                {Math.round(d.tempMax)}°
+              </div>
+              <div className="text-[11px] text-ink-muted tabular-nums">
+                {Math.round(d.tempMin)}°
+              </div>
+              {d.precipProbability != null && (
+                <div className="text-[10px] text-[var(--color-accent)] tabular-nums">
+                  {Math.round(d.precipProbability)}%
+                </div>
+              )}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
+}
+
 // --- Weather card ---
-function WeatherCard({ weather, t }: { weather: WeatherData; t: (k: string) => string }) {
+function WeatherCard({
+  weather,
+  lang,
+  t,
+}: {
+  weather: WeatherData;
+  lang: string;
+  t: (k: string) => string;
+}) {
   const uv = weather.uvIndex;
   return (
     <div className="card p-4 space-y-3">
@@ -207,6 +262,8 @@ function WeatherCard({ weather, t }: { weather: WeatherData; t: (k: string) => s
           </div>
         </div>
       </div>
+
+      <ForecastStrip forecast={weather.forecast} lang={lang} t={t} />
     </div>
   );
 }
@@ -283,7 +340,8 @@ interface Props {
 }
 
 export default function BeachWeatherPanel({ beachId }: Props) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const lang = i18n.language;
   const { data: beaches } = useBeaches();
   const beach = beaches?.find((b) => b.id === beachId);
 
@@ -313,7 +371,7 @@ export default function BeachWeatherPanel({ beachId }: Props) {
           <p className="text-sm text-ink-muted">{t('weather.error')}</p>
         </div>
       )}
-      {weather && <WeatherCard weather={weather} t={t} />}
+      {weather && <WeatherCard weather={weather} lang={lang} t={t} />}
 
       {/* Sun times */}
       {sLoading && (

@@ -234,7 +234,9 @@
     "uvVeryHigh": "Mycket högt",
     "uvExtreme": "Extremt",
     "notAvailable": "Ej tillgänglig",
-    "error": "Väderdata ej tillgänglig"
+    "error": "Väderdata ej tillgänglig",
+    "forecast": "5-dygnsprognos",
+    "today": "Idag"
   },
   "sun": {
     "title": "Soltider",
