@@ -22,10 +22,19 @@ type Props = {
   }) => void;
 };
 
-const STYLE_LIGHT =
-  "https://api.maptiler.com/maps/019951a8-6432-7aea-b555-2ac65a59181f/style.json?key=Dh5hFFvt6R7cmui0rEtJ";
-const STYLE_DARK =
-  "https://api.maptiler.com/maps/019951b2-24e8-7a45-8534-0731061b7984/style.json?key=Dh5hFFvt6R7cmui0rEtJ";
+// The MapTiler key is a publishable client-side key — keep it in env (not in
+// source) and restrict it by allowed origin in the MapTiler dashboard. The
+// style IDs themselves are not secret.
+const MAPTILER_KEY = import.meta.env.VITE_MAPTILER_KEY;
+if (!MAPTILER_KEY) {
+  console.warn(
+    "VITE_MAPTILER_KEY is not set — the map will fail to load. See frontend/.env.example."
+  );
+}
+const STYLE_LIGHT_ID = "019951a8-6432-7aea-b555-2ac65a59181f";
+const STYLE_DARK_ID = "019951b2-24e8-7a45-8534-0731061b7984";
+const STYLE_LIGHT = `https://api.maptiler.com/maps/${STYLE_LIGHT_ID}/style.json?key=${MAPTILER_KEY}`;
+const STYLE_DARK = `https://api.maptiler.com/maps/${STYLE_DARK_ID}/style.json?key=${MAPTILER_KEY}`;
 
 function isDark() {
   return document.documentElement.classList.contains("dark");
