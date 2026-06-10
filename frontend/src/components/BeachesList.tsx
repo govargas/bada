@@ -101,11 +101,6 @@ export default function BeachesList() {
     });
   }, [filteredBySearch, mode, bounds, center, radiusKm, q]);
 
-  // Initial fetch safeguard
-  useEffect(() => {
-    if (!data && !isLoading) refetch();
-  }, [data, isLoading, refetch]);
-
   // Geolocation → nearby mode
   useEffect(() => {
     if (!coords) return;
