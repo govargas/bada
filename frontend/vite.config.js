@@ -16,6 +16,13 @@ export default defineConfig({
       input: {
         main: path.resolve(__dirname, "index.html"),
       },
+      output: {
+        manualChunks: {
+          // maplibre-gl is large and only needed where the map renders; split
+          // it out of the main bundle so the initial JS payload is smaller.
+          maplibre: ["maplibre-gl"],
+        },
+      },
     },
   },
 });
