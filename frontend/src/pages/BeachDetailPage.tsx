@@ -14,6 +14,7 @@ import {
 import { useAuth } from "@/store/auth";
 import Tooltip from "../components/Tooltip";
 import BeachWeatherPanel from "../components/BeachWeatherPanel";
+import { useDocumentTitle } from "../hooks/useDocumentTitle";
 
 // Map numeric/class text → color class
 function qualityClass(q: number | string | undefined) {
@@ -55,6 +56,8 @@ export default function BeachDetailPage() {
     queryFn: () => fetchBeach(id!),
     staleTime: 5 * 60 * 1000,
   });
+
+  useDocumentTitle(data?.locationName);
 
   // --- FAVORITES HOOKS ---
   const queryClient = useQueryClient();

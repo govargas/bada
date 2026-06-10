@@ -19,11 +19,32 @@ const HAV_BASE_URL =
   process.env.HAV_BASE_URL ?? "https://badplatsen.havochvatten.se/badplatsen/api";
 const HAV_USER_AGENT =
   process.env.HAV_USER_AGENT ?? "BADA-build/1.0 (https://github.com/govargas/bada)";
-
-const OUT = resolve(
-  dirname(fileURLToPath(import.meta.url)),
-  "../frontend/public/beaches.json"
+const SITE_URL = (process.env.SITE_URL ?? "https://badaweb.netlify.app").replace(
+  /\/$/,
+  ""
 );
+
+const PUBLIC_DIR = resolve(
+  dirname(fileURLToPath(import.meta.url)),
+  "../frontend/public"
+);
+const OUT = resolve(PUBLIC_DIR, "beaches.json");
+const SITEMAP_OUT = resolve(PUBLIC_DIR, "sitemap.xml");
+
+// Static routes worth indexing alongside the per-beach pages
+const STATIC_PATHS = ["/", "/what-is-eu-beach", "/about", "/terms", "/contact"];
+
+function buildSitemap(beaches) {
+  const today = new Date().toISOString().split("T")[0];
+  const urls = [
+    ...STATIC_PATHS.map((p) => `${SITE_URL}${p}`),
+    ...beaches.map((b) => `${SITE_URL}/beach/${encodeURIComponent(b.id)}`),
+  ];
+  const body = urls
+    .map((loc) => `  <url>\n    <loc>${loc}</loc>\n    <lastmod>${today}</lastmod>\n  </url>`)
+    .join("\n");
+  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
+}
 
 async function main() {
   const url = `${HAV_BASE_URL}/feature/?format=json`;
@@ -60,9 +81,14 @@ async function main() {
     throw new Error("Refusing to write an empty snapshot");
   }
 
-  await mkdir(dirname(OUT), { recursive: true });
+  await mkdir(PUBLIC_DIR, { recursive: true });
   await writeFile(OUT, JSON.stringify(beaches));
   console.log(`Wrote ${beaches.length} beaches → ${OUT}`);
+
+  await writeFile(SITEMAP_OUT, buildSitemap(beaches));
+  console.log(
+    `Wrote sitemap with ${STATIC_PATHS.length + beaches.length} URLs → ${SITEMAP_OUT}`
+  );
 }
 
 main().catch((err) => {
