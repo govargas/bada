@@ -1,5 +1,8 @@
 {
   "appTitle": "BADA",
+  "home": {
+    "title": "Bathing sites in Sweden"
+  },
   "beaches": "Beaches",
   "loadingBeaches": "Loading beaches…",
   "loadError": "Could not load data.",

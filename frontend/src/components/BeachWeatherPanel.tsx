@@ -27,9 +27,9 @@ function formatDayLength(seconds: number, t: (k: string) => string): string {
 function uvColor(uv: number): string {
   if (uv <= 2) return 'text-[var(--color-quality-good)]';
   if (uv <= 5) return 'text-[var(--color-quality-sufficient)]';
-  if (uv <= 7) return 'text-[#e67e22]';
+  if (uv <= 7) return 'text-[var(--color-uv-high)]';
   if (uv <= 10) return 'text-[var(--color-quality-poor)]';
-  return 'text-[#9b59b6]';
+  return 'text-[var(--color-uv-extreme)]';
 }
 
 function uvLabelKey(uv: number): string {

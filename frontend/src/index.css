@@ -16,12 +16,16 @@
   --color-glass: rgba(239, 235, 228, 0.72);
   --color-glass-border: rgba(205, 200, 192, 0.5);
 
-  /* Quality colors */
-  --color-quality-excellent: #1f6fb2;
-  --color-quality-good: #2b8a3e;
-  --color-quality-sufficient: #b08900;
-  --color-quality-poor: #c0392b;
+  /* Quality colors — tuned for WCAG AA (≥4.5:1) on the light badge/card bg */
+  --color-quality-excellent: #155a8a;
+  --color-quality-good: #1c7032;
+  --color-quality-sufficient: #7a6000;
+  --color-quality-poor: #b02e20;
   --color-quality-unknown: #374151;
+
+  /* UV index accent colors (AA on light badge/card bg) */
+  --color-uv-high: #8f4a10;
+  --color-uv-extreme: #8a4ba6;
 
   /* Fonts */
   --font-spectral: "Spectral", serif;
@@ -44,8 +48,16 @@
   --color-glass: rgba(20, 60, 90, 0.78);
   --color-glass-border: rgba(56, 189, 248, 0.25);
 
-  /* Quality colors for dark mode - need lighter shades for contrast */
-  --color-quality-unknown: #9ca3af;
+  /* Quality colors for dark mode — lighter shades, AA on dark badge/card bg */
+  --color-quality-excellent: #7cc4f2;
+  --color-quality-good: #5fd07f;
+  --color-quality-sufficient: #ecc25a;
+  --color-quality-poor: #fab3a7;
+  --color-quality-unknown: #c2cad4;
+
+  /* UV index accent colors (AA on dark badge/card bg) */
+  --color-uv-high: #f6b67a;
+  --color-uv-extreme: #dab6ec;
 }
 
 /* Base defaults */

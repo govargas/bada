@@ -1,5 +1,8 @@
 {
   "appTitle": "BADA",
+  "home": {
+    "title": "Badplatser i Sverige"
+  },
   "beaches": "Badplatser",
   "loadingBeaches": "Laddar badplatser…",
   "loadError": "Kunde inte ladda data.",

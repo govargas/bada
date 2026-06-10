@@ -205,6 +205,10 @@ export default function BeachesList() {
   /* ---------- UI ---------- */
   return (
     <div className="space-y-4">
+      {/* Page heading — visually hidden; gives the landing page an h1 for
+          screen-reader navigation without disrupting the visual design */}
+      <h1 className="sr-only">{t("home.title")}</h1>
+
       {/* Map */}
       <MapView
         points={filtered.map((b) => ({
