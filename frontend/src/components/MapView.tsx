@@ -57,6 +57,19 @@ function getPopupStyles() {
   };
 }
 
+function toGeoJSON(
+  points: Point[]
+): GeoJSON.FeatureCollection<GeoJSON.Point> {
+  return {
+    type: "FeatureCollection",
+    features: points.map((p) => ({
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [p.lon, p.lat] },
+      properties: { id: p.id, name: p.name },
+    })),
+  };
+}
+
 // compute bounds from center + radius (km)
 function circleBounds(
   center: { lon: number; lat: number },
@@ -83,7 +96,8 @@ export default function MapView({
 }: Props) {
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
-  const markersRef = useRef<maplibregl.Marker[]>([]);
+  const pointsRef = useRef<Point[]>(points);
+  pointsRef.current = points; // keep latest data for (re)builds without re-binding
   const onMoveEndRef = useRef(onMoveEnd);
   onMoveEndRef.current = onMoveEnd; // keep latest callback without re-binding listeners
   const onFitBoundsRef = useRef(onFitBounds);
@@ -106,17 +120,107 @@ export default function MapView({
     });
     mapRef.current = map;
 
-    map.once("load", () => setTimeout(() => map.resize(), 0));
+    // Add the beaches source + layers. Idempotent so it can run on first load
+    // and again after a style swap (setStyle wipes custom sources/layers).
+    function addBeachLayers() {
+      if (!map.isStyleLoaded() || map.getSource("beaches")) return;
+      const accent = getAccent();
 
-    // Dark/light swap only when theme class changes
-    const obs = new MutationObserver(() => {
-      const url = styleForTheme();
-      map.setStyle(url);
-      // Markers survive style swaps; if your style clears layers we can redraw, but
-      // here we just wait for style to settle so tiles don’t appear blank.
-      map.once("styledata", () => {
-        // no-op; we keep existing markers (no flicker)
+      map.addSource("beaches", {
+        type: "geojson",
+        data: toGeoJSON(pointsRef.current),
+        cluster: true,
+        clusterMaxZoom: 17, // Max zoom to cluster points on
+        clusterRadius: 40, // Radius of each cluster
       });
+
+      // Cluster circle layer
+      map.addLayer({
+        id: "clusters",
+        type: "circle",
+        source: "beaches",
+        filter: ["has", "point_count"],
+        paint: {
+          "circle-color": accent,
+          "circle-radius": [
+            "step",
+            ["get", "point_count"],
+            15, // radius for clusters with < 10 points
+            10,
+            20, // radius for clusters with 10-99 points
+            30,
+            25, // radius for clusters with 100+ points
+          ],
+          "circle-stroke-width": 2,
+          "circle-stroke-color": isDark()
+            ? "rgba(0, 0, 0, 0.6)"
+            : "rgba(255, 255, 255, 0.85)",
+        },
+      });
+
+      // Cluster count label
+      map.addLayer({
+        id: "cluster-count",
+        type: "symbol",
+        source: "beaches",
+        filter: ["has", "point_count"],
+        layout: {
+          "text-field": "{point_count_abbreviated}",
+          "text-font": ["Noto Sans Bold", "Noto Sans"],
+          "text-size": 13,
+        },
+        paint: {
+          "text-color": "#ffffff",
+          "text-halo-color": "rgba(0, 0, 0, 0.3)",
+          "text-halo-width": 1,
+        },
+      });
+
+      // Individual point — large transparent hit area (44px touch target)
+      map.addLayer({
+        id: "unclustered-point",
+        type: "circle",
+        source: "beaches",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": accent,
+          "circle-radius": 22, // 44px diameter touch target (WCAG)
+          "circle-stroke-width": 2,
+          "circle-stroke-color": isDark()
+            ? "rgba(0, 0, 0, 0.6)"
+            : "rgba(255, 255, 255, 0.85)",
+          "circle-opacity": 0.2,
+          "circle-stroke-opacity": 1,
+        },
+      });
+
+      // Visual marker on top (smaller, fully visible)
+      map.addLayer({
+        id: "unclustered-point-visual",
+        type: "circle",
+        source: "beaches",
+        filter: ["!", ["has", "point_count"]],
+        paint: {
+          "circle-color": accent,
+          "circle-radius": 8,
+          "circle-stroke-width": 2,
+          "circle-stroke-color": isDark()
+            ? "rgba(0, 0, 0, 0.6)"
+            : "rgba(255, 255, 255, 0.85)",
+        },
+      });
+    }
+
+    map.on("load", () => {
+      addBeachLayers();
+      setTimeout(() => map.resize(), 0);
+    });
+
+    // Dark/light swap only when theme class changes. setStyle drops custom
+    // sources/layers, so re-add them once the new style settles.
+    const obs = new MutationObserver(() => {
+      map.setStyle(styleForTheme());
+      map.once("styledata", addBeachLayers);
     });
     obs.observe(document.documentElement, {
       attributes: true,
@@ -154,136 +258,10 @@ export default function MapView({
       }
     });
 
-    return () => {
-      obs.disconnect();
-      markersRef.current.forEach((m) => m.remove());
-      map.remove();
-      mapRef.current = null;
-    };
-  }, []); // ← no dependencies (don’t recreate the map)
+    // ── Interaction handlers — registered ONCE. They are layer-id scoped, so
+    // they survive style swaps and data updates without piling up. ──────────
 
-  // Update markers with clustering support
-  useEffect(() => {
-    const map = mapRef.current;
-    if (!map || !map.isStyleLoaded()) return;
-
-    const accent = getAccent();
-
-    // Remove old markers
-    markersRef.current.forEach((m) => m.remove());
-    markersRef.current = [];
-
-    // Remove old layers and sources if they exist
-    if (map.getLayer("clusters")) map.removeLayer("clusters");
-    if (map.getLayer("cluster-count")) map.removeLayer("cluster-count");
-    if (map.getLayer("unclustered-point-visual"))
-      map.removeLayer("unclustered-point-visual");
-    if (map.getLayer("unclustered-point")) map.removeLayer("unclustered-point");
-    if (map.getSource("beaches")) map.removeSource("beaches");
-
-    // Create GeoJSON from points
-    const geojson: GeoJSON.FeatureCollection<GeoJSON.Point> = {
-      type: "FeatureCollection",
-      features: points.map((p) => ({
-        type: "Feature",
-        geometry: {
-          type: "Point",
-          coordinates: [p.lon, p.lat],
-        },
-        properties: {
-          id: p.id,
-          name: p.name,
-        },
-      })),
-    };
-
-    // Add source with clustering enabled
-    map.addSource("beaches", {
-      type: "geojson",
-      data: geojson,
-      cluster: true,
-      clusterMaxZoom: 17, // Max zoom to cluster points on (increased for better separation)
-      clusterRadius: 40, // Radius of each cluster (reduced for tighter clustering)
-    });
-
-    // Add cluster circle layer
-    map.addLayer({
-      id: "clusters",
-      type: "circle",
-      source: "beaches",
-      filter: ["has", "point_count"],
-      paint: {
-        "circle-color": accent,
-        "circle-radius": [
-          "step",
-          ["get", "point_count"],
-          15, // radius for clusters with < 10 points
-          10,
-          20, // radius for clusters with 10-99 points
-          30,
-          25, // radius for clusters with 100+ points
-        ],
-        "circle-stroke-width": 2,
-        "circle-stroke-color": isDark()
-          ? "rgba(0, 0, 0, 0.6)"
-          : "rgba(255, 255, 255, 0.85)",
-      },
-    });
-
-    // Add cluster count label
-    map.addLayer({
-      id: "cluster-count",
-      type: "symbol",
-      source: "beaches",
-      filter: ["has", "point_count"],
-      layout: {
-        "text-field": "{point_count_abbreviated}",
-        "text-font": ["Noto Sans Bold", "Noto Sans"],
-        "text-size": 13,
-      },
-      paint: {
-        "text-color": "#ffffff", // White text for good contrast on accent color in both themes
-        "text-halo-color": "rgba(0, 0, 0, 0.3)", // Subtle dark halo for extra contrast
-        "text-halo-width": 1,
-      },
-    });
-
-    // Add individual point layer (unclustered)
-    // Using 22px radius (44px diameter) for proper touch targets
-    map.addLayer({
-      id: "unclustered-point",
-      type: "circle",
-      source: "beaches",
-      filter: ["!", ["has", "point_count"]],
-      paint: {
-        "circle-color": accent,
-        "circle-radius": 22, // 44px diameter for proper touch target (WCAG compliance)
-        "circle-stroke-width": 2,
-        "circle-stroke-color": isDark()
-          ? "rgba(0, 0, 0, 0.6)"
-          : "rgba(255, 255, 255, 0.85)",
-        "circle-opacity": 0.2, // Make it mostly transparent
-        "circle-stroke-opacity": 1,
-      },
-    });
-
-    // Add visual marker layer on top (smaller, fully visible)
-    map.addLayer({
-      id: "unclustered-point-visual",
-      type: "circle",
-      source: "beaches",
-      filter: ["!", ["has", "point_count"]],
-      paint: {
-        "circle-color": accent,
-        "circle-radius": 8, // Visual size (16px diameter)
-        "circle-stroke-width": 2,
-        "circle-stroke-color": isDark()
-          ? "rgba(0, 0, 0, 0.6)"
-          : "rgba(255, 255, 255, 0.85)",
-      },
-    });
-
-    // Click handler for clusters - zoom in or show list if can't expand
+    // Click on a cluster - zoom in or show list if can't expand
     map.on("click", "clusters", (e) => {
       const features = map.queryRenderedFeatures(e.point, {
         layers: ["clusters"],
@@ -416,6 +394,24 @@ export default function MapView({
     map.on("mouseleave", "unclustered-point", () => {
       map.getCanvas().style.cursor = "";
     });
+
+    return () => {
+      obs.disconnect();
+      map.remove();
+      mapRef.current = null;
+    };
+  }, []); // ← no dependencies (don't recreate the map or re-bind handlers)
+
+  // Push new data when points change — just update the source, don't rebuild.
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    const src = map.getSource("beaches") as
+      | maplibregl.GeoJSONSource
+      | undefined;
+    // If the source isn't there yet, the load/styledata handler will build it
+    // from pointsRef, so there's nothing to do here.
+    if (src) src.setData(toGeoJSON(points));
   }, [points]);
 
   // Fit to focus (center + radius) without flashing; allow closer zoom for small radii
