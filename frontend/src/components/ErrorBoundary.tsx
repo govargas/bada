@@ -32,7 +32,7 @@ export default class ErrorBoundary extends Component<Props, State> {
         <div className="min-h-screen flex items-center justify-center p-4">
           <div className="max-w-md w-full space-y-6">
             <div className="card p-8 text-center space-y-4">
-              <h1 className="font-spectral text-3xl text-red-600">
+              <h1 className="font-display text-3xl text-[var(--color-quality-poor)]">
                 {t("errorBoundary.title")}
               </h1>
               <p className="text-ink-muted">
@@ -51,7 +51,7 @@ export default class ErrorBoundary extends Component<Props, State> {
               <div className="flex gap-3 justify-center pt-4">
                 <button
                   onClick={() => window.location.reload()}
-                  className="px-4 py-2 rounded-lg bg-accent text-white hover:bg-accent/90"
+                  className="btn btn-primary"
                 >
                   {t("errorBoundary.reloadPage")}
                 </button>

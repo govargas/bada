@@ -5,6 +5,8 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter } from "react-router";
 import { Toaster } from "react-hot-toast";
 import i18n from "./i18n";
+import "@fontsource-variable/zalando-sans";
+import "@fontsource/special-gothic-expanded-one";
 import "./index.css";
 import "maplibre-gl/dist/maplibre-gl.css";
 

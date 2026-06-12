@@ -62,7 +62,7 @@ export default function LoginPage() {
 
   return (
     <main className="max-w-md mx-auto p-6 space-y-6">
-      <h1 className="font-spectral text-2xl">{t("auth.signInTitle")}</h1>
+      <h1 className="font-display text-2xl">{t("auth.signInTitle")}</h1>
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="login-email" className="block text-sm mb-1">{t("auth.email")}</label>
@@ -70,10 +70,10 @@ export default function LoginPage() {
             id="login-email"
             type="email"
             {...register("email")}
-            className="w-full rounded-lg border border-border px-3 py-2"
+            className="input"
           />
           {errors.email && (
-            <p className="text-red-600 text-sm">{errors.email.message}</p>
+            <p className="text-[var(--color-quality-poor)] text-sm">{errors.email.message}</p>
           )}
         </div>
 
@@ -83,21 +83,21 @@ export default function LoginPage() {
             id="login-password"
             type="password"
             {...register("password")}
-            className="w-full rounded-lg border border-border px-3 py-2"
+            className="input"
           />
           {errors.password && (
-            <p className="text-red-600 text-sm">{errors.password.message}</p>
+            <p className="text-[var(--color-quality-poor)] text-sm">{errors.password.message}</p>
           )}
         </div>
 
         {errors.root && (
-          <p className="text-red-600 text-sm">{errors.root.message}</p>
+          <p className="text-[var(--color-quality-poor)] text-sm">{errors.root.message}</p>
         )}
 
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full rounded-lg bg-accent text-white py-2 hover:bg-accent/90 disabled:opacity-50"
+          className="btn btn-primary w-full"
         >
           {isSubmitting ? t("auth.signInProgress") : t("auth.signIn")}
         </button>

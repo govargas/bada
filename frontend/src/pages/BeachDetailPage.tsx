@@ -12,6 +12,7 @@ import {
   useRemoveFavorite,
 } from "../api/favorites";
 import { useAuth } from "@/store/auth";
+import { ArrowLeft, Star, Warning } from "@phosphor-icons/react";
 import Tooltip from "../components/Tooltip";
 import BeachWeatherPanel from "../components/BeachWeatherPanel";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -84,15 +85,12 @@ export default function BeachDetailPage() {
     return (
       <section className="p-4">
         <div className="card p-4">
-          <p className="font-spectral text-lg">{t("loadError")}</p>
+          <p className="font-display text-lg">{t("loadError")}</p>
           <p className="text-sm text-ink-muted mt-1">
             {(error as Error)?.message ?? t("beachDetail.pleaseTryAgain")}
           </p>
-          <Link
-            to="/"
-            className="inline-block mt-3 px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          >
-            ← {t("back")}
+          <Link to="/" className="btn mt-3">
+            <ArrowLeft size={16} aria-hidden="true" /> {t("back")}
           </Link>
         </div>
       </section>
@@ -117,7 +115,7 @@ export default function BeachDetailPage() {
 
   const latestSampleLabel = data.latestSampleDate
     ? formatDate(data.latestSampleDate, "short")
-    : "—";
+    : "–";
 
   // HaV sometimes sends "false"/"true"/empty for unset text fields. Treat
   // those as no-data so we never print a raw "false" to the user.
@@ -129,13 +127,13 @@ export default function BeachDetailPage() {
 
   // Translate algal status
   const algalKey = getAlgalStatusKey(data.algalText);
-  const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "—";
+  const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "–";
 
   // Translate EU motive
   const euMotiveKey = getEuMotiveKey(data.euMotive);
   const euMotiveDisplay = euMotiveKey
     ? t(euMotiveKey)
-    : cleanText(data.euMotive) || "—";
+    : cleanText(data.euMotive) || "–";
 
   async function handleFavoriteClick() {
     if (!token) {
@@ -163,7 +161,7 @@ export default function BeachDetailPage() {
       {/* Heading block */}
       <header className="space-y-1">
         <h1 className="font-beach text-2xl leading-tight">{title}</h1>
-        <p className="text-ink-muted">{muni || "—"}</p>
+        <p className="text-ink-muted">{muni || "–"}</p>
       </header>
 
       {/* KPI row */}
@@ -171,7 +169,7 @@ export default function BeachDetailPage() {
         <Tooltip content={qualityTooltip}>
           <span className={`badge ${pillClass} cursor-help`} tabIndex={0}>
             {qualityText}{" "}
-            {data.classificationYear ? `• ${data.classificationYear}` : ""}
+            {data.classificationYear ? `· ${data.classificationYear}` : ""}
           </span>
         </Tooltip>
         {data.euType && <span className="badge">{t("beachDetail.euBad")}</span>}
@@ -183,8 +181,9 @@ export default function BeachDetailPage() {
           role="alert"
           className="rounded-2xl border border-[var(--color-quality-poor)]/50 bg-[var(--color-quality-poor)]/10 p-4"
         >
-          <h2 className="font-spectral text-lg text-[var(--color-quality-poor)]">
-            ⚠ {t("beachDetail.dissuasion")}
+          <h2 className="font-display text-lg text-[var(--color-quality-poor)] flex items-center gap-2">
+            <Warning size={20} weight="bold" aria-hidden="true" />
+            {t("beachDetail.dissuasion")}
           </h2>
           <ul className="mt-1 text-sm list-disc list-inside space-y-0.5">
             {data.dissuasion.map((d, i) => (
@@ -216,20 +215,22 @@ export default function BeachDetailPage() {
         {/* Actions row */}
         <div className="pt-2 flex items-center gap-2">
           <button
-            className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40 disabled:opacity-60"
+            className="btn"
             onClick={handleFavoriteClick}
             disabled={addFav.isPending || rmFav.isPending}
           >
+            <Star
+              size={16}
+              weight={isFav ? "fill" : "regular"}
+              aria-hidden="true"
+            />
             {isFav
-              ? `★ ${t("beachDetail.removeFavorite")}`
-              : `☆ ${t("beachDetail.addFavorite")}`}
+              ? t("beachDetail.removeFavorite")
+              : t("beachDetail.addFavorite")}
           </button>
 
-          <Link
-            to="/"
-            className="px-3 py-2 rounded-2xl border border-border bg-surface hover:bg-surface-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent/40"
-          >
-            ← {t("back")}
+          <Link to="/" className="btn">
+            <ArrowLeft size={16} aria-hidden="true" /> {t("back")}
           </Link>
         </div>
       </div>
@@ -240,7 +241,7 @@ export default function BeachDetailPage() {
       {/* Description */}
       {data.bathInformation && (
         <article className="card p-4">
-          <h2 className="font-spectral text-lg mb-1">
+          <h2 className="font-display text-lg mb-1">
             {t("beachDetail.bathInformation")}
           </h2>
           <p className="text-sm leading-relaxed whitespace-pre-line">
@@ -252,7 +253,7 @@ export default function BeachDetailPage() {
       {/* Contact */}
       {(data.contactMail || data.contactPhone || data.contactUrl) && (
         <div className="card p-4 space-y-1 text-sm">
-          <h3 className="font-spectral text-lg">{t("nav.contact")}</h3>
+          <h3 className="font-display text-lg">{t("nav.contact")}</h3>
           {data.contactMail && (
             <div>
               {t("beachDetail.mail")}{" "}

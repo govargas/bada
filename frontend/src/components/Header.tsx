@@ -134,7 +134,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
       {/* Skip navigation link for accessibility */}
       <a
         href="#main-content"
-        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-accent focus:text-white focus:px-4 focus:py-2 focus:rounded focus:underline"
+        className="sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-50 focus:bg-accent focus:text-white dark:focus:text-[#07202e] focus:px-4 focus:py-2 focus:rounded-lg focus:underline"
       >
         {t("header.skipToMain")}
       </a>
@@ -154,7 +154,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             </button>
 
             {menuOpen && (
-              <div className="absolute left-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50">
+              <div className="glass-overlay absolute left-0 mt-2 w-56 p-2 z-50">
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {t("header.menu")}
                 </div>
@@ -219,7 +219,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             </button>
 
             {userOpen && (
-              <div className="absolute right-0 mt-2 w-56 rounded-2xl border border-border/50 bg-surface/90 backdrop-blur-3xl shadow-lg p-2 z-50">
+              <div className="glass-overlay absolute right-0 mt-2 w-56 p-2 z-50">
                 <div className="px-2 py-1.5 text-xs text-ink-muted">
                   {authed ? t("nav.account") : t("nav.user")}
                 </div>
@@ -277,7 +277,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               />
               {search && (
                 <button
-                  className="card px-3 py-2 hover:brightness-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+                  className="card card-hover px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
                   onClick={() => {
                     setSearch("");
                     setSearchOpen(false);
@@ -292,7 +292,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
 
             {/* Search results dropdown */}
             {searchOpen && search && (
-              <div className="absolute top-full left-0 right-0 mt-2 rounded-2xl border border-border/50 bg-surface/95 backdrop-blur-3xl shadow-lg max-h-96 overflow-y-auto z-50">
+              <div className="glass-overlay absolute top-full left-0 right-0 mt-2 max-h-96 overflow-y-auto z-50">
                 {/* Screen reader announcement for search results */}
                 <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
                   {filteredBeaches.length > 0
@@ -320,7 +320,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                       >
                         <div className="font-medium">{beach.name}</div>
                         <div className="text-sm text-ink-muted">
-                          {beach.municipality || "—"}
+                          {beach.municipality || "–"}
                         </div>
                       </li>
                     ))}

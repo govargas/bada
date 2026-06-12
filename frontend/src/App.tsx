@@ -16,6 +16,7 @@ import TermsPage from "./pages/TermsPage";
 import ContactPage from "./pages/ContactPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
+import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
   return (
@@ -45,8 +46,8 @@ export default function App() {
               <Route path="/settings" element={<SettingsPage />} />
             </Route>
 
-            {/* Optional 404 */}
-            {/* <Route path="*" element={<NotFoundPage />} /> */}
+            {/* 404 */}
+            <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>
       </div>

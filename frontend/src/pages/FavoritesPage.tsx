@@ -167,7 +167,7 @@ export default function FavoritesPage() {
   if (isLoading) {
     return (
       <main className="max-w-screen-lg mx-auto p-6" aria-busy="true" aria-live="polite">
-        <h1 className="font-spectral text-2xl mb-4">{t("favorites.title")}</h1>
+        <h1 className="font-display text-2xl mb-4">{t("favorites.title")}</h1>
         <span className="sr-only">{t("loadingBeaches")}</span>
         <div className="space-y-3">
           {[...Array(3)].map((_, i) => (
@@ -185,8 +185,8 @@ export default function FavoritesPage() {
   if (isError) {
     return (
       <main className="max-w-screen-lg mx-auto p-6">
-        <h1 className="font-spectral text-2xl mb-4">{t("favorites.title")}</h1>
-        <p className="text-red-600">
+        <h1 className="font-display text-2xl mb-4">{t("favorites.title")}</h1>
+        <p className="text-[var(--color-quality-poor)]">
           {(error as Error)?.message ?? t("loadError")}
         </p>
       </main>
@@ -197,7 +197,7 @@ export default function FavoritesPage() {
   return (
     <main className="max-w-screen-lg mx-auto p-6 space-y-6">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        <h1 className="font-spectral text-2xl">{t("favorites.title")}</h1>
+        <h1 className="font-display text-2xl">{t("favorites.title")}</h1>
         <div className="flex items-center gap-3 flex-wrap">
           <label className="text-sm">
             {t("favorites.sortBy")}{" "}
@@ -222,7 +222,7 @@ export default function FavoritesPage() {
 
       {favorites && favorites.length === 0 && (
         <div className="card p-6">
-          <h2 className="font-spectral text-lg mb-1">{t("favorites.empty")}</h2>
+          <h2 className="font-display text-lg mb-1">{t("favorites.empty")}</h2>
           <p className="text-sm text-ink-muted mb-3">
             {t("favorites.addFavorites")}
           </p>

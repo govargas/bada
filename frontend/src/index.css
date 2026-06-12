@@ -1,6 +1,12 @@
 @import "tailwindcss";
 @import "maplibre-gl/dist/maplibre-gl.css";
 
+/* The app toggles dark mode via the .dark class (useToggleDarkMode), so the
+   dark: variant must follow the class, not the OS media query */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Self-hosted fonts are imported in main.tsx so Vite rebases the woff2 urls */
+
 /* Design tokens (Tailwind v4) */
 @theme {
   /* Light theme */
@@ -12,9 +18,18 @@
   --color-accent: #002fa7;
   --color-badge: #e6e4dc;
 
-  /* Glassmorphism - Light theme */
+  /* Glass material system - three elevation tiers.
+     Tier 0: header/ambient chrome (most transparent, heaviest blur)
+     Tier 1: cards and panels (the default surface)
+     Tier 2: overlays - menus, popovers, dropdowns (most opaque, most readable)
+     Opacity floors are set so ink-on-glass stays WCAG AA over the worst-case
+     frame of the animated background. Do not lower them. */
   --color-glass: rgba(239, 235, 228, 0.72);
+  --color-glass-1: rgba(246, 242, 236, 0.68);
+  --color-glass-2: rgba(246, 242, 236, 0.9);
   --color-glass-border: rgba(205, 200, 192, 0.5);
+  --color-glass-highlight: rgba(255, 255, 255, 0.55);
+  --color-glass-shadow: rgba(110, 95, 75, 0.14);
 
   /* Quality colors — tuned for WCAG AA (≥4.5:1) on the light badge/card bg */
   --color-quality-excellent: #155a8a;
@@ -27,11 +42,14 @@
   --color-uv-high: #8f4a10;
   --color-uv-extreme: #8a4ba6;
 
-  /* Fonts */
-  --font-spectral: "Spectral", serif;
-  --font-inter: "Inter", system-ui, sans-serif;
+  /* Fonts: one workhorse family + the wordmark display face.
+     Radius rule: surfaces (cards, panels, overlays) = rounded-2xl,
+     controls (buttons, inputs) = rounded-lg, pills/badges/icon buttons =
+     rounded-full. Inline-link focus rings keep rounded-sm. */
+  --font-sans: "Zalando Sans Variable", system-ui, sans-serif;
+  --font-display: "Zalando Sans Variable", system-ui, sans-serif;
   --font-title: "Special Gothic Expanded One", sans-serif;
-  --font-beach: "Zalando Sans", sans-serif;
+  --font-beach: "Zalando Sans Variable", system-ui, sans-serif;
 }
 
 /* Dark theme overrides */
@@ -44,9 +62,13 @@
   --color-accent: #38bdf8;
   --color-badge: #1e4057;
 
-  /* Glassmorphism - Dark theme (ocean-tinted) */
+  /* Glass tiers - ocean-tinted */
   --color-glass: rgba(20, 60, 90, 0.78);
+  --color-glass-1: rgba(20, 60, 90, 0.8);
+  --color-glass-2: rgba(15, 42, 60, 0.92);
   --color-glass-border: rgba(56, 189, 248, 0.25);
+  --color-glass-highlight: rgba(255, 255, 255, 0.12);
+  --color-glass-shadow: rgba(2, 16, 28, 0.45);
 
   /* Quality colors for dark mode — lighter shades, AA on dark badge/card bg */
   --color-quality-excellent: #7cc4f2;
@@ -69,14 +91,14 @@
   }
 
   body {
-    @apply text-ink antialiased font-inter;
+    @apply text-ink antialiased font-sans;
   }
 
   h1,
   h2,
   h3,
   h4 {
-    @apply font-spectral text-ink;
+    @apply font-display font-semibold tracking-tight text-ink;
   }
 
   .font-title {
@@ -85,6 +107,8 @@
 
   .font-beach {
     font-family: var(--font-beach);
+    font-weight: 650;
+    letter-spacing: -0.01em;
   }
 
   a {
@@ -96,12 +120,84 @@
 
 /* Reusable bits */
 @layer components {
-  .card {
-    @apply rounded-2xl shadow border border-border/60;
-    background: var(--color-glass);
-    backdrop-filter: blur(8px);
-    -webkit-backdrop-filter: blur(8px);
+  /* Display type carries weight and tracking on non-heading elements too */
+  .font-display {
+    font-weight: 600;
+    letter-spacing: -0.015em;
   }
+
+  /* Glass tier 1 - default surface for cards and panels */
+  .card {
+    @apply rounded-2xl border;
+    border-color: var(--color-glass-border);
+    background: var(--color-glass-1);
+    backdrop-filter: blur(10px) saturate(1.15);
+    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    box-shadow:
+      inset 0 1px 0 var(--color-glass-highlight),
+      0 4px 16px var(--color-glass-shadow);
+    transition:
+      transform 150ms ease,
+      box-shadow 150ms ease;
+  }
+
+  /* Interactive glass: lift on hover, press on tap */
+  .card-hover:hover {
+    transform: translateY(-2px);
+    box-shadow:
+      inset 0 1px 0 var(--color-glass-highlight),
+      0 10px 28px var(--color-glass-shadow);
+  }
+  .card-hover:active {
+    transform: translateY(0) scale(0.99);
+  }
+
+  /* Glass tier 2 - overlays: menus, popovers, dropdowns */
+  .glass-overlay {
+    @apply rounded-2xl border;
+    border-color: var(--color-glass-border);
+    background: var(--color-glass-2);
+    backdrop-filter: blur(20px) saturate(1.2);
+    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    box-shadow:
+      inset 0 1px 0 var(--color-glass-highlight),
+      0 12px 32px var(--color-glass-shadow);
+  }
+
+  /* Controls: rounded-lg per the radius rule, tactile press feedback */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border
+           border-border bg-surface px-3 py-2 font-medium no-underline
+           hover:bg-surface-muted hover:no-underline
+           focus-visible:outline-none focus-visible:ring-2
+           focus-visible:ring-accent/50
+           disabled:opacity-60 disabled:pointer-events-none;
+    color: var(--color-ink);
+    transition:
+      transform 120ms ease,
+      background-color 150ms ease;
+  }
+  .btn:active {
+    transform: scale(0.98);
+  }
+
+  .btn-primary {
+    @apply border-transparent bg-accent text-white hover:bg-accent/90;
+  }
+  /* Dark-mode accent is light cyan; flip the label to ink-dark for AA */
+  .dark .btn-primary {
+    color: #07202e;
+  }
+
+  .input {
+    @apply w-full rounded-lg border border-border px-3 py-2
+           placeholder:text-ink-muted/70
+           focus:outline-none focus:ring-2 focus:ring-accent
+           focus:border-accent/50;
+    color: var(--color-ink);
+    background: var(--color-glass-2);
+  }
+
   .badge {
     @apply inline-flex items-center gap-1 px-2.5 py-1 rounded-full
            text-xs font-medium bg-badge text-ink;
@@ -238,7 +334,7 @@
 
 /* Light mode: Sand texture with subtle grain */
 .ambient-bg {
-  background: 
+  background:
     /* Subtle noise texture overlay */ url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E"),
     /* Warm sand gradient */
       linear-gradient(
@@ -264,7 +360,7 @@
 
 /* Dark mode: Animated water/ocean waves */
 .dark .ambient-bg {
-  background: 
+  background:
     /* Deep wave layer 1 */ radial-gradient(
       ellipse 150% 80% at 50% 120%,
       rgba(30, 90, 140, 0.4) 0%,
@@ -327,5 +423,32 @@
   .dark .ambient-bg {
     animation: none !important;
     background-position: 50% 0%, 50% 0%, 50% 0%, 0% 0% !important;
+  }
+
+  .card-hover:hover,
+  .card-hover:active,
+  .btn:active {
+    transform: none;
+  }
+}
+
+/* Reduced transparency: solid fills, no blur */
+@media (prefers-reduced-transparency: reduce) {
+  .card,
+  .glass-overlay,
+  .input {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    box-shadow: none;
+  }
+
+  .glass-header::before {
+    background: var(--color-surface);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    mask-image: none;
+    -webkit-mask-image: none;
+    border-bottom: 1px solid var(--color-border);
   }
 }

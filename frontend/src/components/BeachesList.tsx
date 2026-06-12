@@ -160,7 +160,7 @@ export default function BeachesList() {
         role="alert"
         className="rounded-2xl border border-border bg-surface-muted p-4"
       >
-        <p className="font-spectral text-lg">{t("beachesList.loadError")}</p>
+        <p className="font-display text-lg">{t("beachesList.loadError")}</p>
         <p className="text-sm text-ink-muted mt-1">
           {(error as Error)?.message ?? t("beachesList.pleaseRetry")}
         </p>
@@ -177,7 +177,7 @@ export default function BeachesList() {
   if (!items.length) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">
+        <p className="font-display text-lg">
           {t("beachesList.noBeachesFound")}
         </p>
         <p className="text-sm text-ink-muted mt-1">
@@ -190,7 +190,7 @@ export default function BeachesList() {
   if ((q || mode !== "default") && filtered.length === 0) {
     return (
       <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-spectral text-lg">{t("beachesList.noMatches")}</p>
+        <p className="font-display text-lg">{t("beachesList.noMatches")}</p>
         <p className="text-sm text-ink-muted mt-1">
           {q
             ? t("beachesList.emptyState")
@@ -225,7 +225,7 @@ export default function BeachesList() {
       {/* Use current location — full width, now under the map */}
       <div className="px-0">
         <button
-          className="card w-full px-3 py-2 hover:brightness-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-center font-medium flex items-center justify-center gap-2"
+          className="card card-hover w-full px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-center font-medium flex items-center justify-center gap-2"
           onClick={handleUseLocation}
           disabled={geoLoading}
         >
@@ -246,7 +246,7 @@ export default function BeachesList() {
           <li key={b.id}>
             <Link
               to={`/beach/${b.id}`}
-              className="card block p-3 hover:brightness-110 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="card card-hover block p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
               <div className="flex items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -254,7 +254,7 @@ export default function BeachesList() {
                     {b.name}
                   </h3>
                   <p className="text-ink-muted text-sm">
-                    {b.municipality || "—"}
+                    {b.municipality || "–"}
                   </p>
                 </div>
                 {typeof b._distanceKm === "number" && (

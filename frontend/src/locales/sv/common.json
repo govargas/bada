@@ -224,7 +224,11 @@
       "language": "Språk",
       "languageDescription": "Välj ditt språk"
     },
-    "backToMap": "← Tillbaka till kartan"
+    "backToMap": "Tillbaka till kartan",
+    "notFound": {
+      "title": "Sidan finns inte",
+      "desc": "Sidan du letar efter har flyttats eller finns inte längre."
+    }
   },
   "weather": {
     "title": "Väder",

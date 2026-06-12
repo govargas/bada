@@ -16,7 +16,7 @@ export default function LanguageSwitcher() {
         aria-pressed={current === "sv"}
         className={`px-2.5 py-1 rounded-lg text-sm transition-colors ${
           current === "sv"
-            ? "bg-accent text-white font-medium"
+            ? "bg-accent text-white dark:text-[#07202e] font-medium"
             : "text-ink hover:bg-surface-muted"
         }`}
       >
@@ -27,7 +27,7 @@ export default function LanguageSwitcher() {
         aria-pressed={current === "en"}
         className={`px-2.5 py-1 rounded-lg text-sm transition-colors ${
           current === "en"
-            ? "bg-accent text-white font-medium"
+            ? "bg-accent text-white dark:text-[#07202e] font-medium"
             : "text-ink hover:bg-surface-muted"
         }`}
       >

@@ -224,7 +224,11 @@
       "language": "Language",
       "languageDescription": "Select your language"
     },
-    "backToMap": "← Back to map"
+    "backToMap": "Back to map",
+    "notFound": {
+      "title": "Page not found",
+      "desc": "The page you are looking for has moved or no longer exists."
+    }
   },
   "weather": {
     "title": "Weather",

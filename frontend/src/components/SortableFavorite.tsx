@@ -73,7 +73,7 @@ export default function SortableFavorite({
           </Link>
         </div>
 
-        <div className="text-sm text-ink-muted truncate">{muni || "—"}</div>
+        <div className="text-sm text-ink-muted truncate">{muni || "–"}</div>
 
         <div className="mt-1">
           <span className={`badge ${classificationClass}`}>

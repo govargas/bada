@@ -227,38 +227,42 @@ function WeatherCard({
   const uv = weather.uvIndex;
   return (
     <div className="card p-4 space-y-3">
-      <h2 className="font-spectral text-lg">{t('weather.title')}</h2>
+      <h2 className="font-display text-lg">{t('weather.title')}</h2>
 
-      {/* Temp row — two big numbers */}
+      {/* Primary stats: water temperature leads, it is the swim decision */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <div className="text-xs text-ink-muted">{t('weather.temperature')}</div>
-          <div className="text-3xl font-semibold tabular-nums leading-none">
-            {Math.round(weather.temperature)}°
-          </div>
+          <div className="text-xs text-ink-muted">{t('weather.waterTemp')}</div>
+          {weather.waterTemperature != null ? (
+            <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight text-accent">
+              {Math.round(weather.waterTemperature)}°
+            </div>
+          ) : (
+            <div className="text-sm text-ink-muted pt-2">
+              {t('weather.notAvailable')}
+            </div>
+          )}
         </div>
         <div>
-          <div className="text-xs text-ink-muted">{t('weather.feelsLike')}</div>
-          <div className="text-3xl font-semibold tabular-nums leading-none text-ink-muted">
-            {Math.round(weather.feelsLike)}°
+          <div className="text-xs text-ink-muted">{t('weather.temperature')}</div>
+          <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight">
+            {Math.round(weather.temperature)}°
           </div>
         </div>
       </div>
 
-      {/* Secondary row */}
-      <div className="grid grid-cols-2 gap-3 text-sm pt-1 border-t border-border/40">
+      {/* Secondary cluster: quieter, grouped below the divider */}
+      <div className="grid grid-cols-2 gap-3 text-sm pt-2 border-t border-border/40">
         <div>
-          <div className="text-xs text-ink-muted">{t('weather.waterTemp')}</div>
-          <div className="font-medium">
-            {weather.waterTemperature != null
-              ? `${Math.round(weather.waterTemperature)}°C`
-              : <span className="text-ink-muted">{t('weather.notAvailable')}</span>}
+          <div className="text-xs text-ink-muted">{t('weather.feelsLike')}</div>
+          <div className="font-medium tabular-nums">
+            {Math.round(weather.feelsLike)}°
           </div>
         </div>
         <div>
           <div className="text-xs text-ink-muted">{t('weather.uvIndex')}</div>
           <div className={`font-medium ${uvColor(uv)}`}>
-            {uv.toFixed(1)}&thinsp;—&thinsp;{t(uvLabelKey(uv))}
+            {uv.toFixed(1)} · {t(uvLabelKey(uv))}
           </div>
         </div>
       </div>
@@ -272,12 +276,12 @@ function WeatherCard({
 function SunCard({ sun, t }: { sun: SunTimes; t: (k: string) => string }) {
   return (
     <div className="card p-4 space-y-3">
-      <h2 className="font-spectral text-lg">{t('sun.title')}</h2>
+      <h2 className="font-display text-lg">{t('sun.title')}</h2>
 
       <SunArc sun={sun} />
 
       {/* Golden hour */}
-      <div className="rounded-xl border border-amber-300/50 bg-amber-50/60 dark:bg-amber-900/15 dark:border-amber-700/30 px-3 py-2">
+      <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-900/15 dark:border-amber-700/30 px-3 py-2">
         <div className="text-[11px] font-medium text-amber-950 dark:text-amber-400 uppercase tracking-wide mb-1.5">
           {t('sun.goldenHour')}
         </div>
