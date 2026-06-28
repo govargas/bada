@@ -112,7 +112,9 @@
     "website": "Webbplats:",
     "pleaseTryAgain": "Vänligen försök igen.",
     "euBad": "EU-bad",
-    "dissuasion": "Avrådan från bad"
+    "dissuasion": "Avrådan från bad",
+    "safetyDisclaimer": "Detta visar den officiella EU/HaV-klassificeringen och den senast rapporterade provtagningen – inte en mätning av vattnet just idag. Förhållandena kan ändras snabbt, till exempel efter kraftigt regn eller varmt väder. Titta alltid på hur vattnet ser ut och luktar, och bada inte om du är osäker – särskilt med små barn eller husdjur.",
+    "safetyDisclaimerSource": "Se den officiella källan (Badplatsen, HaV)"
   },
   "algalStatus": {
     "ingenBlomning": "Ingen blomning",

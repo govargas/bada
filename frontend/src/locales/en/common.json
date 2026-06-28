@@ -112,7 +112,9 @@
     "website": "Website:",
     "pleaseTryAgain": "Please try again.",
     "euBad": "EU Beach",
-    "dissuasion": "Swimming advisory"
+    "dissuasion": "Swimming advisory",
+    "safetyDisclaimer": "This shows the official EU/HaV classification and the most recently reported sample — not a real-time measurement of the water today. Conditions can change quickly, for example after heavy rain or warm weather. Always check how the water looks and smells, and when in doubt, don't swim — especially with young children or pets.",
+    "safetyDisclaimerSource": "Check the official source (Badplatsen, HaV)"
   },
   "algalStatus": {
     "ingenBlomning": "No blooming",

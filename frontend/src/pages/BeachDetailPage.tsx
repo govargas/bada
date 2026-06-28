@@ -243,6 +243,29 @@ export default function BeachDetailPage() {
           </div>
         </div>
 
+        {/* Swim-safety disclaimer — this data is decision support, not a
+            real-time guarantee, so the caveat sits with the safety figures. */}
+        <p className="flex items-start gap-1.5 border-t border-[var(--color-border)] pt-3 text-xs leading-relaxed text-ink-muted">
+          <Info
+            size={14}
+            weight="bold"
+            aria-hidden="true"
+            className="mt-0.5 shrink-0"
+          />
+          <span>
+            {t("beachDetail.safetyDisclaimer")}{" "}
+            <a
+              href="https://badplatsen.havochvatten.se"
+              target="_blank"
+              rel="noreferrer"
+              className="underline text-accent"
+            >
+              {t("beachDetail.safetyDisclaimerSource")}
+            </a>
+            .
+          </span>
+        </p>
+
         {/* Actions row */}
         <div className="pt-2 flex items-center gap-2">
           <button
