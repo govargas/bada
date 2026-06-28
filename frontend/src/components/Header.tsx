@@ -180,6 +180,9 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                 <MenuLink to="/terms" onClick={() => setMenuOpen(false)}>
                   {t("nav.terms")}
                 </MenuLink>
+                <MenuLink to="/privacy" onClick={() => setMenuOpen(false)}>
+                  {t("nav.privacy")}
+                </MenuLink>
                 <MenuLink to="/contact" onClick={() => setMenuOpen(false)}>
                   {t("nav.contact")}
                 </MenuLink>

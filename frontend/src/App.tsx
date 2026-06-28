@@ -13,6 +13,7 @@ import FavoritesPage from "./pages/FavoritesPage";
 import AboutPage from "./pages/AboutPage";
 import WhatIsEUBeachPage from "./pages/WhatIsEUBeachPage";
 import TermsPage from "./pages/TermsPage";
+import PrivacyPage from "./pages/PrivacyPage";
 import ContactPage from "./pages/ContactPage";
 import ProfilePage from "./pages/ProfilePage";
 import SettingsPage from "./pages/SettingsPage";
@@ -37,6 +38,7 @@ export default function App() {
             <Route path="/about" element={<AboutPage />} />
             <Route path="/what-is-eu-beach" element={<WhatIsEUBeachPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/contact" element={<ContactPage />} />
 
             {/* Private */}

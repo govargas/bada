@@ -4,7 +4,9 @@ import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { User } from "../models/User.js";
+import { Favorite } from "../models/Favorite.js";
 import { connectDB } from "../lib/db.js";
+import { requireAuth, AuthedRequest } from "../middleware/auth.js";
 
 export const authRouter = Router();
 
@@ -77,6 +79,25 @@ authRouter.post("/login", authLimiter, async (req, res) => {
     return res.json({ token });
   } catch (err) {
     console.error("LOGIN_ERR", err);
+    return res.status(500).json({ error: "InternalServerError" });
+  }
+});
+
+// DELETE /api/auth/me
+// Permanently delete the authenticated user and all of their data (GDPR:
+// right to erasure). Favorites are removed first so no orphaned rows remain.
+authRouter.delete("/me", requireAuth, async (req, res) => {
+  try {
+    await connectDB();
+    const userId = (req as AuthedRequest).user.sub;
+
+    await Favorite.deleteMany({ userId });
+    const deleted = await User.findByIdAndDelete(userId);
+    if (!deleted) return res.status(404).json({ error: "NotFound" });
+
+    return res.json({ ok: true });
+  } catch (err) {
+    console.error("DELETE_ACCOUNT_ERR", err);
     return res.status(500).json({ error: "InternalServerError" });
   }
 });
