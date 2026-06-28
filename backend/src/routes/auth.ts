@@ -17,6 +17,8 @@ const authLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "TooManyRequests" },
+  // Don't throttle the automated test suite (many auth calls from one IP).
+  skip: () => process.env.NODE_ENV === "test",
 });
 
 authRouter.get("/ping", (_req, res) => res.json({ ok: true, from: "auth" }));
