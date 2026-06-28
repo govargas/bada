@@ -5,14 +5,14 @@ import toast from "react-hot-toast";
 import { fetchBeach } from "../api/beaches";
 import { formatDate } from "../utils/format";
 import { getClassificationKey } from "../utils/quality";
-import { getAlgalStatusKey, getEuMotiveKey } from "../utils/algal";
+import { getAlgalStatusKey, getAlgalSafety, getEuMotiveKey } from "../utils/algal";
 import {
   useFavorites,
   useAddFavorite,
   useRemoveFavorite,
 } from "../api/favorites";
 import { useAuth } from "@/store/auth";
-import { ArrowLeft, Star, Warning } from "@phosphor-icons/react";
+import { ArrowLeft, Star, Warning, Info } from "@phosphor-icons/react";
 import Tooltip from "../components/Tooltip";
 import BeachWeatherPanel from "../components/BeachWeatherPanel";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -129,6 +129,15 @@ export default function BeachDetailPage() {
   const algalKey = getAlgalStatusKey(data.algalText);
   const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "–";
 
+  // Swim-safety verdict derived from the bloom status (null when unmeasured)
+  const algalSafety = getAlgalSafety(algalKey);
+  const algalSafetyToneClass =
+    algalSafety?.tone === "safe"
+      ? "kpi-good"
+      : algalSafety?.tone === "caution"
+      ? "kpi-sufficient"
+      : "kpi-poor";
+
   // Translate EU motive
   const euMotiveKey = getEuMotiveKey(data.euMotive);
   const euMotiveDisplay = euMotiveKey
@@ -203,8 +212,30 @@ export default function BeachDetailPage() {
             <div className="font-medium">{latestSampleLabel}</div>
           </div>
           <div>
-            <div className="text-ink-muted">{t("beachDetail.algalBloom")}</div>
-            <div className="font-medium">{algalDisplay}</div>
+            <div className="text-ink-muted flex items-center gap-1">
+              {t("beachDetail.algalBloom")}
+              <Tooltip content={t("algalBloomInfo")}>
+                <span
+                  tabIndex={0}
+                  role="img"
+                  aria-label={t("algalBloomInfo")}
+                  className="inline-flex cursor-help text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full"
+                >
+                  <Info size={15} weight="bold" aria-hidden="true" />
+                </span>
+              </Tooltip>
+            </div>
+            <div className="font-medium">
+              {algalDisplay}
+              {algalSafety && (
+                <>
+                  {" – "}
+                  <span className={algalSafetyToneClass}>
+                    {t(algalSafety.key)}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
           <div>
             <div className="text-ink-muted">{t("beachDetail.euMotive")}</div>

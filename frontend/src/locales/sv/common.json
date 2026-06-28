@@ -121,6 +121,12 @@
     "mattligBlomning": "Måttlig blomning",
     "lindrigBlomning": "Lindrig blomning"
   },
+  "algalSafety": {
+    "safe": "säkert att bada",
+    "caution": "bada med försiktighet",
+    "avoid": "bad avrådes"
+  },
+  "algalBloomInfo": "Visar den senast rapporterade algblomningen. Att ingen blomning rapporterats betyder inte säkert att vattnet är fritt från alger – det kan finnas blomning som ännu inte hunnit mätas. Är vattnet grumligt, missfärgat eller luktar illa: undvik att bada, särskilt för barn och husdjur.",
   "euMotive": {
     "storBadbelastning": "Stor badbelastning",
     "badbelastning": "Badbelastning",

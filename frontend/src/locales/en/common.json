@@ -121,6 +121,12 @@
     "mattligBlomning": "Moderate blooming",
     "lindrigBlomning": "Mild blooming"
   },
+  "algalSafety": {
+    "safe": "safe to swim",
+    "caution": "swim with caution",
+    "avoid": "swimming not advised"
+  },
+  "algalBloomInfo": "Shows the most recently reported algal bloom. No reported bloom doesn't guarantee the water is algae-free — there may be a bloom that simply hasn't been measured yet. If the water looks cloudy, discoloured or smells bad, avoid swimming, especially with children and pets.",
   "euMotive": {
     "storBadbelastning": "High bathing load",
     "badbelastning": "Bathing load",
