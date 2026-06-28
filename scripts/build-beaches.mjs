@@ -46,19 +46,41 @@ function buildSitemap(beaches) {
   return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${body}\n</urlset>\n`;
 }
 
+// HaV's upstream API occasionally returns a transient 4xx/5xx or times out
+// (e.g. a momentary 400 Bad Request). A single bad reply shouldn't fail the
+// whole scheduled run, so retry a few times with exponential backoff before
+// giving up.
+async function fetchFeatures(url, { attempts = 4, baseDelayMs = 2_000 } = {}) {
+  let lastErr;
+  for (let attempt = 1; attempt <= attempts; attempt++) {
+    try {
+      const res = await fetch(url, {
+        headers: { "User-Agent": HAV_USER_AGENT, Accept: "application/json" },
+        signal: AbortSignal.timeout(20_000),
+      });
+      if (!res.ok) {
+        throw new Error(`HaV feature endpoint: ${res.status} ${res.statusText}`);
+      }
+      return await res.json();
+    } catch (err) {
+      lastErr = err;
+      if (attempt < attempts) {
+        const delay = baseDelayMs * 2 ** (attempt - 1);
+        console.warn(
+          `Attempt ${attempt}/${attempts} failed (${err.message}); retrying in ${delay}ms`
+        );
+        await new Promise((r) => setTimeout(r, delay));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 async function main() {
   const url = `${HAV_BASE_URL}/feature/?format=json`;
   console.log(`Fetching ${url}`);
 
-  const res = await fetch(url, {
-    headers: { "User-Agent": HAV_USER_AGENT, Accept: "application/json" },
-    signal: AbortSignal.timeout(20_000),
-  });
-  if (!res.ok) {
-    throw new Error(`HaV feature endpoint: ${res.status} ${res.statusText}`);
-  }
-
-  const data = await res.json();
+  const data = await fetchFeatures(url);
   const beaches = (data.features ?? [])
     .map((f) => {
       const p = f.properties;
