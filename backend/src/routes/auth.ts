@@ -1,5 +1,4 @@
 import { Router } from "express";
-import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -7,19 +6,9 @@ import { User } from "../models/User.js";
 import { Favorite } from "../models/Favorite.js";
 import { connectDB } from "../lib/db.js";
 import { requireAuth, AuthedRequest } from "../middleware/auth.js";
+import { authRateLimiter } from "../middleware/rateLimit.js";
 
 export const authRouter = Router();
-
-// Throttle credential endpoints to slow brute-force and signup abuse.
-const authLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  limit: 10,
-  standardHeaders: "draft-7",
-  legacyHeaders: false,
-  message: { error: "TooManyRequests" },
-  // Don't throttle the automated test suite (many auth calls from one IP).
-  skip: () => process.env.NODE_ENV === "test",
-});
 
 authRouter.get("/ping", (_req, res) => res.json({ ok: true, from: "auth" }));
 
@@ -29,7 +18,7 @@ const zCreds = z.object({
 });
 
 // POST /api/auth/register
-authRouter.post("/register", authLimiter, async (req, res) => {
+authRouter.post("/register", authRateLimiter, async (req, res) => {
   try {
     await connectDB();
 
@@ -55,7 +44,7 @@ authRouter.post("/register", authLimiter, async (req, res) => {
 });
 
 // POST /api/auth/login
-authRouter.post("/login", authLimiter, async (req, res) => {
+authRouter.post("/login", authRateLimiter, async (req, res) => {
   try {
     await connectDB();
 

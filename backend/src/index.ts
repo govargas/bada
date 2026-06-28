@@ -26,6 +26,10 @@ if (missingEnv.length > 0) {
 
 const app = express();
 
+// Behind exactly one proxy in production (Vercel's edge). This makes req.ip
+// the real client IP from X-Forwarded-For, which the rate limiter keys on.
+app.set("trust proxy", 1);
+
 /** ── Security headers ────────────────────────────────────────────────────── */
 app.use(helmet());
 
