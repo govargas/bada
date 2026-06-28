@@ -3,6 +3,7 @@ console.log("Server booted at", new Date().toISOString());
 
 import express from "express";
 import cors from "cors";
+import helmet from "helmet";
 
 import { healthRouter } from "./routes/health.js";
 import { dbCheckRouter } from "./routes/dbCheck.js";
@@ -12,7 +13,21 @@ import { favoritesRouter } from "./routes/favorites.js";
 import { beachesRouter } from "./routes/beaches.js";
 import { swaggerRouter } from "./swagger.js";
 
+const isProd = process.env.NODE_ENV === "production";
+
+/** ── Required env validation at boot ─────────────────────────────────────── */
+const requiredEnv = ["JWT_SECRET", "MONGODB_URI"];
+const missingEnv = requiredEnv.filter((k) => !process.env[k]);
+if (missingEnv.length > 0) {
+  const msg = `Missing required environment variables: ${missingEnv.join(", ")}`;
+  if (isProd) throw new Error(msg);
+  console.warn(`[WARN] ${msg}`);
+}
+
 const app = express();
+
+/** ── Security headers ────────────────────────────────────────────────────── */
+app.use(helmet());
 
 /** ── CORS (allow comma-separated origins via CORS_ORIGIN or ALLOWED_ORIGIN) ── */
 const allowedOrigins = (
@@ -24,10 +39,18 @@ const allowedOrigins = (
   .map((s) => s.trim())
   .filter(Boolean);
 
+if (isProd && allowedOrigins.length === 0) {
+  throw new Error(
+    "No CORS origins configured. Set CORS_ORIGIN (or ALLOWED_ORIGIN) in production."
+  );
+}
+
 const corsOptions: cors.CorsOptions = {
   origin(origin, cb) {
     if (!origin) return cb(null, true); // non-browser clients
-    if (allowedOrigins.length === 0) return cb(null, true); // dev fallback
+    // Dev fallback: allow all only outside production. In production,
+    // allowedOrigins is guaranteed non-empty by the boot check above.
+    if (!isProd && allowedOrigins.length === 0) return cb(null, true);
     if (allowedOrigins.includes(origin)) return cb(null, true);
     return cb(new Error("Not allowed by CORS"));
   },
@@ -43,7 +66,8 @@ app.use("/api", swaggerRouter);
 
 /** ── Public routers under /api ───────────────────────────────────────────── */
 app.use("/api", healthRouter);
-app.use("/api", dbCheckRouter);
+// Diagnostics endpoint leaks DB/service state; keep it out of production.
+if (!isProd) app.use("/api", dbCheckRouter);
 app.use("/api", favoritesRouter);
 app.use("/api", beachesRouter);
 

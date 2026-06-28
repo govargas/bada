@@ -29,7 +29,14 @@ export async function apiFetch<T = unknown>(
     headers.Authorization = `Bearer ${token}`;
   }
 
-  logApi("→", options.method ?? "GET", url, { headers, body: options.body });
+  // Redact the bearer token even when debug logging is enabled.
+  const safeHeaders = headers.Authorization
+    ? { ...headers, Authorization: "Bearer [REDACTED]" }
+    : headers;
+  logApi("→", options.method ?? "GET", url, {
+    headers: safeHeaders,
+    body: options.body,
+  });
 
   const res = await fetch(url, { ...options, headers });
 

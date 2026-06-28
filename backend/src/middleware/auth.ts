@@ -14,7 +14,9 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
     if (type !== "Bearer" || !token)
       return res.status(401).json({ error: "InvalidAuthHeader" });
 
-    const payload = jwt.verify(token, process.env.JWT_SECRET!) as {
+    const payload = jwt.verify(token, process.env.JWT_SECRET!, {
+      algorithms: ["HS256"],
+    }) as {
       sub: string;
       email: string;
     };

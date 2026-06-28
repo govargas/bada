@@ -295,21 +295,24 @@ export default function MapView({
             if (!leaves) return;
 
             const styles = getPopupStyles();
-            const beachList = leaves
-              .map((leaf: any) => {
-                const props = leaf.properties;
-                return `<a href="/beach/${props.id}" style="display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};">${props.name}</a>`;
-              })
-              .join("");
+            const container = document.createElement("div");
+            container.style.maxHeight = "200px";
+            container.style.overflowY = "auto";
+            for (const leaf of leaves) {
+              const props = leaf.properties as { id: string; name: string };
+              const link = document.createElement("a");
+              link.href = `/beach/${encodeURIComponent(props.id)}`;
+              link.textContent = props.name;
+              link.style.cssText = `display: block; padding: 4px 0; text-decoration: none; color: ${styles.color}; font-weight: 500; border-bottom: 1px solid ${styles.borderColor};`;
+              container.appendChild(link);
+            }
 
             const popup = new maplibregl.Popup({
               closeButton: true,
               maxWidth: "300px",
             })
               .setLngLat(coordinates)
-              .setHTML(
-                `<div style="max-height: 200px; overflow-y: auto;">${beachList}</div>`
-              )
+              .setDOMContent(container)
               .addTo(map);
 
             // Apply dark mode styles to popup container
@@ -363,11 +366,13 @@ export default function MapView({
       }
 
       const styles = getPopupStyles();
+      const link = document.createElement("a");
+      link.href = `/beach/${encodeURIComponent(id)}`;
+      link.textContent = name;
+      link.style.cssText = `text-decoration: none; color: ${styles.color}; font-weight: 500;`;
       const popup = new maplibregl.Popup({ closeButton: false })
         .setLngLat(coordinates)
-        .setHTML(
-          `<a href="/beach/${id}" style="text-decoration: none; color: ${styles.color}; font-weight: 500;">${name}</a>`
-        )
+        .setDOMContent(link)
         .addTo(map);
 
       // Apply dark mode styles to popup container

@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -6,6 +7,15 @@ import { User } from "../models/User.js";
 import { connectDB } from "../lib/db.js";
 
 export const authRouter = Router();
+
+// Throttle credential endpoints to slow brute-force and signup abuse.
+const authLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  limit: 10,
+  standardHeaders: "draft-7",
+  legacyHeaders: false,
+  message: { error: "TooManyRequests" },
+});
 
 authRouter.get("/ping", (_req, res) => res.json({ ok: true, from: "auth" }));
 
@@ -15,7 +25,7 @@ const zCreds = z.object({
 });
 
 // POST /api/auth/register
-authRouter.post("/register", async (req, res) => {
+authRouter.post("/register", authLimiter, async (req, res) => {
   try {
     await connectDB();
 
@@ -41,7 +51,7 @@ authRouter.post("/register", async (req, res) => {
 });
 
 // POST /api/auth/login
-authRouter.post("/login", async (req, res) => {
+authRouter.post("/login", authLimiter, async (req, res) => {
   try {
     await connectDB();
 
@@ -62,7 +72,7 @@ authRouter.post("/login", async (req, res) => {
     const token = jwt.sign(
       { sub: String(user._id), email },
       process.env.JWT_SECRET!,
-      { expiresIn: "7d" }
+      { expiresIn: "7d", algorithm: "HS256" }
     );
     return res.json({ token });
   } catch (err) {
