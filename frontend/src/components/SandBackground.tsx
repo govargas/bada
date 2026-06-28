@@ -1,5 +1,5 @@
-import { useRef } from "react";
-import { Canvas, useFrame, extend } from "@react-three/fiber";
+import { useRef, useEffect } from "react";
+import { Canvas, useFrame, useThree, extend } from "@react-three/fiber";
 import * as THREE from "three";
 
 // Procedural Beach Texture Shader
@@ -171,6 +171,22 @@ declare global {
 
 function BeachScene() {
   const materialRef = useRef<BeachTextureMaterial>(null);
+  const invalidate = useThree((s) => s.invalidate);
+
+  // Drive the on-demand render loop at ~30fps. RAF pauses on hidden tabs.
+  useEffect(() => {
+    let raf = 0;
+    let last = 0;
+    const loop = (ts: number) => {
+      if (ts - last >= 33) {
+        last = ts;
+        invalidate();
+      }
+      raf = requestAnimationFrame(loop);
+    };
+    raf = requestAnimationFrame(loop);
+    return () => cancelAnimationFrame(raf);
+  }, [invalidate]);
 
   useFrame(({ clock, size }) => {
     if (materialRef.current) {
@@ -194,9 +210,10 @@ export default function SandBackground() {
   return (
     <div className="fixed inset-0 -z-10 w-full h-full" aria-hidden="true">
       <Canvas
+        frameloop="demand"
         camera={{ position: [0, 0, 5], fov: 60 }}
-        gl={{ antialias: true, alpha: false }}
-        dpr={[1, 2]}
+        gl={{ antialias: true, alpha: false, powerPreference: "high-performance" }}
+        dpr={[1, 1.5]}
       >
         <color attach="background" args={["#efebe4"]} />
         <BeachScene />
