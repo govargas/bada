@@ -68,7 +68,7 @@ app.use("/api", swaggerRouter);
 app.use("/api", healthRouter);
 // Diagnostics endpoint leaks DB/service state; keep it out of production.
 if (!isProd) app.use("/api", dbCheckRouter);
-app.use("/api", favoritesRouter);
+app.use("/api/favorites", favoritesRouter);
 app.use("/api", beachesRouter);
 
 /** ── Auth ───────────────────────────────────────────────────────────────── */

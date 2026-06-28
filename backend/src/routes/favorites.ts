@@ -13,7 +13,9 @@ const zCreate = z.object({
   note: z.string().max(500).optional(),
 });
 
-// Ensure DB connection for every favorites op
+// Ensure DB connection for every favorites op.
+// This router is mounted at /api/favorites, so this only runs for
+// favorites traffic — not every /api request.
 favoritesRouter.use(async (_req, _res, next) => {
   try {
     await connectDB();
@@ -27,7 +29,7 @@ favoritesRouter.use(async (_req, _res, next) => {
  * GET /api/favorites
  * List current user's favorites (stable order)
  */
-favoritesRouter.get("/favorites", requireAuth, async (req, res) => {
+favoritesRouter.get("/", requireAuth, async (req, res) => {
   const userId = (req as AuthedRequest).user.sub;
   const items = await Favorite.find({ userId })
     .sort({ order: 1, updatedAt: 1, _id: 1 }) // stable sort
@@ -38,7 +40,7 @@ favoritesRouter.get("/favorites", requireAuth, async (req, res) => {
 /**
  * POST /api/favorites
  */
-favoritesRouter.post("/favorites", requireAuth, async (req, res) => {
+favoritesRouter.post("/", requireAuth, async (req, res) => {
   const parsed = zCreate.safeParse(req.body);
   if (!parsed.success) {
     // keep the existing error style
@@ -69,7 +71,7 @@ favoritesRouter.post("/favorites", requireAuth, async (req, res) => {
 /**
  * DELETE /api/favorites/:id
  */
-favoritesRouter.delete("/favorites/:id", requireAuth, async (req, res) => {
+favoritesRouter.delete("/:id", requireAuth, async (req, res) => {
   const userId = (req as AuthedRequest).user.sub;
 
   const id = req.params.id as string | undefined;
@@ -88,7 +90,7 @@ favoritesRouter.delete("/favorites/:id", requireAuth, async (req, res) => {
  * DELETE /api/favorites/by-beach/:beachId
  */
 favoritesRouter.delete(
-  "/favorites/by-beach/:beachId",
+  "/by-beach/:beachId",
   requireAuth,
   async (req, res) => {
     const userId = (req as AuthedRequest).user.sub;
@@ -105,7 +107,7 @@ favoritesRouter.delete(
  * Persist custom order. Accepts: { order: string[] } where each string is a beachId.
  * Non-owned or unknown ids are ignored. Any favorites not included are appended after.
  */
-favoritesRouter.patch("/favorites/reorder", requireAuth, async (req, res) => {
+favoritesRouter.patch("/reorder", requireAuth, async (req, res) => {
   try {
     const userId = (req as AuthedRequest).user.sub;
 
