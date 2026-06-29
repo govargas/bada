@@ -7,6 +7,7 @@ import {
   CloudRain,
   CloudSnow,
   CloudSun,
+  Clock,
   Drop,
   Sun,
   Thermometer,
@@ -228,9 +229,9 @@ function buildHourMarks(barStart: number, barEnd: number) {
 }
 
 // --- Sun arc bar ---
-// Gradient strip from civil twilight begin → end with golden-hour zones,
+// Gradient strip from civil twilight begin to end with golden-hour zones,
 // fixed hour-reference ticks, and a live "now" dot.
-function SunArc({ sun }: { sun: SunTimes }) {
+function SunArc({ sun, t }: { sun: SunTimes; t: (k: string) => string }) {
   const barStart = sun.civilTwilightBegin.getTime();
   const barEnd = sun.civilTwilightEnd.getTime();
   const span = barEnd - barStart;
@@ -261,40 +262,52 @@ function SunArc({ sun }: { sun: SunTimes }) {
 
   const hourMarks = buildHourMarks(barStart, barEnd);
 
-  // Clamp sunrise/sunset labels away from card edges so text doesn't clip
-  const srLabel = Math.max(5, Math.min(95, srPct));
-  const ssLabel = Math.max(5, Math.min(95, ssPct));
-
   return (
-    <div className="mt-1 mb-3">
-      {/* Gradient bar */}
+    <div className="rounded-xl border border-border/40 bg-surface-muted/35 dark:bg-surface-muted/20 p-3">
+      <div className="mb-2 grid grid-cols-2 gap-2 text-xs text-ink-muted">
+        <div>
+          <span>{t('sun.civilTwilightBegin')}</span>
+          <span className="ml-1 font-medium tabular-nums text-ink">
+            {formatTime(sun.civilTwilightBegin)}
+          </span>
+        </div>
+        <div className="text-right">
+          <span>{t('sun.civilTwilightEnd')}</span>
+          <span className="ml-1 font-medium tabular-nums text-ink">
+            {formatTime(sun.civilTwilightEnd)}
+          </span>
+        </div>
+      </div>
+
       <div
-        className="relative h-5 rounded-full overflow-hidden"
+        className="relative h-4 overflow-hidden rounded-full ring-1 ring-border/30"
         style={{ background: gradient }}
         aria-hidden="true"
       >
-        {/* Hour reference ticks — short lines at the bottom of the bar */}
         {hourMarks.map(({ pct: p }) => (
           <div
             key={p}
-            className="absolute bottom-0 w-px h-2 bg-white/25"
+            className="absolute bottom-0 h-2 w-px bg-white/25"
             style={{ left: `${p}%` }}
           />
         ))}
-        {/* Sunrise / sunset full-height ticks */}
-        <div className="absolute top-0 h-full w-px bg-white/50" style={{ left: `${srPct}%` }} />
-        <div className="absolute top-0 h-full w-px bg-white/50" style={{ left: `${ssPct}%` }} />
-        {/* Now marker */}
+        <div
+          className="absolute top-0 h-full w-px bg-white/55"
+          style={{ left: `${srPct}%` }}
+        />
+        <div
+          className="absolute top-0 h-full w-px bg-white/55"
+          style={{ left: `${ssPct}%` }}
+        />
         {isNow && (
           <div
-            className="absolute w-2.5 h-2.5 rounded-full bg-white shadow border border-white/80"
+            className="absolute h-2.5 w-2.5 rounded-full border border-white/80 bg-white shadow"
             style={{ left: `${nowPct}%`, top: '50%', transform: 'translate(-50%, -50%)' }}
           />
         )}
       </div>
 
-      {/* Hour reference labels */}
-      <div className="relative h-3.5 mt-0.5" aria-hidden="true">
+      <div className="relative mt-1 h-3.5" aria-hidden="true">
         {hourMarks.map(({ pct: p, label }) => (
           <span
             key={p}
@@ -306,20 +319,19 @@ function SunArc({ sun }: { sun: SunTimes }) {
         ))}
       </div>
 
-      {/* Sunrise / sunset time labels — clamped from edges */}
-      <div className="relative h-4 mt-0.5">
-        <span
-          className="absolute text-[10px] text-ink-muted -translate-x-1/2"
-          style={{ left: `${srLabel}%` }}
-        >
-          {formatTime(sun.sunrise)}
-        </span>
-        <span
-          className="absolute text-[10px] text-ink-muted -translate-x-1/2"
-          style={{ left: `${ssLabel}%` }}
-        >
-          {formatTime(sun.sunset)}
-        </span>
+      <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="rounded-lg bg-surface/55 px-3 py-2">
+          <div className="text-xs text-ink-muted">{t('sun.sunrise')}</div>
+          <div className="text-base font-semibold tabular-nums text-ink">
+            {formatTime(sun.sunrise)}
+          </div>
+        </div>
+        <div className="rounded-lg bg-surface/55 px-3 py-2 text-right">
+          <div className="text-xs text-ink-muted">{t('sun.sunset')}</div>
+          <div className="text-base font-semibold tabular-nums text-ink">
+            {formatTime(sun.sunset)}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -470,64 +482,67 @@ function WeatherCard({
 // --- Sun times card ---
 function SunCard({ sun, t }: { sun: SunTimes; t: (k: string) => string }) {
   return (
-    <div className="card p-4 space-y-3">
-      <h2 className="font-display text-lg">{t('sun.title')}</h2>
-
-      <SunArc sun={sun} />
-
-      {/* Golden hour */}
-      <div className="rounded-lg border border-amber-300/50 bg-amber-50/60 dark:bg-amber-900/15 dark:border-amber-700/30 px-3 py-2">
-        <div className="text-[11px] font-medium text-amber-950 dark:text-amber-400 uppercase tracking-wide mb-1.5">
-          {t('sun.goldenHour')}
-        </div>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-          <div>
-            <div className="text-xs text-ink-muted">{t('sun.morning')}</div>
-            <div className="tabular-nums">
-              {formatTime(sun.sunrise)} – {formatTime(sun.goldenHourMorningEnd)}
-            </div>
-          </div>
-          <div>
-            <div className="text-xs text-ink-muted">{t('sun.evening')}</div>
-            <div className="tabular-nums">
-              {formatTime(sun.goldenHourEveningStart)} – {formatTime(sun.sunset)}
-            </div>
-          </div>
+    <div className="card p-4 sm:p-5 space-y-3">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        <h2 className="font-display text-lg">{t('sun.title')}</h2>
+        <div className="inline-flex w-fit items-center gap-1.5 rounded-full bg-surface-muted/55 px-3 py-1 text-xs text-ink-muted">
+          <Clock size={14} weight="bold" aria-hidden="true" />
+          <span>{t('sun.dayLength')}</span>
+          <span className="font-semibold tabular-nums text-ink">
+            {formatDayLength(sun.dayLengthSeconds, t)}
+          </span>
         </div>
       </div>
 
-      {/* Twilight rows */}
-      <div className="grid grid-cols-2 gap-3 text-sm">
-        <div>
-          <div className="text-xs text-ink-muted">{t('sun.civilTwilightBegin')}</div>
-          <div className="tabular-nums">{formatTime(sun.civilTwilightBegin)}</div>
-        </div>
-        <div>
-          <div className="text-xs text-ink-muted">{t('sun.civilTwilightEnd')}</div>
-          <div className="tabular-nums">{formatTime(sun.civilTwilightEnd)}</div>
+      <SunArc sun={sun} t={t} />
+
+      <div className="grid grid-cols-1 gap-2 lg:grid-cols-[1.15fr_0.85fr]">
+        <div className="rounded-xl border border-amber-300/50 bg-amber-50/65 px-3 py-3 dark:border-amber-700/30 dark:bg-amber-900/15">
+          <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-amber-950 dark:text-amber-300">
+            <Sun size={17} weight="duotone" aria-hidden="true" />
+            {t('sun.goldenHour')}
+          </div>
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+            <div className="rounded-lg bg-white/45 px-3 py-2 dark:bg-white/5">
+              <div className="text-xs text-ink-muted">{t('sun.morning')}</div>
+              <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                {formatTime(sun.sunrise)} - {formatTime(sun.goldenHourMorningEnd)}
+              </div>
+            </div>
+            <div className="rounded-lg bg-white/45 px-3 py-2 dark:bg-white/5">
+              <div className="text-xs text-ink-muted">{t('sun.evening')}</div>
+              <div className="mt-0.5 text-sm font-semibold tabular-nums">
+                {formatTime(sun.goldenHourEveningStart)} - {formatTime(sun.sunset)}
+              </div>
+            </div>
+          </div>
         </div>
 
-        {occurs(sun.nauticalTwilightBegin) && (
-          <>
+        <div className="rounded-xl border border-border/40 bg-surface-muted/30 px-3 py-3">
+          <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
             <div>
-              <div className="text-xs text-ink-muted">{t('sun.nauticalTwilightBegin')}</div>
-              <div className="tabular-nums">{formatTime(sun.nauticalTwilightBegin)}</div>
+              <div className="text-xs text-ink-muted">{t('sun.civilTwilightBegin')}</div>
+              <div className="font-medium tabular-nums">{formatTime(sun.civilTwilightBegin)}</div>
             </div>
             <div>
-              <div className="text-xs text-ink-muted">{t('sun.nauticalTwilightEnd')}</div>
-              <div className="tabular-nums">{formatTime(sun.nauticalTwilightEnd)}</div>
+              <div className="text-xs text-ink-muted">{t('sun.civilTwilightEnd')}</div>
+              <div className="font-medium tabular-nums">{formatTime(sun.civilTwilightEnd)}</div>
             </div>
-          </>
-        )}
-      </div>
 
-      {/* Day length */}
-      <div className="text-sm text-ink-muted border-t border-border/40 pt-2">
-        {t('sun.dayLength')}
-        {': '}
-        <span className="text-ink font-medium tabular-nums">
-          {formatDayLength(sun.dayLengthSeconds, t)}
-        </span>
+            {occurs(sun.nauticalTwilightBegin) && (
+              <>
+                <div>
+                  <div className="text-xs text-ink-muted">{t('sun.nauticalTwilightBegin')}</div>
+                  <div className="font-medium tabular-nums">{formatTime(sun.nauticalTwilightBegin)}</div>
+                </div>
+                <div>
+                  <div className="text-xs text-ink-muted">{t('sun.nauticalTwilightEnd')}</div>
+                  <div className="font-medium tabular-nums">{formatTime(sun.nauticalTwilightEnd)}</div>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
