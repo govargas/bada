@@ -4,6 +4,7 @@ console.log("Server booted at", new Date().toISOString());
 import express from "express";
 import cors from "cors";
 import helmet from "helmet";
+import cookieParser from "cookie-parser";
 
 import { healthRouter } from "./routes/health.js";
 import { dbCheckRouter } from "./routes/dbCheck.js";
@@ -64,6 +65,7 @@ const corsOptions: cors.CorsOptions = {
 
 app.use(cors(corsOptions));
 app.use(express.json());
+app.use(cookieParser());
 
 /** ── API Documentation (Swagger UI) ───────────────────────────────────────── */
 app.use("/api", swaggerRouter);

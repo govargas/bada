@@ -61,6 +61,57 @@ describe("auth", () => {
     expect(res.body.error).toBe("InvalidCredentials");
   });
 
+  describe("session cookie", () => {
+    it("sets an httpOnly session cookie on login", async () => {
+      await request(app)
+        .post("/api/auth/register")
+        .send({ email: "cookie@example.com", password: "testpass123" });
+      const res = await request(app)
+        .post("/api/auth/login")
+        .send({ email: "cookie@example.com", password: "testpass123" });
+
+      const setCookie = res.headers["set-cookie"] as unknown as string[];
+      expect(Array.isArray(setCookie)).toBe(true);
+      const session = setCookie.find((c) => c.startsWith("bada_session="));
+      expect(session).toBeDefined();
+      expect(session).toMatch(/HttpOnly/i);
+      expect(session).toMatch(/SameSite=Lax/i);
+    });
+
+    it("authenticates a protected route via the cookie (no Authorization header)", async () => {
+      const agent = request.agent(app);
+      await agent
+        .post("/api/auth/register")
+        .send({ email: "agent@example.com", password: "testpass123" });
+      await agent
+        .post("/api/auth/login")
+        .send({ email: "agent@example.com", password: "testpass123" });
+
+      const me = await agent.get("/api/auth/me"); // cookie sent automatically
+      expect(me.status).toBe(200);
+      expect(me.body.user.email).toBe("agent@example.com");
+    });
+
+    it("clears the session cookie on logout", async () => {
+      const agent = request.agent(app);
+      await agent
+        .post("/api/auth/register")
+        .send({ email: "logout@example.com", password: "testpass123" });
+      await agent
+        .post("/api/auth/login")
+        .send({ email: "logout@example.com", password: "testpass123" });
+
+      const before = await agent.get("/api/auth/me");
+      expect(before.status).toBe(200);
+
+      const logout = await agent.post("/api/auth/logout");
+      expect(logout.status).toBe(200);
+
+      const after = await agent.get("/api/auth/me");
+      expect(after.status).toBe(401);
+    });
+  });
+
   describe("account deletion", () => {
     it("requires auth", async () => {
       const res = await request(app).delete("/api/auth/me");

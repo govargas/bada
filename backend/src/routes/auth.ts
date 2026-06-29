@@ -7,6 +7,10 @@ import { Favorite } from "../models/Favorite.js";
 import { connectDB } from "../lib/db.js";
 import { requireAuth, AuthedRequest } from "../middleware/auth.js";
 import { authRateLimiter } from "../middleware/rateLimit.js";
+import {
+  setSessionCookie,
+  clearSessionCookie,
+} from "../lib/sessionCookie.js";
 
 export const authRouter = Router();
 
@@ -67,11 +71,23 @@ authRouter.post("/login", authRateLimiter, async (req, res) => {
       process.env.JWT_SECRET!,
       { expiresIn: "7d", algorithm: "HS256" }
     );
+    // Set the httpOnly session cookie (the new auth path) and also return the
+    // token in the body so existing header/localStorage clients keep working
+    // until the frontend migration lands.
+    setSessionCookie(res, token);
     return res.json({ token });
   } catch (err) {
     console.error("LOGIN_ERR", err);
     return res.status(500).json({ error: "InternalServerError" });
   }
+});
+
+// POST /api/auth/logout
+// Clear the session cookie. Intentionally does not require a valid token so a
+// user with an expired/garbled cookie can still log out cleanly.
+authRouter.post("/logout", (_req, res) => {
+  clearSessionCookie(res);
+  return res.json({ ok: true });
 });
 
 // DELETE /api/auth/me
@@ -86,6 +102,7 @@ authRouter.delete("/me", requireAuth, async (req, res) => {
     const deleted = await User.findByIdAndDelete(userId);
     if (!deleted) return res.status(404).json({ error: "NotFound" });
 
+    clearSessionCookie(res);
     return res.json({ ok: true });
   } catch (err) {
     console.error("DELETE_ACCOUNT_ERR", err);
