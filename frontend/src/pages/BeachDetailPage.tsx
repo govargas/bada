@@ -49,7 +49,7 @@ export default function BeachDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const location = useLocation();
-  const { token } = useAuth();
+  const status = useAuth((s) => s.status);
 
   const { data, isLoading, isError, error } = useQuery({
     queryKey: ["beach", id],
@@ -145,7 +145,7 @@ export default function BeachDetailPage() {
     : cleanText(data.euMotive) || "–";
 
   async function handleFavoriteClick() {
-    if (!token) {
+    if (status !== "authenticated") {
       navigate("/login", { replace: false, state: { from: location } });
       return;
     }
@@ -157,7 +157,7 @@ export default function BeachDetailPage() {
         await addFav.mutateAsync(id!);
         toast.success(t("favorites.added"));
       }
-      queryClient.invalidateQueries({ queryKey: ["favorites", token] });
+      queryClient.invalidateQueries({ queryKey: ["favorites"] });
       queryClient.invalidateQueries({ queryKey: ["beach", id] });
     } catch (e: any) {
       const errorMsg = e?.message ?? t("favorites.removed");

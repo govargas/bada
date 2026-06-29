@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useTranslation } from "react-i18next";
 import { useNavigate, Link } from "react-router";
 import toast from "react-hot-toast";
+import { apiFetch } from "@/api/client";
 
 type FormData = {
   email: string;
@@ -38,30 +39,17 @@ export default function RegisterPage() {
 
   async function onSubmit(values: FormData) {
     try {
-      const res = await fetch(
-        `${import.meta.env.VITE_API_BASE}/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            email: values.email,
-            password: values.password,
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        const msg = body?.error ?? res.statusText;
-        setError("root", { message: msg });
-        toast.error(msg);
-        return;
-      }
-
+      await apiFetch("/auth/register", {
+        method: "POST",
+        body: JSON.stringify({
+          email: values.email,
+          password: values.password,
+        }),
+      });
       toast.success(t("auth.registerSuccess"));
       navigate("/login", { replace: true });
     } catch (err: any) {
-      const errorMsg = err.message ?? t("auth.registerFailed");
+      const errorMsg = err?.message ?? t("auth.registerFailed");
       setError("root", { message: errorMsg });
       toast.error(errorMsg);
     }

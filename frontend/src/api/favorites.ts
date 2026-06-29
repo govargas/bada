@@ -14,13 +14,14 @@ export type Favorite = {
 
 /**
  * List favorites for the current user.
- * IMPORTANT: subscribe to token via selector so the query updates on login/logout.
+ * IMPORTANT: subscribe to auth status via selector so the query refetches on
+ * login/logout. The session cookie identifies the user, so the key is static.
  */
 export function useFavorites() {
-  const token = useAuth((s) => s.token);
+  const status = useAuth((s) => s.status);
   return useQuery<Favorite[]>({
-    queryKey: ["favorites", token],
-    enabled: !!token,
+    queryKey: ["favorites"],
+    enabled: status === "authenticated",
     queryFn: () => apiFetch("/favorites"),
     staleTime: 60_000,
     // keepPreviousData: true, // optional for smoother transitions
@@ -29,11 +30,9 @@ export function useFavorites() {
 
 /**
  * Add a new favorite by beachId.
- * OK to use getState() in mutations to avoid unnecessary re-renders.
  */
 export function useAddFavorite() {
   const qc = useQueryClient();
-  const token = useAuth.getState().token;
 
   return useMutation({
     mutationFn: (beachId: string) =>
@@ -42,7 +41,7 @@ export function useAddFavorite() {
         body: JSON.stringify({ beachId }),
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["favorites", token] });
+      qc.invalidateQueries({ queryKey: ["favorites"] });
     },
   });
 }
@@ -52,7 +51,6 @@ export function useAddFavorite() {
  */
 export function useRemoveFavorite() {
   const qc = useQueryClient();
-  const token = useAuth.getState().token;
 
   return useMutation({
     mutationFn: (vars: { id?: string; beachId?: string }) => {
@@ -62,21 +60,21 @@ export function useRemoveFavorite() {
       return apiFetch<void>(url, { method: "DELETE" });
     },
     onMutate: async (vars) => {
-      await qc.cancelQueries({ queryKey: ["favorites", token] });
-      const prev = qc.getQueryData<Favorite[]>(["favorites", token]);
+      await qc.cancelQueries({ queryKey: ["favorites"] });
+      const prev = qc.getQueryData<Favorite[]>(["favorites"]);
       if (prev) {
         const next = prev.filter((f) =>
           vars.id ? f._id !== vars.id : f.beachId !== vars.beachId
         );
-        qc.setQueryData(["favorites", token], next);
+        qc.setQueryData(["favorites"], next);
       }
       return { prev };
     },
     onError: (_err, _vars, ctx) => {
-      if (ctx?.prev) qc.setQueryData(["favorites", token], ctx.prev);
+      if (ctx?.prev) qc.setQueryData(["favorites"], ctx.prev);
     },
     onSettled: () => {
-      qc.invalidateQueries({ queryKey: ["favorites", token] });
+      qc.invalidateQueries({ queryKey: ["favorites"] });
     },
   });
 }
@@ -87,7 +85,6 @@ export function useRemoveFavorite() {
  */
 export function useReorderFavorites() {
   const qc = useQueryClient();
-  const token = useAuth.getState().token;
   return useMutation({
     mutationFn: (order: string[]) =>
       apiFetch<void>("/favorites/reorder", {
@@ -95,7 +92,7 @@ export function useReorderFavorites() {
         body: JSON.stringify({ order }),
       }),
     onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["favorites", token] });
+      qc.invalidateQueries({ queryKey: ["favorites"] });
     },
   });
 }

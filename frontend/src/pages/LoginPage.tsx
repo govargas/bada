@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate, useLocation, Link } from "react-router";
 import toast from "react-hot-toast";
 import { useAuth } from "@/store/auth";
+import { apiFetch } from "@/api/client";
 
 type FormData = {
   email: string;
@@ -14,7 +15,7 @@ type FormData = {
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const { setToken } = useAuth();
+  const refresh = useAuth((s) => s.refresh);
   const navigate = useNavigate();
   const location = useLocation();
   const from = (location.state as any)?.from?.pathname || "/";
@@ -35,26 +36,17 @@ export default function LoginPage() {
 
   async function onSubmit(values: FormData) {
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE}/auth/login`, {
+      // The server sets the httpOnly session cookie; we then hydrate auth
+      // state from /auth/me. No token is handled in JS anymore.
+      await apiFetch("/auth/login", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(values),
       });
-
-      if (!res.ok) {
-        const body = await res.json().catch(() => null);
-        const msg = body?.error ?? res.statusText;
-        setError("root", { message: msg });
-        toast.error(msg);
-        return;
-      }
-
-      const data = await res.json();
-      setToken(data.token);
+      await refresh();
       toast.success(t("auth.signInSuccess"));
       navigate(from, { replace: true });
     } catch (err: any) {
-      const errorMsg = err.message ?? t("auth.signInFailed");
+      const errorMsg = err?.message ?? t("auth.signInFailed");
       setError("root", { message: errorMsg });
       toast.error(errorMsg);
     }

@@ -10,7 +10,7 @@ import { deleteAccount } from "@/api/account";
 export default function SettingsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
-  const clearToken = useAuth((s) => s.clearToken);
+  const clearLocal = useAuth((s) => s.clearLocal);
   const queryClient = useQueryClient();
 
   const [confirming, setConfirming] = useState(false);
@@ -20,7 +20,7 @@ export default function SettingsPage() {
     setDeleting(true);
     try {
       await deleteAccount();
-      clearToken();
+      clearLocal();
       queryClient.clear();
       toast.success(t("pages.settings.deleteSuccess"));
       navigate("/", { replace: true });

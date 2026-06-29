@@ -5,12 +5,12 @@ import { useQueryClient } from "@tanstack/react-query";
 
 export default function ProfilePage() {
   const { t } = useTranslation();
-  const { token, clearToken } = useAuth();
+  const logout = useAuth((s) => s.logout);
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const handleLogout = () => {
-    clearToken();
+  const handleLogout = async () => {
+    await logout();
     queryClient.clear();
     navigate("/");
   };

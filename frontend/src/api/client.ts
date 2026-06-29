@@ -1,7 +1,13 @@
-import { useAuth } from "@/store/auth";
 import { logApi } from "@/utils/logger";
 
-const API_BASE = import.meta.env.VITE_API_BASE;
+// Topology A requires the app to be same-origin with its API: in production we
+// ALWAYS use the relative "/api" path, which Netlify proxies to the backend so
+// the session cookie stays first-party. This is hardcoded for prod on purpose —
+// a stale VITE_API_BASE pointing at the cross-site backend would silently break
+// cookie auth. In dev, VITE_API_BASE points at a local backend.
+const API_BASE = import.meta.env.PROD
+  ? "/api"
+  : import.meta.env.VITE_API_BASE ?? "/api";
 
 type FetchOptions = Omit<RequestInit, "headers"> & {
   headers?: Record<string, string>;
@@ -11,13 +17,6 @@ export async function apiFetch<T = unknown>(
   path: string,
   options: FetchOptions = {}
 ): Promise<T> {
-  if (!API_BASE && !path.startsWith("http")) {
-    throw new Error(
-      "VITE_API_BASE is not set. Did you configure frontend/.env(.local)?"
-    );
-  }
-
-  const token = useAuth.getState().token;
   const url = path.startsWith("http") ? path : `${API_BASE}${path}`;
 
   const headers: Record<string, string> = {
@@ -25,20 +24,14 @@ export async function apiFetch<T = unknown>(
     ...(options.headers || {}),
   };
 
-  if (token) {
-    headers.Authorization = `Bearer ${token}`;
-  }
-
-  // Redact the bearer token even when debug logging is enabled.
-  const safeHeaders = headers.Authorization
-    ? { ...headers, Authorization: "Bearer [REDACTED]" }
-    : headers;
   logApi("→", options.method ?? "GET", url, {
-    headers: safeHeaders,
+    headers,
     body: options.body,
   });
 
-  const res = await fetch(url, { ...options, headers });
+  // credentials:"include" sends/receives the httpOnly session cookie, including
+  // on the dev cross-origin (localhost:5180 → localhost:3000) case.
+  const res = await fetch(url, { ...options, headers, credentials: "include" });
 
   logApi("←", res.status, res.statusText, url);
 

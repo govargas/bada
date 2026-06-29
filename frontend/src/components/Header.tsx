@@ -47,8 +47,9 @@ export default function Header({ languageSwitcher }: HeaderProps) {
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
 
-  const { token, clearToken } = useAuth();
-  const authed = !!token;
+  const status = useAuth((s) => s.status);
+  const logout = useAuth((s) => s.logout);
+  const authed = status === "authenticated";
   const qc = useQueryClient();
 
   // Fetch beaches for search dropdown
@@ -70,8 +71,8 @@ export default function Header({ languageSwitcher }: HeaderProps) {
       .slice(0, 10); // Limit to 10 results
   }, [search, beaches]);
 
-  function handleLogout() {
-    clearToken();
+  async function handleLogout() {
+    await logout();
     qc.clear(); // clear cached queries (favorites, etc.)
     setUserOpen(false);
   }

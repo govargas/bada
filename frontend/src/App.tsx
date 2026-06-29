@@ -1,4 +1,6 @@
+import { useEffect } from "react";
 import { Routes, Route } from "react-router";
+import { useAuth } from "./store/auth";
 import Header from "./components/Header";
 import LanguageSwitcher from "./components/LanguageSwitcher";
 import ErrorBoundary from "./components/ErrorBoundary";
@@ -20,6 +22,12 @@ import SettingsPage from "./pages/SettingsPage";
 import NotFoundPage from "./pages/NotFoundPage";
 
 export default function App() {
+  // Resolve auth state once on load by checking the session cookie via /auth/me.
+  const refresh = useAuth((s) => s.refresh);
+  useEffect(() => {
+    refresh();
+  }, [refresh]);
+
   return (
     <ErrorBoundary>
       {/* Three.js ambient background (water/sand) */}
