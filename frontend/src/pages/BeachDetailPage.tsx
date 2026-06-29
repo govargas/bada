@@ -16,9 +16,12 @@ import {
   ArrowLeft,
   CalendarBlank,
   ClipboardText,
+  EnvelopeSimple,
+  Globe,
   Info,
   Leaf,
   MapPin,
+  Phone,
   Star,
   Warning,
   type Icon,
@@ -71,6 +74,33 @@ function DetailFact({
       </div>
       <div className="mt-1 text-sm font-semibold leading-snug text-ink">
         {value}
+      </div>
+    </div>
+  );
+}
+
+function ContactItem({
+  icon: ContactIcon,
+  label,
+  children,
+}: {
+  icon: Icon;
+  label: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div className="flex items-start gap-2 rounded-xl bg-surface-muted/35 px-3 py-2.5">
+      <ContactIcon
+        size={16}
+        weight="bold"
+        aria-hidden="true"
+        className="mt-0.5 shrink-0 text-ink-muted"
+      />
+      <div className="min-w-0">
+        <div className="text-xs text-ink-muted">{label}</div>
+        <div className="mt-0.5 break-words text-sm font-medium text-ink">
+          {children}
+        </div>
       </div>
     </div>
   );
@@ -175,6 +205,10 @@ export default function BeachDetailPage() {
   const euMotiveDisplay = euMotiveKey
     ? t(euMotiveKey)
     : cleanText(data.euMotive) || "-";
+  const hasContact =
+    Boolean(data.contactMail) ||
+    Boolean(data.contactPhone) ||
+    Boolean(data.contactUrl);
 
   async function handleFavoriteClick() {
     if (status !== "authenticated") {
@@ -198,7 +232,7 @@ export default function BeachDetailPage() {
   }
 
   return (
-    <section className="p-4 space-y-4">
+    <section className="mx-auto w-full max-w-6xl px-4 py-4 sm:py-5 space-y-4 md:space-y-5">
       <div className="card p-4 sm:p-5 space-y-4">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <header className="min-w-0 space-y-2">
@@ -316,56 +350,63 @@ export default function BeachDetailPage() {
         </div>
       </div>
 
-      {/* Weather & sun times */}
       {id && <BeachWeatherPanel beachId={id} />}
 
-      {/* Description */}
-      {data.bathInformation && (
-        <article className="card p-4">
-          <h2 className="font-display text-lg mb-1">
-            {t("beachDetail.bathInformation")}
-          </h2>
-          <p className="text-sm leading-relaxed whitespace-pre-line">
-            {data.bathInformation}
-          </p>
-        </article>
-      )}
+      {(data.bathInformation || hasContact) && (
+        <div
+          className={`grid gap-4 ${
+            data.bathInformation && hasContact
+              ? "lg:grid-cols-[minmax(0,1.35fr)_minmax(280px,0.65fr)]"
+              : ""
+          }`}
+        >
+          {data.bathInformation && (
+            <article className="card p-4 sm:p-5">
+              <h2 className="font-display text-lg mb-2">
+                {t("beachDetail.bathInformation")}
+              </h2>
+              <p className="max-w-3xl text-sm leading-relaxed whitespace-pre-line">
+                {data.bathInformation}
+              </p>
+            </article>
+          )}
 
-      {/* Contact */}
-      {(data.contactMail || data.contactPhone || data.contactUrl) && (
-        <div className="card p-4 space-y-1 text-sm">
-          <h3 className="font-display text-lg">{t("nav.contact")}</h3>
-          {data.contactMail && (
-            <div>
-              {t("beachDetail.mail")}{" "}
-              <a
-                href={`mailto:${data.contactMail}`}
-                className="underline text-accent"
-              >
-                {data.contactMail}
-              </a>
-            </div>
-          )}
-          {data.contactPhone && (
-            <div>
-              {t("beachDetail.phone")} {data.contactPhone}
-            </div>
-          )}
-          {data.contactUrl && (
-            <div>
-              {t("beachDetail.website")}{" "}
-              <a
-                href={
-                  data.contactUrl.startsWith("http")
-                    ? data.contactUrl
-                    : `https://${data.contactUrl}`
-                }
-                target="_blank"
-                rel="noreferrer"
-                className="underline text-accent"
-              >
-                {data.contactUrl}
-              </a>
+          {hasContact && (
+            <div className="card p-4 sm:p-5 space-y-3">
+              <h3 className="font-display text-lg">{t("nav.contact")}</h3>
+              <div className="space-y-2">
+                {data.contactMail && (
+                  <ContactItem icon={EnvelopeSimple} label={t("beachDetail.mail")}>
+                    <a
+                      href={`mailto:${data.contactMail}`}
+                      className="underline text-accent"
+                    >
+                      {data.contactMail}
+                    </a>
+                  </ContactItem>
+                )}
+                {data.contactPhone && (
+                  <ContactItem icon={Phone} label={t("beachDetail.phone")}>
+                    {data.contactPhone}
+                  </ContactItem>
+                )}
+                {data.contactUrl && (
+                  <ContactItem icon={Globe} label={t("beachDetail.website")}>
+                    <a
+                      href={
+                        data.contactUrl.startsWith("http")
+                          ? data.contactUrl
+                          : `https://${data.contactUrl}`
+                      }
+                      target="_blank"
+                      rel="noreferrer"
+                      className="underline text-accent"
+                    >
+                      {data.contactUrl}
+                    </a>
+                  </ContactItem>
+                )}
+              </div>
             </div>
           )}
         </div>
