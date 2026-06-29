@@ -14,7 +14,7 @@ function header(req: Request, name: string): string | undefined {
 // header, HS256, iss "netlify") — see netlify.toml's `signed`. A direct caller
 // hitting the Vercel backend can't produce a valid signature, so this is how we
 // tell trustworthy proxied traffic from spoofable direct traffic.
-export function isSignedByNetlify(req: Request): boolean {
+function isSignedByNetlify(req: Request): boolean {
   const secret = process.env.PROXY_SIGNING_KEY;
   if (!secret) return false;
   const token = header(req, "x-nf-sign");

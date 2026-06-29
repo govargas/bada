@@ -13,7 +13,6 @@ import { requireAuth } from "./middleware/auth.js";
 import { favoritesRouter } from "./routes/favorites.js";
 import { beachesRouter } from "./routes/beaches.js";
 import { swaggerRouter } from "./swagger.js";
-import { isSignedByNetlify } from "./middleware/rateLimit.js"; // TEMP: proxy-signing check
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -85,17 +84,6 @@ app.get("/api/protected/ping", requireAuth, (req, res) => {
 });
 app.get("/api/auth/me", requireAuth, (req, res) => {
   res.json({ user: (req as any).user });
-});
-
-/** ── TEMP: verify Netlify proxy signing (remove after activation check). ──── */
-// Returns only booleans — no secrets, no headers. `mode` reflects whether the
-// backend has PROXY_SIGNING_KEY (hardened) or not (transitional); `signed` is
-// whether THIS request carried a valid Netlify signature.
-app.get("/api/proxy-check", (req, res) => {
-  res.json({
-    mode: process.env.PROXY_SIGNING_KEY ? "hardened" : "transitional",
-    signed: isSignedByNetlify(req),
-  });
 });
 
 /** ── Quick direct health ping ────────────────────────────────────────────── */

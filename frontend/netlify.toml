@@ -1,7 +1,6 @@
 # All routing lives here (not in _redirects): on this site _redirects rules are
 # evaluated first, and its /* catch-all shadowed every netlify.toml redirect —
-# including the signed API proxy, which only netlify.toml can express. So
-# _redirects is removed and everything is consolidated here, in order.
+# including the signed API proxy, which only netlify.toml can express.
 
 # Signed API proxy (topology A): Netlify signs each proxied request (x-nf-sign,
 # HS256, iss "netlify") using PROXY_SIGNING_KEY so the backend can verify the
@@ -13,30 +12,9 @@
   force = true
   signed = "PROXY_SIGNING_KEY"
 
-# TEMP diagnosis paths (throwaway): confirm netlify.toml redirects now fire, and
-# isolate plain vs signed. Removed once verified.
-[[redirects]]
-  from = "/proxytest-plain/*"
-  to = "https://bada-backend.vercel.app/api/:splat"
-  status = 200
-  force = true
-
-[[redirects]]
-  from = "/proxytest-signed/*"
-  to = "https://bada-backend.vercel.app/api/:splat"
-  status = 200
-  force = true
-  signed = "PROXY_SIGNING_KEY"
-
 # SPA fallback: serve index.html for client-side routes. No `force`, so real
 # static files (assets, robots.txt, og-image) are still served directly.
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-
-# TEMP marker — confirms this file is live; removed after verification.
-[[headers]]
-  for = "/*"
-  [headers.values]
-    X-Bada-Toml = "frontend"
