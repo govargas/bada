@@ -2,20 +2,53 @@ import type { Request, RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+import jwt from "jsonwebtoken";
+
+function header(req: Request, name: string): string | undefined {
+  const v = req.headers[name];
+  return Array.isArray(v) ? v[0] : v;
+}
+
+// Did this request genuinely come through our Netlify proxy? When PROXY_SIGNING_KEY
+// is set, Netlify signs every proxied request with it (JWS in the `x-nf-sign`
+// header, HS256, iss "netlify") — see netlify.toml's `signed`. A direct caller
+// hitting the Vercel backend can't produce a valid signature, so this is how we
+// tell trustworthy proxied traffic from spoofable direct traffic.
+function isSignedByNetlify(req: Request): boolean {
+  const secret = process.env.PROXY_SIGNING_KEY;
+  if (!secret) return false;
+  const token = header(req, "x-nf-sign");
+  if (!token) return false;
+  try {
+    jwt.verify(token, secret, { algorithms: ["HS256"], issuer: "netlify" });
+    return true;
+  } catch {
+    return false;
+  }
+}
 
 // Resolve the real client IP to throttle on. Under topology A the browser
 // reaches us through the Netlify /api/* proxy, so req.ip / X-Forwarded-For
-// collapse to Netlify's egress IP — keying on that would throttle ALL users
-// as one. Netlify forwards the true client IP in x-nf-client-connection-ip, so
-// prefer it, falling back to req.ip for any direct-to-backend requests.
+// collapse to Netlify's egress IP — keying on that would throttle ALL users as
+// one. Netlify forwards the true client IP in x-nf-client-connection-ip.
 //
-// Caveat: a request sent directly to the backend (bypassing Netlify) could
-// forge this header to spread its rate-limit identity. Follow-up: verify the
-// signed `x-nf-netlify-proxy` header, or restrict the backend to proxy traffic.
-function clientKey(req: Request): string {
-  const nf = req.headers["x-nf-client-connection-ip"];
-  const fromNetlify = Array.isArray(nf) ? nf[0] : nf;
-  return fromNetlify || req.ip || req.socket.remoteAddress || "unknown";
+// Hardened mode (PROXY_SIGNING_KEY set): trust that forwarded IP only when the
+// request carries a valid Netlify signature; otherwise fall back to req.ip (the
+// connecting IP, which can't be spoofed) so a direct caller can't forge a
+// per-request identity to evade throttling.
+//
+// Transitional mode (key unset): best-effort — trust the forwarded IP so real
+// proxied users aren't lumped under Netlify's egress IP. Forgeable; set
+// PROXY_SIGNING_KEY in Netlify + the backend to harden.
+export function clientKey(req: Request): string {
+  const fallback = req.ip || req.socket.remoteAddress || "unknown";
+  const fwd = header(req, "x-nf-client-connection-ip");
+  if (!fwd) return fallback;
+
+  if (process.env.PROXY_SIGNING_KEY) {
+    return isSignedByNetlify(req) ? fwd : fallback;
+  }
+  return fwd; // transitional best-effort
 }
 
 // Throttle credential endpoints to slow brute-force and signup abuse:
