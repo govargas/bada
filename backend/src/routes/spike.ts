@@ -40,7 +40,12 @@ spikeRouter.get("/whoami", (req, res) => {
     reqIps: req.ips,
     xForwardedFor: req.headers["x-forwarded-for"] ?? null,
     xVercelForwardedFor: req.headers["x-vercel-forwarded-for"] ?? null,
+    xNfClientConnectionIp: req.headers["x-nf-client-connection-ip"] ?? null,
     host: req.headers.host,
     origin: req.headers.origin ?? null,
+    // Full header dump so we can hunt for any header that preserves the real
+    // client IP through the Netlify proxy (decides whether rate limiting is
+    // salvageable under topology A).
+    allHeaders: req.headers,
   });
 });
