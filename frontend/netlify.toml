@@ -11,3 +11,10 @@
   status = 200
   force = true
   signed = "PROXY_SIGNING_KEY"
+
+# TEMP marker: proves whether Netlify is reading THIS netlify.toml (i.e. whether
+# it sits at the configured base directory). Remove with the diagnostic.
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Bada-Toml = "frontend"
