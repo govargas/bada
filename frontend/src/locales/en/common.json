@@ -151,7 +151,8 @@
     "retry": "Retry",
     "noMatches": "No matches here.",
     "panOrZoom": "Pan or zoom to a different area.",
-    "widenRadius": "Try widening the radius."
+    "widenRadius": "Try widening the radius.",
+    "mapUnavailable": "The map cannot be shown on this device. The beach list is still available below."
   },
   "theme": {
     "darkOn": "Dark theme: on",

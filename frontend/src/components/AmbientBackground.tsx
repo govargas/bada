@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState, useEffect } from "react";
+import { Component, lazy, Suspense, useEffect, useState, type ErrorInfo, type ReactNode } from "react";
 import { usePrefersReducedMotion } from "../hooks/usePrefersReducedMotion";
 import { useDarkModeObserver } from "../hooks/useDarkModeObserver";
+import { canUseWebGL } from "../utils/webgl";
 
 // Lazy load the 3D backgrounds to improve initial load time
 // Use dynamic import with a small delay to prioritize main content rendering
@@ -41,21 +42,76 @@ function FallbackBackground({ isDark }: { isDark: boolean }) {
   );
 }
 
+type BackgroundErrorBoundaryProps = {
+  children: ReactNode;
+  fallback: ReactNode;
+  resetKey: string;
+};
+
+type BackgroundErrorBoundaryState = {
+  hasError: boolean;
+};
+
+class BackgroundErrorBoundary extends Component<
+  BackgroundErrorBoundaryProps,
+  BackgroundErrorBoundaryState
+> {
+  state: BackgroundErrorBoundaryState = {
+    hasError: false,
+  };
+
+  static getDerivedStateFromError(): BackgroundErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  componentDidUpdate(prevProps: BackgroundErrorBoundaryProps) {
+    if (prevProps.resetKey !== this.props.resetKey && this.state.hasError) {
+      this.setState({ hasError: false });
+    }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    if (import.meta.env.DEV) {
+      console.warn("Ambient background failed; using CSS fallback.", error, errorInfo);
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return this.props.fallback;
+    }
+
+    return this.props.children;
+  }
+}
+
 export default function AmbientBackground() {
   const isDark = useDarkModeObserver();
   const prefersReducedMotion = usePrefersReducedMotion();
   const [renderKey, setRenderKey] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [supportsWebGL, setSupportsWebGL] = useState<boolean | null>(null);
 
   // Delay Three.js loading until after first paint to prioritize main content
   useEffect(() => {
+    let timerId: number | undefined;
+
     // Use requestAnimationFrame to wait for first paint
     const rafId = requestAnimationFrame(() => {
       // Then use a small timeout to ensure content is interactive
-      const timerId = setTimeout(() => setIsReady(true), 50);
-      return () => clearTimeout(timerId);
+      timerId = window.setTimeout(() => {
+        setSupportsWebGL(canUseWebGL());
+        setIsReady(true);
+      }, 50);
     });
-    return () => cancelAnimationFrame(rafId);
+
+    return () => {
+      cancelAnimationFrame(rafId);
+
+      if (timerId !== undefined) {
+        window.clearTimeout(timerId);
+      }
+    };
   }, []);
 
   // Force re-render when theme changes to reset WebGL context
@@ -64,18 +120,22 @@ export default function AmbientBackground() {
   }, [isDark]);
 
   // Use static fallback if user prefers reduced motion or not ready yet
-  if (prefersReducedMotion || !isReady) {
+  if (prefersReducedMotion || !isReady || supportsWebGL !== true) {
     return <FallbackBackground isDark={isDark} />;
   }
 
+  const fallback = <FallbackBackground isDark={isDark} />;
+  const backgroundKey = `${isDark}-${renderKey}`;
+
   return (
-    <Suspense fallback={<FallbackBackground isDark={isDark} />}>
-      {isDark ? (
-        <WaterBackground key={`water-${renderKey}`} />
-      ) : (
-        <SandBackground key={`sand-${renderKey}`} />
-      )}
-    </Suspense>
+    <BackgroundErrorBoundary fallback={fallback} resetKey={backgroundKey}>
+      <Suspense fallback={fallback}>
+        {isDark ? (
+          <WaterBackground key={`water-${renderKey}`} />
+        ) : (
+          <SandBackground key={`sand-${renderKey}`} />
+        )}
+      </Suspense>
+    </BackgroundErrorBoundary>
   );
 }
-

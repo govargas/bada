@@ -1,7 +1,10 @@
 // frontend/src/components/MapView.tsx
-import { useEffect, useRef } from "react";
+import { MapTrifold } from "@phosphor-icons/react";
+import { useEffect, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import maplibregl, { Map, LngLatBoundsLike } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { canUseWebGL } from "../utils/webgl";
 
 type Point = { id: string; name: string; lat: number; lon: number };
 type Props = {
@@ -88,14 +91,34 @@ function circleBounds(
   ];
 }
 
+function MapFallback({ message }: { message: string }) {
+  return (
+    <div className="card p-0">
+      <div
+        className="w-full h-[260px] rounded-2xl overflow-hidden border border-border bg-surface-muted flex items-center justify-center p-6 text-center"
+        role="status"
+      >
+        <div className="max-w-[17rem] space-y-3">
+          <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-surface text-accent">
+            <MapTrifold size={24} weight="duotone" aria-hidden="true" />
+          </div>
+          <p className="text-sm text-ink-muted">{message}</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function MapView({
   points = [],
   focus,
   onMoveEnd,
   onFitBounds,
 }: Props) {
+  const { t } = useTranslation();
   const ref = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<Map | null>(null);
+  const [mapUnavailable, setMapUnavailable] = useState(false);
   const pointsRef = useRef<Point[]>(points);
   pointsRef.current = points; // keep latest data for (re)builds without re-binding
   const onMoveEndRef = useRef(onMoveEnd);
@@ -105,20 +128,49 @@ export default function MapView({
 
   // Init map ONCE
   useEffect(() => {
-    if (!ref.current) return;
+    if (!ref.current || mapUnavailable) return;
 
-    const map = new maplibregl.Map({
-      container: ref.current,
-      style: styleForTheme(),
-      center: [15, 62],
-      zoom: 4.3,
-      minZoom: 3,
-      maxZoom: 18, // Increased to allow more detailed zoom
-      dragRotate: false,
-      pitchWithRotate: false,
-      attributionControl: { compact: true },
-    });
+    if (!canUseWebGL()) {
+      setMapUnavailable(true);
+      return;
+    }
+
+    let map: Map;
+
+    try {
+      map = new maplibregl.Map({
+        container: ref.current,
+        style: styleForTheme(),
+        center: [15, 62],
+        zoom: 4.3,
+        minZoom: 3,
+        maxZoom: 18, // Increased to allow more detailed zoom
+        dragRotate: false,
+        pitchWithRotate: false,
+        attributionControl: { compact: true },
+      });
+    } catch (error) {
+      if (import.meta.env.DEV) {
+        console.warn("Map failed to initialize; using fallback.", error);
+      }
+      setMapUnavailable(true);
+      return;
+    }
+
     mapRef.current = map;
+
+    const handleMapError = (event: maplibregl.ErrorEvent) => {
+      const message =
+        event.error instanceof Error
+          ? event.error.message
+          : String(event.error ?? "");
+
+      if (message.toLowerCase().includes("webgl")) {
+        setMapUnavailable(true);
+      }
+    };
+
+    map.on("error", handleMapError);
 
     // Add the beaches source + layers. Idempotent so it can run on first load
     // and again after a style swap (setStyle wipes custom sources/layers).
@@ -402,10 +454,11 @@ export default function MapView({
 
     return () => {
       obs.disconnect();
+      map.off("error", handleMapError);
       map.remove();
       mapRef.current = null;
     };
-  }, []); // ← no dependencies (don't recreate the map or re-bind handlers)
+  }, [mapUnavailable]);
 
   // Push new data when points change — just update the source, don't rebuild.
   useEffect(() => {
@@ -444,6 +497,10 @@ export default function MapView({
       map.flyTo({ center: [focus.center.lon, focus.center.lat], zoom: 11 });
     }
   }, [focus]);
+
+  if (mapUnavailable) {
+    return <MapFallback message={t("beachesList.mapUnavailable")} />;
+  }
 
   return (
     <div className="card p-0">

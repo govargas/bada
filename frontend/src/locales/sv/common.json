@@ -151,7 +151,8 @@
     "retry": "Försök igen",
     "noMatches": "Inga träffar här.",
     "panOrZoom": "Panorera eller zooma till ett annat område.",
-    "widenRadius": "Prova att öka sökradien."
+    "widenRadius": "Prova att öka sökradien.",
+    "mapUnavailable": "Kartan kan inte visas på den här enheten. Badplatserna visas fortfarande i listan nedan."
   },
   "theme": {
     "darkOn": "Mörkt tema: på",
