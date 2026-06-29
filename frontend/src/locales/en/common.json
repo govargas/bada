@@ -115,7 +115,8 @@
     "pleaseTryAgain": "Please try again.",
     "euBad": "EU Beach",
     "dissuasion": "Swimming advisory",
-    "safetyDisclaimer": "This shows the official EU/HaV classification and the most recently reported sample — not a real-time measurement of the water today. Conditions can change quickly, for example after heavy rain or warm weather. Always check how the water looks and smells, and when in doubt, don't swim — especially with young children or pets.",
+    "sourceAndSafety": "Source and safety note",
+    "safetyDisclaimer": "This shows the official EU/HaV classification and the most recently reported sample. It is not a real-time measurement of the water today. Conditions can change quickly, for example after heavy rain or warm weather. Always check how the water looks and smells. When in doubt, don't swim, especially with young children or pets.",
     "safetyDisclaimerSource": "Check the official source (Badplatsen, HaV)"
   },
   "algalStatus": {
@@ -130,7 +131,7 @@
     "caution": "swim with caution",
     "avoid": "swimming not advised"
   },
-  "algalBloomInfo": "Shows the most recently reported algal bloom. No reported bloom doesn't guarantee the water is algae-free — there may be a bloom that simply hasn't been measured yet. If the water looks cloudy, discoloured or smells bad, avoid swimming, especially with children and pets.",
+  "algalBloomInfo": "Shows the most recently reported algal bloom. No reported bloom doesn't guarantee the water is algae-free. There may be a bloom that simply hasn't been measured yet. If the water looks cloudy, discoloured or smells bad, avoid swimming, especially with children and pets.",
   "euMotive": {
     "storBadbelastning": "High bathing load",
     "badbelastning": "Bathing load",

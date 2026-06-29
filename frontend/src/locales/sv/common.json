@@ -115,7 +115,8 @@
     "pleaseTryAgain": "Vänligen försök igen.",
     "euBad": "EU-bad",
     "dissuasion": "Avrådan från bad",
-    "safetyDisclaimer": "Detta visar den officiella EU/HaV-klassificeringen och den senast rapporterade provtagningen – inte en mätning av vattnet just idag. Förhållandena kan ändras snabbt, till exempel efter kraftigt regn eller varmt väder. Titta alltid på hur vattnet ser ut och luktar, och bada inte om du är osäker – särskilt med små barn eller husdjur.",
+    "sourceAndSafety": "Källa och säkerhetsnotis",
+    "safetyDisclaimer": "Detta visar den officiella EU/HaV-klassificeringen och den senast rapporterade provtagningen. Det är inte en mätning av vattnet just idag. Förhållandena kan ändras snabbt, till exempel efter kraftigt regn eller varmt väder. Titta alltid på hur vattnet ser ut och luktar. Bada inte om du är osäker, särskilt med små barn eller husdjur.",
     "safetyDisclaimerSource": "Se den officiella källan (Badplatsen, HaV)"
   },
   "algalStatus": {
@@ -130,7 +131,7 @@
     "caution": "bada med försiktighet",
     "avoid": "bad avrådes"
   },
-  "algalBloomInfo": "Visar den senast rapporterade algblomningen. Att ingen blomning rapporterats betyder inte säkert att vattnet är fritt från alger – det kan finnas blomning som ännu inte hunnit mätas. Är vattnet grumligt, missfärgat eller luktar illa: undvik att bada, särskilt för barn och husdjur.",
+  "algalBloomInfo": "Visar den senast rapporterade algblomningen. Att ingen blomning rapporterats betyder inte säkert att vattnet är fritt från alger. Det kan finnas blomning som ännu inte hunnit mätas. Är vattnet grumligt, missfärgat eller luktar illa: undvik att bada, särskilt för barn och husdjur.",
   "euMotive": {
     "storBadbelastning": "Stor badbelastning",
     "badbelastning": "Badbelastning",

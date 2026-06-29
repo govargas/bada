@@ -12,7 +12,17 @@ import {
   useRemoveFavorite,
 } from "../api/favorites";
 import { useAuth } from "@/store/auth";
-import { ArrowLeft, Star, Warning, Info } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  CalendarBlank,
+  ClipboardText,
+  Info,
+  Leaf,
+  MapPin,
+  Star,
+  Warning,
+  type Icon,
+} from "@phosphor-icons/react";
 import Tooltip from "../components/Tooltip";
 import BeachWeatherPanel from "../components/BeachWeatherPanel";
 import { useDocumentTitle } from "../hooks/useDocumentTitle";
@@ -42,6 +52,28 @@ function qualityClass(q: number | string | undefined) {
     if (s.includes("dålig") || s.includes("poor")) return "kpi-poor";
   }
   return "kpi-unknown";
+}
+
+function DetailFact({
+  icon: FactIcon,
+  label,
+  value,
+}: {
+  icon: Icon;
+  label: string;
+  value: React.ReactNode;
+}) {
+  return (
+    <div className="rounded-xl border border-border/40 bg-surface-muted/40 px-3 py-3">
+      <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+        <FactIcon size={15} weight="bold" aria-hidden="true" />
+        <span>{label}</span>
+      </div>
+      <div className="mt-1 text-sm font-semibold leading-snug text-ink">
+        {value}
+      </div>
+    </div>
+  );
 }
 
 export default function BeachDetailPage() {
@@ -115,7 +147,7 @@ export default function BeachDetailPage() {
 
   const latestSampleLabel = data.latestSampleDate
     ? formatDate(data.latestSampleDate, "short")
-    : "–";
+    : "-";
 
   // HaV sometimes sends "false"/"true"/empty for unset text fields. Treat
   // those as no-data so we never print a raw "false" to the user.
@@ -127,7 +159,7 @@ export default function BeachDetailPage() {
 
   // Translate algal status
   const algalKey = getAlgalStatusKey(data.algalText);
-  const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "–";
+  const algalDisplay = algalKey ? t(algalKey) : cleanText(data.algalText) || "-";
 
   // Swim-safety verdict derived from the bloom status (null when unmeasured)
   const algalSafety = getAlgalSafety(algalKey);
@@ -142,7 +174,7 @@ export default function BeachDetailPage() {
   const euMotiveKey = getEuMotiveKey(data.euMotive);
   const euMotiveDisplay = euMotiveKey
     ? t(euMotiveKey)
-    : cleanText(data.euMotive) || "–";
+    : cleanText(data.euMotive) || "-";
 
   async function handleFavoriteClick() {
     if (status !== "authenticated") {
@@ -167,92 +199,88 @@ export default function BeachDetailPage() {
 
   return (
     <section className="p-4 space-y-4">
-      {/* Heading block */}
-      <header className="space-y-1">
-        <h1 className="font-beach text-2xl leading-tight">{title}</h1>
-        <p className="text-ink-muted">{muni || "–"}</p>
-      </header>
+      <div className="card p-4 sm:p-5 space-y-4">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <header className="min-w-0 space-y-2">
+            <h1 className="font-beach text-3xl leading-tight sm:text-4xl">
+              {title}
+            </h1>
+            <p className="flex items-center gap-1.5 text-sm text-ink-muted">
+              <MapPin size={16} weight="bold" aria-hidden="true" />
+              <span>{muni || "-"}</span>
+            </p>
+          </header>
 
-      {/* KPI row */}
-      <div className="flex items-center gap-2">
-        <Tooltip content={qualityTooltip}>
-          <span className={`badge ${pillClass} cursor-help`} tabIndex={0}>
-            {qualityText}{" "}
-            {data.classificationYear ? `· ${data.classificationYear}` : ""}
-          </span>
-        </Tooltip>
-        {data.euType && <span className="badge">{t("beachDetail.euBad")}</span>}
-      </div>
-
-      {/* Swimming advisory — surfaced prominently because it is safety data */}
-      {data.dissuasion && data.dissuasion.length > 0 && (
-        <div
-          role="alert"
-          className="rounded-2xl border border-[var(--color-quality-poor)]/50 bg-[var(--color-quality-poor)]/10 p-4"
-        >
-          <h2 className="font-display text-lg text-[var(--color-quality-poor)] flex items-center gap-2">
-            <Warning size={20} weight="bold" aria-hidden="true" />
-            {t("beachDetail.dissuasion")}
-          </h2>
-          <ul className="mt-1 text-sm list-disc list-inside space-y-0.5">
-            {data.dissuasion.map((d, i) => (
-              <li key={i}>{d}</li>
-            ))}
-          </ul>
-        </div>
-      )}
-
-      {/* Meta card */}
-      <div className="card p-4 space-y-3">
-        <div className="grid grid-cols-2 gap-3 text-sm">
-          <div>
-            <div className="text-ink-muted">
-              {t("beachDetail.latestSampleDate")}
-            </div>
-            <div className="font-medium">{latestSampleLabel}</div>
-          </div>
-          <div>
-            <div className="text-ink-muted flex items-center gap-1">
-              {t("beachDetail.algalBloom")}
-              <Tooltip content={t("algalBloomInfo")}>
-                <span
-                  tabIndex={0}
-                  role="img"
-                  aria-label={t("algalBloomInfo")}
-                  className="inline-flex cursor-help text-ink-muted focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent rounded-full"
-                >
-                  <Info size={15} weight="bold" aria-hidden="true" />
-                </span>
-              </Tooltip>
-            </div>
-            <div className="font-medium">
-              {algalDisplay}
-              {algalSafety && (
-                <>
-                  {" – "}
-                  <span className={algalSafetyToneClass}>
-                    {t(algalSafety.key)}
+          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
+            <Tooltip content={qualityTooltip}>
+              <span className={`badge ${pillClass} cursor-help`} tabIndex={0}>
+                {qualityText}
+                {data.classificationYear && (
+                  <span className="text-ink-muted">
+                    {data.classificationYear}
                   </span>
-                </>
-              )}
-            </div>
-          </div>
-          <div>
-            <div className="text-ink-muted">{t("beachDetail.euMotive")}</div>
-            <div className="font-medium">{euMotiveDisplay}</div>
+                )}
+              </span>
+            </Tooltip>
+            {data.euType && (
+              <span className="badge">{t("beachDetail.euBad")}</span>
+            )}
           </div>
         </div>
 
-        {/* Swim-safety disclaimer — this data is decision support, not a
-            real-time guarantee, so the caveat sits with the safety figures. */}
-        <p className="flex items-start gap-1.5 border-t border-[var(--color-border)] pt-3 text-xs leading-relaxed text-ink-muted">
-          <Info
-            size={14}
-            weight="bold"
-            aria-hidden="true"
-            className="mt-0.5 shrink-0"
+        {data.dissuasion && data.dissuasion.length > 0 && (
+          <div
+            role="alert"
+            className="rounded-xl border border-[var(--color-quality-poor)]/50 bg-[var(--color-quality-poor)]/10 p-3"
+          >
+            <h2 className="font-display text-base text-[var(--color-quality-poor)] flex items-center gap-2">
+              <Warning size={19} weight="bold" aria-hidden="true" />
+              {t("beachDetail.dissuasion")}
+            </h2>
+            <ul className="mt-1 text-sm list-disc list-inside space-y-0.5">
+              {data.dissuasion.map((d, i) => (
+                <li key={i}>{d}</li>
+              ))}
+            </ul>
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
+          <DetailFact
+            icon={CalendarBlank}
+            label={t("beachDetail.latestSampleDate")}
+            value={latestSampleLabel}
           />
-          <span>
+          <DetailFact
+            icon={Leaf}
+            label={t("beachDetail.algalBloom")}
+            value={
+              <span>
+                {algalDisplay}
+                {algalSafety && (
+                  <>
+                    {" - "}
+                    <span className={algalSafetyToneClass}>
+                      {t(algalSafety.key)}
+                    </span>
+                  </>
+                )}
+              </span>
+            }
+          />
+          <DetailFact
+            icon={ClipboardText}
+            label={t("beachDetail.euMotive")}
+            value={euMotiveDisplay}
+          />
+        </div>
+
+        <details className="group border-t border-border/50 pt-3">
+          <summary className="flex cursor-pointer list-none items-center gap-1.5 text-xs font-medium text-ink-muted hover:text-ink">
+            <Info size={14} weight="bold" aria-hidden="true" />
+            {t("beachDetail.sourceAndSafety")}
+          </summary>
+          <p className="mt-2 max-w-4xl text-xs leading-relaxed text-ink-muted">
             {t("beachDetail.safetyDisclaimer")}{" "}
             <a
               href="https://badplatsen.havochvatten.se"
@@ -263,13 +291,12 @@ export default function BeachDetailPage() {
               {t("beachDetail.safetyDisclaimerSource")}
             </a>
             .
-          </span>
-        </p>
+          </p>
+        </details>
 
-        {/* Actions row */}
-        <div className="pt-2 flex items-center gap-2">
+        <div className="flex flex-col gap-2 border-t border-border/50 pt-3 sm:flex-row sm:items-center">
           <button
-            className="btn"
+            className={`btn w-full sm:w-auto ${isFav ? "" : "btn-primary"}`}
             onClick={handleFavoriteClick}
             disabled={addFav.isPending || rmFav.isPending}
           >
@@ -283,7 +310,7 @@ export default function BeachDetailPage() {
               : t("beachDetail.addFavorite")}
           </button>
 
-          <Link to="/" className="btn">
+          <Link to="/" className="btn w-full sm:w-auto">
             <ArrowLeft size={16} aria-hidden="true" /> {t("back")}
           </Link>
         </div>
