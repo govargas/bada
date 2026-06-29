@@ -12,7 +12,6 @@ import { requireAuth } from "./middleware/auth.js";
 import { favoritesRouter } from "./routes/favorites.js";
 import { beachesRouter } from "./routes/beaches.js";
 import { swaggerRouter } from "./swagger.js";
-import { spikeRouter } from "./routes/spike.js"; // TEMPORARY: cookie-topology spike
 
 const isProd = process.env.NODE_ENV === "production";
 
@@ -75,7 +74,6 @@ app.use("/api", healthRouter);
 if (!isProd) app.use("/api", dbCheckRouter);
 app.use("/api/favorites", favoritesRouter);
 app.use("/api", beachesRouter);
-app.use("/api/spike", spikeRouter); // TEMPORARY: cookie-topology spike — remove after decision
 
 /** ── Auth ───────────────────────────────────────────────────────────────── */
 app.use("/api/auth", authRouter);
