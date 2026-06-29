@@ -1,7 +1,22 @@
-import type { RequestHandler } from "express";
+import type { Request, RequestHandler } from "express";
 import rateLimit from "express-rate-limit";
 import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
+
+// Resolve the real client IP to throttle on. Under topology A the browser
+// reaches us through the Netlify /api/* proxy, so req.ip / X-Forwarded-For
+// collapse to Netlify's egress IP — keying on that would throttle ALL users
+// as one. Netlify forwards the true client IP in x-nf-client-connection-ip, so
+// prefer it, falling back to req.ip for any direct-to-backend requests.
+//
+// Caveat: a request sent directly to the backend (bypassing Netlify) could
+// forge this header to spread its rate-limit identity. Follow-up: verify the
+// signed `x-nf-netlify-proxy` header, or restrict the backend to proxy traffic.
+function clientKey(req: Request): string {
+  const nf = req.headers["x-nf-client-connection-ip"];
+  const fromNetlify = Array.isArray(nf) ? nf[0] : nf;
+  return fromNetlify || req.ip || req.socket.remoteAddress || "unknown";
+}
 
 // Throttle credential endpoints to slow brute-force and signup abuse:
 // at most LIMIT attempts per WINDOW from a single client.
@@ -18,6 +33,7 @@ const memoryLimiter = rateLimit({
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { error: "TooManyRequests" },
+  keyGenerator: (req) => clientKey(req),
   // Don't throttle the automated test suite (many auth calls from one IP).
   skip: () => process.env.NODE_ENV === "test",
 });
@@ -47,7 +63,7 @@ function buildAuthRateLimiter(): RequestHandler {
   });
 
   return async (req, res, next) => {
-    const key = req.ip || req.socket.remoteAddress || "unknown";
+    const key = clientKey(req);
     try {
       const { success } = await ratelimit.limit(key);
       if (!success) {
