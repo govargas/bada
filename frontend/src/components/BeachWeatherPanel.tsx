@@ -1,4 +1,18 @@
+import type { ReactNode } from 'react';
 import { useTranslation } from 'react-i18next';
+import {
+  Cloud,
+  CloudFog,
+  CloudLightning,
+  CloudRain,
+  CloudSnow,
+  CloudSun,
+  Drop,
+  Sun,
+  Thermometer,
+  Waves,
+  type Icon,
+} from '@phosphor-icons/react';
 import { useBeaches } from '../hooks/useBeaches';
 import { useWeather } from '../hooks/useWeather';
 import { useSunTimes } from '../hooks/useSunTimes';
@@ -38,6 +52,150 @@ function uvLabelKey(uv: number): string {
   if (uv <= 7) return 'weather.uvHigh';
   if (uv <= 10) return 'weather.uvVeryHigh';
   return 'weather.uvExtreme';
+}
+
+type WeatherPresentation = {
+  Icon: Icon;
+  label: string;
+  className: string;
+};
+
+function weatherPresentation(code: number, t: (k: string) => string): WeatherPresentation {
+  if (code === 0) {
+    return {
+      Icon: Sun,
+      label: t('weather.conditionClear'),
+      className:
+        'border-amber-300/50 bg-amber-100/70 text-amber-700 dark:border-amber-300/20 dark:bg-amber-400/15 dark:text-amber-200',
+    };
+  }
+  if (code === 1) {
+    return {
+      Icon: CloudSun,
+      label: t('weather.conditionMainlyClear'),
+      className:
+        'border-sky-300/45 bg-sky-100/60 text-sky-700 dark:border-sky-300/20 dark:bg-sky-400/15 dark:text-sky-200',
+    };
+  }
+  if (code === 2) {
+    return {
+      Icon: CloudSun,
+      label: t('weather.conditionPartlyCloudy'),
+      className:
+        'border-sky-300/45 bg-sky-100/60 text-sky-700 dark:border-sky-300/20 dark:bg-sky-400/15 dark:text-sky-200',
+    };
+  }
+  if (code === 3) {
+    return {
+      Icon: Cloud,
+      label: t('weather.conditionOvercast'),
+      className:
+        'border-slate-300/50 bg-slate-100/60 text-slate-600 dark:border-slate-300/20 dark:bg-slate-400/15 dark:text-slate-200',
+    };
+  }
+  if (code === 45 || code === 48) {
+    return {
+      Icon: CloudFog,
+      label: t('weather.conditionFog'),
+      className:
+        'border-zinc-300/50 bg-zinc-100/60 text-zinc-600 dark:border-zinc-300/20 dark:bg-zinc-400/15 dark:text-zinc-200',
+    };
+  }
+  if ([51, 53, 55, 56, 57].includes(code)) {
+    return {
+      Icon: CloudRain,
+      label: t('weather.conditionDrizzle'),
+      className:
+        'border-sky-300/50 bg-sky-100/60 text-sky-700 dark:border-sky-300/20 dark:bg-sky-400/15 dark:text-sky-200',
+    };
+  }
+  if ([61, 63, 65, 66, 67].includes(code)) {
+    return {
+      Icon: CloudRain,
+      label: t('weather.conditionRain'),
+      className:
+        'border-blue-300/50 bg-blue-100/60 text-blue-700 dark:border-blue-300/20 dark:bg-blue-400/15 dark:text-blue-200',
+    };
+  }
+  if ([71, 73, 75, 77, 85, 86].includes(code)) {
+    return {
+      Icon: CloudSnow,
+      label: t('weather.conditionSnow'),
+      className:
+        'border-cyan-300/50 bg-cyan-100/60 text-cyan-700 dark:border-cyan-300/20 dark:bg-cyan-400/15 dark:text-cyan-100',
+    };
+  }
+  if ([80, 81, 82].includes(code)) {
+    return {
+      Icon: CloudRain,
+      label: t('weather.conditionShowers'),
+      className:
+        'border-blue-300/50 bg-blue-100/60 text-blue-700 dark:border-blue-300/20 dark:bg-blue-400/15 dark:text-blue-200',
+    };
+  }
+  if ([95, 96, 99].includes(code)) {
+    return {
+      Icon: CloudLightning,
+      label: t('weather.conditionThunderstorm'),
+      className:
+        'border-orange-300/60 bg-orange-100/70 text-orange-800 dark:border-orange-300/25 dark:bg-orange-400/15 dark:text-orange-200',
+    };
+  }
+  return {
+    Icon: Cloud,
+    label: t('weather.conditionOvercast'),
+    className:
+      'border-slate-300/50 bg-slate-100/60 text-slate-600 dark:border-slate-300/20 dark:bg-slate-400/15 dark:text-slate-200',
+  };
+}
+
+function ConditionMark({
+  presentation,
+  size = 'md',
+}: {
+  presentation: WeatherPresentation;
+  size?: 'md' | 'lg';
+}) {
+  const WeatherIcon = presentation.Icon;
+  const sizeClass = size === 'lg' ? 'size-14' : 'size-9';
+  const iconSize = size === 'lg' ? 30 : 21;
+
+  return (
+    <span
+      className={`${sizeClass} shrink-0 rounded-full border grid place-items-center ${presentation.className}`}
+      title={presentation.label}
+      aria-label={presentation.label}
+    >
+      <WeatherIcon size={iconSize} weight="duotone" aria-hidden="true" />
+    </span>
+  );
+}
+
+function MetricTile({
+  icon: MetricIcon,
+  label,
+  value,
+  detail,
+  valueClassName = 'text-ink',
+}: {
+  icon: Icon;
+  label: string;
+  value: ReactNode;
+  detail?: ReactNode;
+  valueClassName?: string;
+}) {
+  return (
+    <div className="rounded-xl border border-border/40 bg-surface-muted/35 dark:bg-surface-muted/20 px-3 py-2.5">
+      <div className="flex items-center gap-1.5 text-xs text-ink-muted">
+        <MetricIcon size={15} weight="bold" aria-hidden="true" />
+        <span>{label}</span>
+      </div>
+      <div className={`mt-1 text-2xl font-semibold leading-none tabular-nums ${valueClassName}`}>
+        {value}
+      </div>
+      {detail && <div className="mt-1 text-xs text-ink-muted">{detail}</div>}
+    </div>
+  );
 }
 
 // Returns whole-hour marks (every 6h for long days, every 3h for short)
@@ -184,28 +342,60 @@ function ForecastStrip({
   });
 
   return (
-    <div className="pt-1 border-t border-border/40">
-      <div className="text-xs text-ink-muted mb-2">{t('weather.forecast')}</div>
-      <ul className="grid grid-cols-5 gap-1 text-center">
+    <div className="pt-3 border-t border-border/40">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div className="text-xs font-medium text-ink">{t('weather.forecast')}</div>
+        <div className="hidden sm:flex items-center gap-3 text-[10px] text-ink-muted">
+          <span>{t('weather.high')}</span>
+          <span>{t('weather.low')}</span>
+          <span>{t('weather.rain')}</span>
+        </div>
+      </div>
+      <ul className="grid grid-cols-1 sm:grid-cols-5 gap-2">
         {forecast.slice(0, 5).map((d, i) => {
           // Parse as local date; append noon to avoid TZ day-shift
           const day = new Date(`${d.date}T12:00:00`);
+          const condition = weatherPresentation(d.weatherCode, t);
+          const rain =
+            d.precipProbability == null
+              ? t('weather.notAvailable')
+              : `${Math.round(d.precipProbability)}%`;
+
           return (
-            <li key={d.date} className="space-y-0.5">
-              <div className="text-[11px] text-ink-muted capitalize">
-                {i === 0 ? t('weather.today') : weekdayFmt.format(day)}
-              </div>
-              <div className="text-sm font-medium tabular-nums">
-                {Math.round(d.tempMax)}°
-              </div>
-              <div className="text-[11px] text-ink-muted tabular-nums">
-                {Math.round(d.tempMin)}°
-              </div>
-              {d.precipProbability != null && (
-                <div className="text-[10px] text-[var(--color-accent)] tabular-nums">
-                  {Math.round(d.precipProbability)}%
+            <li
+              key={d.date}
+              className="rounded-xl border border-border/40 bg-surface-muted/35 dark:bg-surface-muted/20 p-2.5"
+            >
+              <div className="flex items-center gap-2 sm:block sm:text-center">
+                <div className="text-[11px] font-medium text-ink-muted capitalize">
+                  {i === 0 ? t('weather.today') : weekdayFmt.format(day)}
                 </div>
-              )}
+                <div className="sm:mx-auto sm:mt-1 sm:w-fit">
+                  <ConditionMark presentation={condition} />
+                </div>
+              </div>
+
+              <div className="mt-2 grid grid-cols-3 gap-1 text-left sm:text-center">
+                <div>
+                  <div className="text-[10px] text-ink-muted">{t('weather.high')}</div>
+                  <div className="text-sm font-semibold tabular-nums">
+                    {Math.round(d.tempMax)}°
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-ink-muted">{t('weather.low')}</div>
+                  <div className="text-sm font-medium text-ink-muted tabular-nums">
+                    {Math.round(d.tempMin)}°
+                  </div>
+                </div>
+                <div>
+                  <div className="text-[10px] text-ink-muted">{t('weather.rain')}</div>
+                  <div className="flex items-center gap-0.5 text-sm font-medium text-[var(--color-accent)] tabular-nums sm:justify-center">
+                    <Drop size={12} weight="fill" aria-hidden="true" />
+                    {rain}
+                  </div>
+                </div>
+              </div>
             </li>
           );
         })}
@@ -225,46 +415,51 @@ function WeatherCard({
   t: (k: string) => string;
 }) {
   const uv = weather.uvIndex;
+  const condition = weatherPresentation(weather.weatherCode, t);
+
   return (
     <div className="card p-4 space-y-3">
-      <h2 className="font-display text-lg">{t('weather.title')}</h2>
-
-      {/* Primary stats: water temperature leads, it is the swim decision */}
-      <div className="grid grid-cols-2 gap-3">
-        <div>
-          <div className="text-xs text-ink-muted">{t('weather.waterTemp')}</div>
-          {weather.waterTemperature != null ? (
-            <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight text-accent">
-              {Math.round(weather.waterTemperature)}°
+      <div className="rounded-xl border border-border/40 bg-surface-muted/45 dark:bg-surface-muted/25 p-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="min-w-0 flex items-center gap-3">
+            <ConditionMark presentation={condition} size="lg" />
+            <div className="min-w-0">
+              <h2 className="font-display text-lg leading-tight">{t('weather.title')}</h2>
+              <div className="text-sm text-ink-muted">{condition.label}</div>
             </div>
-          ) : (
-            <div className="text-sm text-ink-muted pt-2">
-              {t('weather.notAvailable')}
+          </div>
+          <div className="shrink-0 text-left sm:text-right">
+            <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight">
+              {Math.round(weather.temperature)}°
             </div>
-          )}
-        </div>
-        <div>
-          <div className="text-xs text-ink-muted">{t('weather.temperature')}</div>
-          <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight">
-            {Math.round(weather.temperature)}°
+            <div className="mt-1 text-xs text-ink-muted">{t('weather.temperature')}</div>
           </div>
         </div>
       </div>
 
-      {/* Secondary cluster: quieter, grouped below the divider */}
-      <div className="grid grid-cols-2 gap-3 text-sm pt-2 border-t border-border/40">
-        <div>
-          <div className="text-xs text-ink-muted">{t('weather.feelsLike')}</div>
-          <div className="font-medium tabular-nums">
-            {Math.round(weather.feelsLike)}°
-          </div>
-        </div>
-        <div>
-          <div className="text-xs text-ink-muted">{t('weather.uvIndex')}</div>
-          <div className={`font-medium ${uvColor(uv)}`}>
-            {uv.toFixed(1)} · {t(uvLabelKey(uv))}
-          </div>
-        </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <MetricTile
+          icon={Waves}
+          label={t('weather.waterTemp')}
+          value={
+            weather.waterTemperature != null
+              ? `${Math.round(weather.waterTemperature)}°`
+              : t('weather.notAvailable')
+          }
+          valueClassName="text-accent"
+        />
+        <MetricTile
+          icon={Thermometer}
+          label={t('weather.feelsLike')}
+          value={`${Math.round(weather.feelsLike)}°`}
+        />
+        <MetricTile
+          icon={Sun}
+          label={t('weather.uvIndex')}
+          value={uv.toFixed(1)}
+          detail={t(uvLabelKey(uv))}
+          valueClassName={uvColor(uv)}
+        />
       </div>
 
       <ForecastStrip forecast={weather.forecast} lang={lang} t={t} />

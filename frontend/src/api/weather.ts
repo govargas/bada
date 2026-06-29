@@ -10,10 +10,12 @@ interface OpenMeteoForecastResponse {
     temperature_2m: number;
     apparent_temperature: number;
     uv_index: number;
+    weather_code: number;
     time: string;
   };
   daily: {
     time: string[];
+    weather_code: number[];
     temperature_2m_max: number[];
     temperature_2m_min: number[];
     uv_index_max: number[];
@@ -31,9 +33,9 @@ async function fetchForecast(lat: number, lon: number): Promise<OpenMeteoForecas
   const params = new URLSearchParams({
     latitude: String(lat),
     longitude: String(lon),
-    current: 'temperature_2m,apparent_temperature,uv_index',
+    current: 'temperature_2m,apparent_temperature,uv_index,weather_code',
     daily:
-      'temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max',
+      'weather_code,temperature_2m_max,temperature_2m_min,uv_index_max,precipitation_probability_max',
     forecast_days: String(FORECAST_DAYS),
     timezone: 'auto',
   });
@@ -45,6 +47,7 @@ async function fetchForecast(lat: number, lon: number): Promise<OpenMeteoForecas
 function toDailyForecast(daily: OpenMeteoForecastResponse['daily']): DailyForecast[] {
   return daily.time.map((date, i) => ({
     date,
+    weatherCode: daily.weather_code[i],
     tempMax: daily.temperature_2m_max[i],
     tempMin: daily.temperature_2m_min[i],
     uvMax: daily.uv_index_max[i],
@@ -74,6 +77,7 @@ export async function fetchBeachWeather(lat: number, lon: number): Promise<Weath
     temperature: forecast.current.temperature_2m,
     feelsLike: forecast.current.apparent_temperature,
     uvIndex: forecast.current.uv_index,
+    weatherCode: forecast.current.weather_code,
     waterTemperature,
     fetchedAt: forecast.current.time,
     forecast: toDailyForecast(forecast.daily),

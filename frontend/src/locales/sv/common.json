@@ -284,7 +284,20 @@
     "notAvailable": "Ej tillgänglig",
     "error": "Väderdata ej tillgänglig",
     "forecast": "5-dygnsprognos",
-    "today": "Idag"
+    "today": "Idag",
+    "high": "Max",
+    "low": "Min",
+    "rain": "Regn",
+    "conditionClear": "Klart",
+    "conditionMainlyClear": "Mestadels klart",
+    "conditionPartlyCloudy": "Delvis molnigt",
+    "conditionOvercast": "Mulet",
+    "conditionFog": "Dimma",
+    "conditionDrizzle": "Duggregn",
+    "conditionRain": "Regn",
+    "conditionShowers": "Skurar",
+    "conditionSnow": "Snö",
+    "conditionThunderstorm": "Åska"
   },
   "sun": {
     "title": "Soltider",

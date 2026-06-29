@@ -1,6 +1,7 @@
 export interface DailyForecast {
   /** ISO date (YYYY-MM-DD) in the beach's local timezone */
   date: string;
+  weatherCode: number;
   tempMax: number;
   tempMin: number;
   uvMax: number;
@@ -12,6 +13,7 @@ export interface WeatherData {
   temperature: number;
   feelsLike: number;
   uvIndex: number;
+  weatherCode: number;
   waterTemperature: number | null;
   fetchedAt: string;
   /** Today + next days (planning ahead, not just "right now") */

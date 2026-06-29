@@ -284,7 +284,20 @@
     "notAvailable": "N/A",
     "error": "Weather data unavailable",
     "forecast": "5-day forecast",
-    "today": "Today"
+    "today": "Today",
+    "high": "High",
+    "low": "Low",
+    "rain": "Rain",
+    "conditionClear": "Clear sky",
+    "conditionMainlyClear": "Mainly clear",
+    "conditionPartlyCloudy": "Partly cloudy",
+    "conditionOvercast": "Overcast",
+    "conditionFog": "Fog",
+    "conditionDrizzle": "Drizzle",
+    "conditionRain": "Rain",
+    "conditionShowers": "Showers",
+    "conditionSnow": "Snow",
+    "conditionThunderstorm": "Thunderstorm"
   },
   "sun": {
     "title": "Sun times",
