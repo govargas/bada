@@ -1,10 +1,9 @@
 # Don't redirect these files - serve them directly
 /robots.txt   /robots.txt   200
 
-# Proxy the API through Netlify (topology A) so the browser only ever talks to
-# this origin — the backend session cookie stays first-party to badaweb.netlify.app
-# and CORS drops out. Must precede the catch-all.
-/api/*   https://bada-backend.vercel.app/api/:splat   200
+# NOTE: the /api/* proxy now lives in netlify.toml as a *signed* redirect
+# (topology A). It's kept out of this file so the signed rule isn't shadowed by
+# an unsigned one here.
 
 # Catch-all: serve index.html for client-side routing
 /*   /index.html   200
