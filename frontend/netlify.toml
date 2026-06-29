@@ -18,3 +18,18 @@
   for = "/*"
   [headers.values]
     X-Bada-Toml = "frontend"
+
+# TEMP diagnosis (throwaway paths, don't touch live /api): isolate whether
+# netlify.toml redirects proxy at all, and whether `signed` specifically works.
+[[redirects]]
+  from = "/proxytest-plain/*"
+  to = "https://bada-backend.vercel.app/api/:splat"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/proxytest-signed/*"
+  to = "https://bada-backend.vercel.app/api/:splat"
+  status = 200
+  force = true
+  signed = "PROXY_SIGNING_KEY"
