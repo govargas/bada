@@ -4,25 +4,25 @@
   <defs>
     <style>
       .st0 {
-        fill: #e11418;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st1 { fill: currentColor; }
 
       .st2 {
-        fill: #e33232;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st3 {
-        fill: #d91c1e;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st4 {
-        fill: #e53c3d;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st5 {
-        fill: #d91b1d;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st6 { fill: currentColor; }
@@ -30,31 +30,31 @@
       .st7 { fill: currentColor; }
 
       .st8 {
-        fill: #e33034;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st9 {
-        fill: #e02122;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st10 {
-        fill: #df2a2b;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st11 {
-        fill: #de3532;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st12 {
-        fill: #e03535;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st13 {
-        fill: #e23b3e;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st14 {
-        fill: #e42e30;
+        fill: var(--color-accent, #002fa7);
       }
 
       .st15 { fill: currentColor; }

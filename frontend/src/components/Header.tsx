@@ -6,7 +6,16 @@ import { useAuth } from "@/store/auth";
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { fetchBeaches } from "../api/beaches";
 import MenuIcon from "../assets/menu_icon.svg?react";
-import UserIcon from "../assets/user_icon.svg?react";
+import SwimmerUserIcon from "../assets/user_icon.svg?react";
+import {
+  GearSix,
+  Heart,
+  Moon,
+  SignIn,
+  SignOut,
+  Sun,
+  UserPlus,
+} from "@phosphor-icons/react";
 import { useOutsideClose } from "../hooks/useOutsideClose";
 import { useToggleDarkMode } from "../hooks/useToggleDarkMode";
 
@@ -216,10 +225,16 @@ export default function Header({ languageSwitcher }: HeaderProps) {
               aria-label={t("header.userMenu")}
               aria-expanded={userOpen}
               aria-haspopup="true"
-              className="p-2 rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
+              className="group flex h-11 w-11 items-center justify-center rounded-full hover:bg-surface-muted/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-ink"
               onClick={() => setUserOpen((v) => !v)}
             >
-              <UserIcon width={30} height={30} aria-hidden="true" />
+              <SwimmerUserIcon
+                width={34}
+                height={20}
+                className="max-w-none transition-transform duration-150 group-hover:-rotate-3 group-hover:scale-105"
+                aria-hidden="true"
+                focusable="false"
+              />
             </button>
 
             {userOpen && (
@@ -230,29 +245,57 @@ export default function Header({ languageSwitcher }: HeaderProps) {
                 <div className="h-px bg-border my-1" />
                 {!authed ? (
                   <>
-                    <MenuLink to="/login">{t("nav.signIn")}</MenuLink>
-                    <MenuLink to="/register">{t("nav.register")}</MenuLink>
+                    <MenuLink to="/login" icon={<SignIn size={16} weight="bold" />}>
+                      {t("nav.signIn")}
+                    </MenuLink>
+                    <MenuLink
+                      to="/register"
+                      icon={<UserPlus size={16} weight="bold" />}
+                    >
+                      {t("nav.register")}
+                    </MenuLink>
                   </>
                 ) : (
                   <>
-                    <MenuLink to="/favorites">
+                    <MenuLink to="/favorites" icon={<Heart size={16} weight="bold" />}>
                       {t("nav.favoriteBeaches")}
                     </MenuLink>
-                    <MenuLink to="/profile">{t("nav.profile")}</MenuLink>
-                    <MenuLink to="/settings">{t("nav.settings")}</MenuLink>
+                    <MenuLink
+                      to="/profile"
+                      icon={
+                        <SwimmerUserIcon
+                          width={19}
+                          height={11}
+                          className="max-w-none"
+                          aria-hidden="true"
+                          focusable="false"
+                        />
+                      }
+                    >
+                      {t("nav.profile")}
+                    </MenuLink>
+                    <MenuLink to="/settings" icon={<GearSix size={16} weight="bold" />}>
+                      {t("nav.settings")}
+                    </MenuLink>
                     <div className="h-px bg-border my-1" />
                     <button
-                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
+                      className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm flex items-center gap-2"
                       onClick={handleLogout}
                     >
+                      <SignOut size={16} weight="bold" aria-hidden="true" />
                       {t("nav.logOut")}
                     </button>
                   </>
                 )}
                 <button
-                  className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
+                  className="w-full text-left px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm flex items-center gap-2"
                   onClick={() => setIsDark(!isDark)}
                 >
+                  {isDark ? (
+                    <Moon size={16} weight="bold" aria-hidden="true" />
+                  ) : (
+                    <Sun size={16} weight="bold" aria-hidden="true" />
+                  )}
                   {isDark ? t("theme.darkOn") : t("theme.darkOff")}
                 </button>
               </div>
@@ -362,17 +405,20 @@ function MenuLink({
   to,
   children,
   onClick,
+  icon,
 }: {
   to: string;
   children: React.ReactNode;
   onClick?: () => void;
+  icon?: React.ReactNode;
 }) {
   return (
     <Link
       to={to}
-      className="block px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
+      className="flex items-center gap-2 px-2 py-1.5 rounded-lg hover:bg-surface-muted text-sm"
       onClick={onClick}
     >
+      {icon && <span className="shrink-0 text-ink-muted">{icon}</span>}
       {children}
     </Link>
   );

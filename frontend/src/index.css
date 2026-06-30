@@ -18,18 +18,25 @@
   --color-accent: #002fa7;
   --color-badge: #e6e4dc;
 
-  /* Glass material system - three elevation tiers.
+  /* Liquid Glass 2026 web approximation - overall material rule.
+     This is not Apple's platform Liquid Glass. On the web, BADA uses a
+     disciplined frosted-glass system: readable opacity floors, refractive
+     edge highlights, restrained tint, and solid reduced-transparency fallbacks.
+
+     Glass material system - three elevation tiers.
      Tier 0: header/ambient chrome (most transparent, heaviest blur)
      Tier 1: cards and panels (the default surface)
      Tier 2: overlays - menus, popovers, dropdowns (most opaque, most readable)
      Opacity floors are set so ink-on-glass stays WCAG AA over the worst-case
      frame of the animated background. Do not lower them. */
-  --color-glass: rgba(239, 235, 228, 0.72);
-  --color-glass-1: rgba(246, 242, 236, 0.68);
-  --color-glass-2: rgba(246, 242, 236, 0.9);
-  --color-glass-border: rgba(205, 200, 192, 0.5);
-  --color-glass-highlight: rgba(255, 255, 255, 0.55);
-  --color-glass-shadow: rgba(110, 95, 75, 0.14);
+  --color-glass: rgba(244, 240, 232, 0.74);
+  --color-glass-1: rgba(248, 245, 239, 0.72);
+  --color-glass-2: rgba(248, 245, 239, 0.92);
+  --color-glass-border: rgba(255, 255, 255, 0.58);
+  --color-glass-highlight: rgba(255, 255, 255, 0.72);
+  --color-glass-shadow: rgba(78, 66, 48, 0.18);
+  --color-glass-refraction: rgba(255, 255, 255, 0.24);
+  --color-glass-tint: rgba(0, 47, 167, 0.08);
 
   /* Quality colors — tuned for WCAG AA (≥4.5:1) on the light badge/card bg */
   --color-quality-excellent: #155a8a;
@@ -63,12 +70,14 @@
   --color-badge: #1e4057;
 
   /* Glass tiers - ocean-tinted */
-  --color-glass: rgba(20, 60, 90, 0.78);
-  --color-glass-1: rgba(20, 60, 90, 0.8);
-  --color-glass-2: rgba(15, 42, 60, 0.92);
-  --color-glass-border: rgba(56, 189, 248, 0.25);
-  --color-glass-highlight: rgba(255, 255, 255, 0.12);
-  --color-glass-shadow: rgba(2, 16, 28, 0.45);
+  --color-glass: rgba(16, 54, 82, 0.8);
+  --color-glass-1: rgba(19, 60, 89, 0.82);
+  --color-glass-2: rgba(13, 38, 57, 0.94);
+  --color-glass-border: rgba(144, 216, 255, 0.24);
+  --color-glass-highlight: rgba(255, 255, 255, 0.2);
+  --color-glass-shadow: rgba(2, 16, 28, 0.5);
+  --color-glass-refraction: rgba(255, 255, 255, 0.08);
+  --color-glass-tint: rgba(56, 189, 248, 0.1);
 
   /* Quality colors for dark mode — lighter shades, AA on dark badge/card bg */
   --color-quality-excellent: #7cc4f2;
@@ -98,7 +107,7 @@
   h2,
   h3,
   h4 {
-    @apply font-display font-semibold tracking-tight text-ink;
+    @apply font-display font-semibold text-ink;
   }
 
   .font-title {
@@ -108,7 +117,7 @@
   .font-beach {
     font-family: var(--font-beach);
     font-weight: 650;
-    letter-spacing: -0.01em;
+    letter-spacing: 0;
   }
 
   a {
@@ -123,22 +132,58 @@
   /* Display type carries weight and tracking on non-heading elements too */
   .font-display {
     font-weight: 600;
-    letter-spacing: -0.015em;
+    letter-spacing: 0;
   }
 
   /* Glass tier 1 - default surface for cards and panels */
   .card {
     @apply rounded-2xl border;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border-color: var(--color-glass-border);
-    background: var(--color-glass-1);
-    backdrop-filter: blur(10px) saturate(1.15);
-    -webkit-backdrop-filter: blur(10px) saturate(1.15);
+    background:
+      linear-gradient(
+        135deg,
+        var(--color-glass-refraction),
+        transparent 42%
+      ),
+      linear-gradient(
+        180deg,
+        var(--color-glass-1),
+        color-mix(in srgb, var(--color-glass-1) 86%, transparent)
+      );
+    backdrop-filter: blur(18px) saturate(1.24) contrast(1.03);
+    -webkit-backdrop-filter: blur(18px) saturate(1.24) contrast(1.03);
     box-shadow:
       inset 0 1px 0 var(--color-glass-highlight),
-      0 4px 16px var(--color-glass-shadow);
+      inset 0 -1px 0 rgba(255, 255, 255, 0.08),
+      0 14px 42px var(--color-glass-shadow);
     transition:
       transform 150ms ease,
       box-shadow 150ms ease;
+  }
+
+  .card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    background:
+      radial-gradient(
+        circle at 18% 0%,
+        var(--color-glass-highlight),
+        transparent 30%
+      ),
+      linear-gradient(
+        90deg,
+        transparent,
+        var(--color-glass-tint) 44%,
+        transparent 74%
+      );
+    opacity: 0.42;
+    pointer-events: none;
   }
 
   /* Interactive glass: lift on hover, press on tap */
@@ -146,7 +191,8 @@
     transform: translateY(-2px);
     box-shadow:
       inset 0 1px 0 var(--color-glass-highlight),
-      0 10px 28px var(--color-glass-shadow);
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      0 18px 54px var(--color-glass-shadow);
   }
   .card-hover:active {
     transform: translateY(0) scale(0.99);
@@ -155,34 +201,77 @@
   /* Glass tier 2 - overlays: menus, popovers, dropdowns */
   .glass-overlay {
     @apply rounded-2xl border;
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
     border-color: var(--color-glass-border);
-    background: var(--color-glass-2);
-    backdrop-filter: blur(20px) saturate(1.2);
-    -webkit-backdrop-filter: blur(20px) saturate(1.2);
+    background:
+      linear-gradient(135deg, var(--color-glass-refraction), transparent 46%),
+      var(--color-glass-2);
+    backdrop-filter: blur(26px) saturate(1.28) contrast(1.04);
+    -webkit-backdrop-filter: blur(26px) saturate(1.28) contrast(1.04);
     box-shadow:
       inset 0 1px 0 var(--color-glass-highlight),
-      0 12px 32px var(--color-glass-shadow);
+      inset 0 -1px 0 rgba(255, 255, 255, 0.1),
+      0 18px 56px var(--color-glass-shadow);
+  }
+
+  .liquid-chip {
+    @apply inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium;
+    border-color: var(--color-glass-border);
+    color: var(--color-ink);
+    background: color-mix(in srgb, var(--color-glass-2) 70%, transparent);
+    backdrop-filter: blur(16px) saturate(1.2);
+    -webkit-backdrop-filter: blur(16px) saturate(1.2);
+  }
+
+  .page-shell {
+    @apply mx-auto w-full max-w-6xl px-4 py-4 sm:py-6;
+  }
+
+  .content-shell {
+    @apply mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 sm:py-8;
   }
 
   /* Controls: rounded-lg per the radius rule, tactile press feedback */
   .btn {
     @apply inline-flex items-center justify-center gap-2 rounded-lg border
-           border-border bg-surface px-3 py-2 font-medium no-underline
-           hover:bg-surface-muted hover:no-underline
+           px-3 py-2 font-medium no-underline
+           hover:no-underline
            focus-visible:outline-none focus-visible:ring-2
            focus-visible:ring-accent/50
            disabled:opacity-60 disabled:pointer-events-none;
+    border-color: var(--color-glass-border);
     color: var(--color-ink);
+    background:
+      linear-gradient(135deg, var(--color-glass-refraction), transparent 45%),
+      color-mix(in srgb, var(--color-glass-2) 72%, transparent);
+    box-shadow:
+      inset 0 1px 0 var(--color-glass-highlight),
+      0 8px 22px var(--color-glass-shadow);
+    backdrop-filter: blur(14px) saturate(1.18);
+    -webkit-backdrop-filter: blur(14px) saturate(1.18);
     transition:
       transform 120ms ease,
       background-color 150ms ease;
+  }
+  .btn:hover {
+    background:
+      linear-gradient(135deg, var(--color-glass-refraction), transparent 45%),
+      color-mix(in srgb, var(--color-glass-2) 88%, transparent);
   }
   .btn:active {
     transform: scale(0.98);
   }
 
   .btn-primary {
-    @apply border-transparent bg-accent text-white hover:bg-accent/90;
+    @apply border-transparent bg-accent text-white;
+    background:
+      linear-gradient(135deg, rgba(255, 255, 255, 0.24), transparent 44%),
+      var(--color-accent);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      0 14px 34px color-mix(in srgb, var(--color-accent) 28%, transparent);
   }
   /* Dark-mode accent is light cyan; flip the label to ink-dark for AA */
   .dark .btn-primary {
@@ -436,11 +525,17 @@
 @media (prefers-reduced-transparency: reduce) {
   .card,
   .glass-overlay,
-  .input {
+  .input,
+  .btn,
+  .liquid-chip {
     background: var(--color-surface);
     backdrop-filter: none;
     -webkit-backdrop-filter: none;
     box-shadow: none;
+  }
+
+  .card::before {
+    display: none;
   }
 
   .glass-header::before {

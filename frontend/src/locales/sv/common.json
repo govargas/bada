@@ -2,7 +2,19 @@
   "appTitle": "BADA",
   "loading": "Laddar…",
   "home": {
-    "title": "Badplatser i Sverige"
+    "title": "Hitta tryggare badvatten",
+    "subtitle": "Sök EU-klassade badplatser, skanna kartan och öppna officiell vatteninfo innan du badar.",
+    "badge": "Officiell badplatsdata",
+    "visible": "Visas",
+    "mode": "Vy",
+    "modeSearch": "Sökresultat",
+    "modeNearby": "Nära dig",
+    "modeViewport": "Kartområde",
+    "modeDefault": "Stockholmsområdet",
+    "resultsTitle": "Badplatser",
+    "resultsMeta": "Visar {{visible}} av {{total}} badplatser",
+    "euSite": "EU-bad",
+    "openDetails": "Öppna detaljer"
   },
   "beaches": "Badplatser",
   "loadingBeaches": "Laddar badplatser…",
@@ -53,8 +65,8 @@
     "logOut": "Logga ut",
     "signIn": "Logga in",
     "register": "Registrera",
-    "account": "KONTO",
-    "user": "ANVÄNDARE"
+    "account": "Konto",
+    "user": "Användare"
   },
   "auth": {
     "signInTitle": "Logga in",
@@ -117,7 +129,9 @@
     "dissuasion": "Avrådan från bad",
     "sourceAndSafety": "Källa och säkerhetsnotis",
     "safetyDisclaimer": "Detta visar den officiella EU/HaV-klassificeringen och den senast rapporterade provtagningen. Det är inte en mätning av vattnet just idag. Förhållandena kan ändras snabbt, till exempel efter kraftigt regn eller varmt väder. Titta alltid på hur vattnet ser ut och luktar. Bada inte om du är osäker, särskilt med små barn eller husdjur.",
-    "safetyDisclaimerSource": "Se den officiella källan (Badplatsen, HaV)"
+    "safetyDisclaimerSource": "Se den officiella källan (Badplatsen, HaV)",
+    "swimAdvisory": "Avrådan från bad",
+    "checkLocalConditions": "Kontrollera platsen"
   },
   "algalStatus": {
     "ingenBlomning": "Ingen blomning",
@@ -169,12 +183,12 @@
       "dataSourceDesc": "BADA använder officiell data från Havs- och Vattenmyndigheten (HaV), som övervakar och klassar EU-badplatser över hela Sverige.",
       "dataSourceDirective": "Vattenkvalitetsklassningar baseras på EU:s badvattendirektiv och uppdateras regelbundet under badsäsongen.",
       "features": "Funktioner",
-      "featureMap": "🗺️ Interaktiv karta över alla EU-klassade badplatser i Sverige",
-      "featureLocation": "📍 Hitta närmaste badplats baserat på din nuvarande plats",
-      "featureQuality": "🔬 Se vattenkvalitet, klassning och senaste provresultat",
-      "featureFavorites": "❤️ Spara dina favoritbadplatser till din profil",
-      "featureDarkMode": "🌗 Mörkt läge och responsiv design",
-      "featureLang": "🌐 Flerspråkigt stöd (Svenska / Engelska)",
+      "featureMap": "Interaktiv karta över alla EU-klassade badplatser i Sverige",
+      "featureLocation": "Hitta närmaste badplats baserat på din nuvarande plats",
+      "featureQuality": "Se vattenkvalitet, klassning och senaste provresultat",
+      "featureFavorites": "Spara dina favoritbadplatser till din profil",
+      "featureDarkMode": "Mörkt läge och responsiv design",
+      "featureLang": "Flerspråkigt stöd (Svenska / Engelska)",
       "builtWith": "Byggd med",
       "builtWithDesc": "BADA är byggd med React, TypeScript, Node.js, Express och MongoDB. Kartor drivs av MapLibre och OpenStreetMap. Se vår",
       "builtWithDesc2": "för mer information.",
@@ -229,12 +243,26 @@
       "privacyDesc": "För frågor om integritet och datahantering, se våra användarvillkor eller kontakta oss via GitHub."
     },
     "profile": {
-      "title": "Din profil"
+      "title": "Din profil",
+      "accountInfo": "Kontoinformation",
+      "accountInfoDesc": "Du är inloggad. Ditt konto låter dig spara badplatser och nå dem från vilken enhet som helst.",
+      "favorites": "Dina favoriter",
+      "favoritesDesc": "Hantera dina sparade badplatser och håll koll på platserna du vill återvända till.",
+      "viewFavorites": "Visa favoriter",
+      "signOut": "Logga ut",
+      "signOutDesc": "Logga ut från ditt konto. Du behöver logga in igen för att nå sparade badplatser."
     },
     "settings": {
       "title": "Inställningar",
+      "appearance": "Utseende",
       "language": "Språk",
-      "languageDescription": "Välj ditt språk",
+      "languageDescription": "Välj ditt föredragna språk för BADA.",
+      "theme": "Tema",
+      "themeDesc": "Växla mellan den ljusa sandytan och den mörka vattenytan.",
+      "useDark": "Använd mörkt tema",
+      "useLight": "Använd ljust tema",
+      "notifications": "Aviseringar",
+      "notificationsDesc": "Aviseringsinställningar kommer i en framtida uppdatering.",
       "account": "Konto",
       "deleteAccount": "Radera konto",
       "deleteAccountDesc": "Radera ditt konto och alla dina sparade favoriter permanent. Detta går inte att ångra.",

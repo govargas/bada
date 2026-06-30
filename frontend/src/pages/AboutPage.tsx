@@ -1,11 +1,29 @@
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
-import { ArrowLeft } from "@phosphor-icons/react";
+import {
+  ArrowLeft,
+  GlobeHemisphereWest,
+  Heart,
+  MapTrifold,
+  Moon,
+  NavigationArrow,
+  TestTube,
+  type Icon,
+} from "@phosphor-icons/react";
 
 export default function AboutPage() {
   const { t } = useTranslation();
+  const features: Array<{ key: string; Icon: Icon }> = [
+    { key: "featureMap", Icon: MapTrifold },
+    { key: "featureLocation", Icon: NavigationArrow },
+    { key: "featureQuality", Icon: TestTube },
+    { key: "featureFavorites", Icon: Heart },
+    { key: "featureDarkMode", Icon: Moon },
+    { key: "featureLang", Icon: GlobeHemisphereWest },
+  ];
+
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-6">
+    <main className="content-shell space-y-6">
       <h1 className="font-display text-3xl">{t("pages.about.title")}</h1>
       
       <section className="space-y-4">
@@ -30,13 +48,25 @@ export default function AboutPage() {
 
       <section className="space-y-4">
         <h2 className="font-display text-2xl">{t("pages.about.features")}</h2>
-        <ul className="space-y-2 list-disc list-inside text-ink">
-          <li>{t("pages.about.featureMap")}</li>
-          <li>{t("pages.about.featureLocation")}</li>
-          <li>{t("pages.about.featureQuality")}</li>
-          <li>{t("pages.about.featureFavorites")}</li>
-          <li>{t("pages.about.featureDarkMode")}</li>
-          <li>{t("pages.about.featureLang")}</li>
+        <ul className="grid gap-2 sm:grid-cols-2">
+          {features.map(({ key, Icon }) => (
+            <li
+              key={key}
+              className="rounded-xl border border-border/40 bg-surface-muted/35 px-3 py-3"
+            >
+              <div className="flex items-start gap-2.5">
+                <Icon
+                  size={18}
+                  weight="bold"
+                  aria-hidden="true"
+                  className="mt-0.5 shrink-0 text-accent"
+                />
+                <span className="text-sm leading-snug text-ink">
+                  {t(`pages.about.${key}`)}
+                </span>
+              </div>
+            </li>
+          ))}
         </ul>
       </section>
 
@@ -68,4 +98,3 @@ export default function AboutPage() {
     </main>
   );
 }
-

@@ -2,7 +2,19 @@
   "appTitle": "BADA",
   "loading": "Loading…",
   "home": {
-    "title": "Bathing sites in Sweden"
+    "title": "Find safer bathing water",
+    "subtitle": "Search EU-classified bathing sites, scan the map, and open official water details before you swim.",
+    "badge": "Official beach data",
+    "visible": "Visible",
+    "mode": "View",
+    "modeSearch": "Search results",
+    "modeNearby": "Near you",
+    "modeViewport": "Map area",
+    "modeDefault": "Stockholm area",
+    "resultsTitle": "Bathing sites",
+    "resultsMeta": "Showing {{visible}} of {{total}} sites",
+    "euSite": "EU site",
+    "openDetails": "Open details"
   },
   "beaches": "Beaches",
   "loadingBeaches": "Loading beaches…",
@@ -53,8 +65,8 @@
     "logOut": "Log out",
     "signIn": "Sign in",
     "register": "Register",
-    "account": "ACCOUNT",
-    "user": "USER"
+    "account": "Account",
+    "user": "User"
   },
   "auth": {
     "signInTitle": "Sign in",
@@ -117,7 +129,9 @@
     "dissuasion": "Swimming advisory",
     "sourceAndSafety": "Source and safety note",
     "safetyDisclaimer": "This shows the official EU/HaV classification and the most recently reported sample. It is not a real-time measurement of the water today. Conditions can change quickly, for example after heavy rain or warm weather. Always check how the water looks and smells. When in doubt, don't swim, especially with young children or pets.",
-    "safetyDisclaimerSource": "Check the official source (Badplatsen, HaV)"
+    "safetyDisclaimerSource": "Check the official source (Badplatsen, HaV)",
+    "swimAdvisory": "Swimming advisory",
+    "checkLocalConditions": "Check local conditions"
   },
   "algalStatus": {
     "ingenBlomning": "No blooming",
@@ -169,12 +183,12 @@
       "dataSourceDesc": "BADA uses official data from the Swedish Agency for Marine and Water Management (Havs- och Vattenmyndigheten, HaV), which monitors and classifies EU bathing waters across Sweden.",
       "dataSourceDirective": "Water quality classifications are based on the European Bathing Water Directive and are updated regularly throughout the bathing season.",
       "features": "Features",
-      "featureMap": "🗺️ Interactive map of all EU-classified beaches in Sweden",
-      "featureLocation": "📍 Find the nearest beach based on your current location",
-      "featureQuality": "🔬 View water quality, classification, and recent test results",
-      "featureFavorites": "❤️ Save your favorite beaches to your profile",
-      "featureDarkMode": "🌗 Dark mode and responsive design",
-      "featureLang": "🌐 Multi-language support (Swedish / English)",
+      "featureMap": "Interactive map of all EU-classified beaches in Sweden",
+      "featureLocation": "Find the nearest beach based on your current location",
+      "featureQuality": "View water quality, classification, and recent test results",
+      "featureFavorites": "Save your favorite beaches to your profile",
+      "featureDarkMode": "Dark mode and responsive design",
+      "featureLang": "Multi-language support (Swedish / English)",
       "builtWith": "Built With",
       "builtWithDesc": "BADA is built with React, TypeScript, Node.js, Express, and MongoDB. Maps are powered by MapLibre and OpenStreetMap. See our",
       "builtWithDesc2": "for more details.",
@@ -229,12 +243,26 @@
       "privacyDesc": "For questions about privacy and data handling, please see our terms of use or contact us through GitHub."
     },
     "profile": {
-      "title": "Your Profile"
+      "title": "Your Profile",
+      "accountInfo": "Account information",
+      "accountInfoDesc": "You are signed in. Your account lets you save beaches and access them from any device.",
+      "favorites": "Your favorites",
+      "favoritesDesc": "Manage your saved beaches and keep track of the places you want to revisit.",
+      "viewFavorites": "View favorites",
+      "signOut": "Sign out",
+      "signOutDesc": "Sign out of your account. You will need to sign in again to access saved beaches."
     },
     "settings": {
       "title": "Settings",
+      "appearance": "Appearance",
       "language": "Language",
-      "languageDescription": "Select your language",
+      "languageDescription": "Choose your preferred language for BADA.",
+      "theme": "Theme",
+      "themeDesc": "Switch between the light sand surface and the dark water surface.",
+      "useDark": "Use dark theme",
+      "useLight": "Use light theme",
+      "notifications": "Notifications",
+      "notificationsDesc": "Notification preferences will be available in a future update.",
       "account": "Account",
       "deleteAccount": "Delete account",
       "deleteAccountDesc": "Permanently delete your account and all of your saved favourites. This cannot be undone.",

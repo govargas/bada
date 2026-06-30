@@ -5,7 +5,7 @@ import { ArrowLeft } from "@phosphor-icons/react";
 export default function PrivacyPage() {
   const { t } = useTranslation();
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-6">
+    <main className="content-shell space-y-6">
       <h1 className="font-display text-3xl">{t("pages.privacy.title")}</h1>
 
       <p className="text-ink leading-relaxed max-w-prose">

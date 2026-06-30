@@ -5,7 +5,7 @@ import { ArrowLeft } from "@phosphor-icons/react";
 export default function ContactPage() {
   const { t } = useTranslation();
   return (
-    <main className="max-w-3xl mx-auto p-6 space-y-6">
+    <main className="content-shell space-y-6">
       <h1 className="font-display text-3xl">{t("pages.contact.title")}</h1>
       
       <section className="space-y-4">
@@ -63,4 +63,3 @@ export default function ContactPage() {
     </main>
   );
 }
-

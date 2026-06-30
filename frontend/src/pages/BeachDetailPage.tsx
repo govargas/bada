@@ -209,6 +209,17 @@ export default function BeachDetailPage() {
     Boolean(data.contactMail) ||
     Boolean(data.contactPhone) ||
     Boolean(data.contactUrl);
+  const hasDissuasion = Boolean(data.dissuasion && data.dissuasion.length > 0);
+  const swimVerdictClass = hasDissuasion
+    ? "kpi-poor"
+    : algalSafety
+    ? algalSafetyToneClass
+    : "kpi-unknown";
+  const swimVerdictText = hasDissuasion
+    ? t("beachDetail.swimAdvisory")
+    : algalSafety
+    ? t(algalSafety.key)
+    : t("beachDetail.checkLocalConditions");
 
   async function handleFavoriteClick() {
     if (status !== "authenticated") {
@@ -232,37 +243,50 @@ export default function BeachDetailPage() {
   }
 
   return (
-    <section className="mx-auto w-full max-w-6xl px-4 py-4 sm:py-5 space-y-4 md:space-y-5">
-      <div className="card p-4 sm:p-5 space-y-4">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <header className="min-w-0 space-y-2">
-            <h1 className="font-beach text-3xl leading-tight sm:text-4xl">
-              {title}
-            </h1>
-            <p className="flex items-center gap-1.5 text-sm text-ink-muted">
-              <MapPin size={16} weight="bold" aria-hidden="true" />
-              <span>{muni || "-"}</span>
-            </p>
+    <section className="page-shell space-y-4 md:space-y-5">
+      <div className="card p-4 sm:p-5 space-y-5">
+        <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(250px,0.34fr)] lg:items-start">
+          <header className="min-w-0 space-y-3">
+            <div className="flex flex-wrap items-center gap-2">
+              {data.euType && (
+                <span className="liquid-chip">{t("beachDetail.euBad")}</span>
+              )}
+              <span className={`liquid-chip ${swimVerdictClass}`}>
+                {swimVerdictText}
+              </span>
+            </div>
+            <div className="space-y-2">
+              <h1 className="font-beach text-4xl leading-[1.02] sm:text-5xl">
+                {title}
+              </h1>
+              <p className="flex items-center gap-1.5 text-base text-ink-muted">
+                <MapPin size={18} weight="bold" aria-hidden="true" />
+                <span>{muni || "-"}</span>
+              </p>
+            </div>
           </header>
 
-          <div className="flex flex-wrap items-center gap-2 lg:justify-end">
-            <Tooltip content={qualityTooltip}>
-              <span className={`badge ${pillClass} cursor-help`} tabIndex={0}>
+          <Tooltip content={qualityTooltip}>
+            <div
+              className="rounded-2xl border border-border/40 bg-surface-muted/35 p-4 cursor-help"
+              tabIndex={0}
+            >
+              <div className="text-xs text-ink-muted">
+                {t("waterQuality")}
+              </div>
+              <div className={`mt-1 text-2xl font-semibold leading-tight ${pillClass}`}>
                 {qualityText}
-                {data.classificationYear && (
-                  <span className="text-ink-muted">
-                    {data.classificationYear}
-                  </span>
-                )}
-              </span>
-            </Tooltip>
-            {data.euType && (
-              <span className="badge">{t("beachDetail.euBad")}</span>
-            )}
-          </div>
+              </div>
+              {data.classificationYear && (
+                <div className="mt-1 text-sm text-ink-muted">
+                  {t("latestYear")} {data.classificationYear}
+                </div>
+              )}
+            </div>
+          </Tooltip>
         </div>
 
-        {data.dissuasion && data.dissuasion.length > 0 && (
+        {hasDissuasion && (
           <div
             role="alert"
             className="rounded-xl border border-[var(--color-quality-poor)]/50 bg-[var(--color-quality-poor)]/10 p-3"
@@ -272,7 +296,7 @@ export default function BeachDetailPage() {
               {t("beachDetail.dissuasion")}
             </h2>
             <ul className="mt-1 text-sm list-disc list-inside space-y-0.5">
-              {data.dissuasion.map((d, i) => (
+              {data.dissuasion?.map((d, i) => (
                 <li key={i}>{d}</li>
               ))}
             </ul>

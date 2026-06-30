@@ -8,6 +8,7 @@ import {
   CloudSnow,
   CloudSun,
   Clock,
+  CaretDown,
   Drop,
   Sun,
   Thermometer,
@@ -352,67 +353,152 @@ function ForecastStrip({
     weekday: 'short',
     timeZone: 'Europe/Stockholm',
   });
+  const days = forecast.slice(0, 5);
+  const today = days[0];
+  const todayRain =
+    today?.precipProbability == null
+      ? t('weather.notAvailable')
+      : `${Math.round(today.precipProbability)}%`;
 
   return (
     <div className="pt-3 border-t border-border/40">
-      <div className="mb-2 flex items-center justify-between gap-3">
-        <div className="text-xs font-medium text-ink">{t('weather.forecast')}</div>
-        <div className="hidden sm:flex items-center gap-3 text-[10px] text-ink-muted">
-          <span>{t('weather.high')}</span>
-          <span>{t('weather.low')}</span>
-          <span>{t('weather.rain')}</span>
+      <details className="group rounded-xl border border-border/40 bg-surface-muted/35 p-3 sm:hidden">
+        <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
+          <div>
+            <div className="text-sm font-semibold text-ink">
+              {t('weather.forecast')}
+            </div>
+            {today && (
+              <div className="mt-1 text-xs text-ink-muted">
+                {t('weather.today')}: {Math.round(today.tempMax)}° / {todayRain}
+              </div>
+            )}
+          </div>
+          <CaretDown
+            size={18}
+            weight="bold"
+            aria-hidden="true"
+            className="shrink-0 text-ink-muted transition-transform group-open:rotate-180"
+          />
+        </summary>
+
+        <ul className="mt-3 grid gap-2">
+          {days.map((d, i) => (
+            <ForecastDay
+              key={d.date}
+              day={d}
+              index={i}
+              weekdayFmt={weekdayFmt}
+              t={t}
+              compact
+            />
+          ))}
+        </ul>
+      </details>
+
+      <div className="hidden sm:block">
+        <div className="mb-2 flex items-center justify-between gap-3">
+          <div className="text-xs font-medium text-ink">{t('weather.forecast')}</div>
+          <div className="hidden sm:flex items-center gap-3 text-[10px] text-ink-muted">
+            <span>{t('weather.high')}</span>
+            <span>{t('weather.low')}</span>
+            <span>{t('weather.rain')}</span>
+          </div>
+        </div>
+        <ul className="grid grid-cols-1 sm:grid-cols-5 gap-2">
+          {days.map((d, i) => (
+            <ForecastDay
+              key={d.date}
+              day={d}
+              index={i}
+              weekdayFmt={weekdayFmt}
+              t={t}
+            />
+          ))}
+        </ul>
+      </div>
+    </div>
+  );
+}
+
+function ForecastDay({
+  day: d,
+  index,
+  weekdayFmt,
+  t,
+  compact = false,
+}: {
+  day: DailyForecast;
+  index: number;
+  weekdayFmt: Intl.DateTimeFormat;
+  t: (k: string) => string;
+  compact?: boolean;
+}) {
+  const day = new Date(`${d.date}T12:00:00`);
+  const condition = weatherPresentation(d.weatherCode, t);
+  const rain =
+    d.precipProbability == null
+      ? t('weather.notAvailable')
+      : `${Math.round(d.precipProbability)}%`;
+
+  if (compact) {
+    return (
+      <li className="rounded-xl border border-border/40 bg-surface/40 px-3 py-2.5">
+        <div className="grid grid-cols-[auto_1fr_auto] items-center gap-3">
+          <ConditionMark presentation={condition} />
+          <div>
+            <div className="text-sm font-semibold capitalize">
+              {index === 0 ? t('weather.today') : weekdayFmt.format(day)}
+            </div>
+            <div className="text-xs text-ink-muted">{condition.label}</div>
+          </div>
+          <div className="text-right text-sm">
+            <div className="font-semibold tabular-nums">
+              {Math.round(d.tempMax)}° / {Math.round(d.tempMin)}°
+            </div>
+            <div className="flex items-center justify-end gap-0.5 text-xs font-medium text-[var(--color-accent)] tabular-nums">
+              <Drop size={11} weight="fill" aria-hidden="true" />
+              {rain}
+            </div>
+          </div>
+        </div>
+      </li>
+    );
+  }
+
+  return (
+    <li className="rounded-xl border border-border/40 bg-surface-muted/35 dark:bg-surface-muted/20 p-2.5">
+      <div className="flex items-center gap-2 sm:block sm:text-center">
+        <div className="text-[11px] font-medium text-ink-muted capitalize">
+          {index === 0 ? t('weather.today') : weekdayFmt.format(day)}
+        </div>
+        <div className="sm:mx-auto sm:mt-1 sm:w-fit">
+          <ConditionMark presentation={condition} />
         </div>
       </div>
-      <ul className="grid grid-cols-1 sm:grid-cols-5 gap-2">
-        {forecast.slice(0, 5).map((d, i) => {
-          // Parse as local date; append noon to avoid TZ day-shift
-          const day = new Date(`${d.date}T12:00:00`);
-          const condition = weatherPresentation(d.weatherCode, t);
-          const rain =
-            d.precipProbability == null
-              ? t('weather.notAvailable')
-              : `${Math.round(d.precipProbability)}%`;
 
-          return (
-            <li
-              key={d.date}
-              className="rounded-xl border border-border/40 bg-surface-muted/35 dark:bg-surface-muted/20 p-2.5"
-            >
-              <div className="flex items-center gap-2 sm:block sm:text-center">
-                <div className="text-[11px] font-medium text-ink-muted capitalize">
-                  {i === 0 ? t('weather.today') : weekdayFmt.format(day)}
-                </div>
-                <div className="sm:mx-auto sm:mt-1 sm:w-fit">
-                  <ConditionMark presentation={condition} />
-                </div>
-              </div>
-
-              <div className="mt-2 grid grid-cols-3 gap-1 text-left sm:text-center">
-                <div>
-                  <div className="text-[10px] text-ink-muted">{t('weather.high')}</div>
-                  <div className="text-sm font-semibold tabular-nums">
-                    {Math.round(d.tempMax)}°
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-ink-muted">{t('weather.low')}</div>
-                  <div className="text-sm font-medium text-ink-muted tabular-nums">
-                    {Math.round(d.tempMin)}°
-                  </div>
-                </div>
-                <div>
-                  <div className="text-[10px] text-ink-muted">{t('weather.rain')}</div>
-                  <div className="flex items-center gap-0.5 text-sm font-medium text-[var(--color-accent)] tabular-nums sm:justify-center">
-                    <Drop size={12} weight="fill" aria-hidden="true" />
-                    {rain}
-                  </div>
-                </div>
-              </div>
-            </li>
-          );
-        })}
-      </ul>
-    </div>
+      <div className="mt-2 grid grid-cols-3 gap-1 text-left sm:text-center">
+        <div>
+          <div className="text-[10px] text-ink-muted">{t('weather.high')}</div>
+          <div className="text-sm font-semibold tabular-nums">
+            {Math.round(d.tempMax)}°
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-ink-muted">{t('weather.low')}</div>
+          <div className="text-sm font-medium text-ink-muted tabular-nums">
+            {Math.round(d.tempMin)}°
+          </div>
+        </div>
+        <div>
+          <div className="text-[10px] text-ink-muted">{t('weather.rain')}</div>
+          <div className="flex items-center gap-0.5 text-sm font-medium text-[var(--color-accent)] tabular-nums sm:justify-center">
+            <Drop size={12} weight="fill" aria-hidden="true" />
+            {rain}
+          </div>
+        </div>
+      </div>
+    </li>
   );
 }
 
@@ -441,7 +527,7 @@ function WeatherCard({
             </div>
           </div>
           <div className="shrink-0 text-left sm:text-right">
-            <div className="text-4xl font-semibold tabular-nums leading-none tracking-tight">
+            <div className="text-4xl font-semibold tabular-nums leading-none">
               {Math.round(weather.temperature)}°
             </div>
             <div className="mt-1 text-xs text-ink-muted">{t('weather.temperature')}</div>
@@ -458,7 +544,11 @@ function WeatherCard({
               ? `${Math.round(weather.waterTemperature)}°`
               : t('weather.notAvailable')
           }
-          valueClassName="text-accent"
+          valueClassName={
+            weather.waterTemperature != null
+              ? 'text-accent'
+              : 'text-base leading-tight text-ink-muted'
+          }
         />
         <MetricTile
           icon={Thermometer}

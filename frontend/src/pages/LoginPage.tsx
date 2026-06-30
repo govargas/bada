@@ -53,9 +53,10 @@ export default function LoginPage() {
   }
 
   return (
-    <main className="max-w-md mx-auto p-6 space-y-6">
-      <h1 className="font-display text-2xl">{t("auth.signInTitle")}</h1>
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    <main className="mx-auto w-full max-w-md px-4 py-6 sm:py-8">
+      <div className="card p-6 space-y-6">
+        <h1 className="font-display text-2xl">{t("auth.signInTitle")}</h1>
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
           <label htmlFor="login-email" className="block text-sm mb-1">{t("auth.email")}</label>
           <input
@@ -93,14 +94,15 @@ export default function LoginPage() {
         >
           {isSubmitting ? t("auth.signInProgress") : t("auth.signIn")}
         </button>
-      </form>
+        </form>
 
-      <p className="text-sm text-ink-muted">
-        {t("auth.noAccount")}{" "}
-        <Link to="/register" className="text-accent underline">
-          {t("auth.registerHere")}
-        </Link>
-      </p>
+        <p className="text-sm text-ink-muted">
+          {t("auth.noAccount")}{" "}
+          <Link to="/register" className="text-accent underline">
+            {t("auth.registerHere")}
+          </Link>
+        </p>
+      </div>
     </main>
   );
 }

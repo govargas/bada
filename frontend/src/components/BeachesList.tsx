@@ -3,6 +3,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
+import {
+  ArrowRight,
+  Crosshair,
+  MapPin,
+  NavigationArrow,
+  Waves,
+} from "@phosphor-icons/react";
 import MapView from "./MapView";
 
 import { fetchBeaches } from "../api/beaches";
@@ -141,6 +148,15 @@ export default function BeachesList() {
       ? undefined
       : { center: { lon: center.lon, lat: center.lat }, radiusKm };
 
+  const modeLabel =
+    q.length > 0
+      ? t("home.modeSearch")
+      : mode === "nearby"
+      ? t("home.modeNearby")
+      : mode === "viewport"
+      ? t("home.modeViewport")
+      : t("home.modeDefault");
+
   /* ---------- STATES ---------- */
   if (isLoading) {
     return (
@@ -204,64 +220,131 @@ export default function BeachesList() {
 
   /* ---------- UI ---------- */
   return (
-    <div className="space-y-4">
-      {/* Page heading — visually hidden; gives the landing page an h1 for
-          screen-reader navigation without disrupting the visual design */}
-      <h1 className="sr-only">{t("home.title")}</h1>
+    <div className="page-shell space-y-5">
+      <section className="grid gap-4 lg:grid-cols-[0.78fr_1.22fr] lg:items-stretch">
+        <div className="card flex min-h-[260px] flex-col justify-between p-4 sm:p-5">
+          <div className="space-y-3">
+            <span className="liquid-chip">
+              <Waves size={15} weight="bold" aria-hidden="true" />
+              {t("home.badge")}
+            </span>
+            <div className="space-y-2">
+              <h1 className="font-beach text-3xl leading-[1.05] sm:text-4xl">
+                {t("home.title")}
+              </h1>
+              <p className="max-w-md text-sm leading-relaxed text-ink-muted sm:text-base">
+                {t("home.subtitle")}
+              </p>
+            </div>
+          </div>
 
-      {/* Map */}
-      <MapView
-        points={filtered.map((b) => ({
-          id: b.id,
-          name: b.name,
-          lat: b.lat,
-          lon: b.lon,
-        }))}
-        focus={mapFocus}
-        onMoveEnd={handleMoveEnd}
-        onFitBounds={handleFitBounds}
-      />
+          <div className="mt-5 grid grid-cols-2 gap-2">
+            <div className="rounded-xl border border-border/40 bg-surface-muted/35 px-3 py-3">
+              <div className="text-xs text-ink-muted">{t("home.visible")}</div>
+              <div className="mt-1 text-2xl font-semibold tabular-nums">
+                {filtered.length}
+              </div>
+            </div>
+            <div className="rounded-xl border border-border/40 bg-surface-muted/35 px-3 py-3">
+              <div className="text-xs text-ink-muted">{t("home.mode")}</div>
+              <div className="mt-1 text-sm font-semibold leading-tight">
+                {modeLabel}
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {/* Use current location — full width, now under the map */}
-      <div className="px-0">
-        <button
-          className="card card-hover w-full px-3 py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent text-center font-medium flex items-center justify-center gap-2"
-          onClick={handleUseLocation}
-          disabled={geoLoading}
-        >
-          {geoLoading
-            ? t("beachesList.gettingLocation")
-            : `${t("beachesList.requestLocation")}`}
-        </button>
-      </div>
+        <div className="space-y-3">
+          <MapView
+            points={filtered.map((b) => ({
+              id: b.id,
+              name: b.name,
+              lat: b.lat,
+              lon: b.lon,
+            }))}
+            focus={mapFocus}
+            onMoveEnd={handleMoveEnd}
+            onFitBounds={handleFitBounds}
+          />
+
+          <button
+            className="btn w-full py-3 text-center font-semibold"
+            onClick={handleUseLocation}
+            disabled={geoLoading}
+          >
+            {geoLoading ? (
+              <>
+                <NavigationArrow size={17} weight="bold" aria-hidden="true" />
+                {t("beachesList.gettingLocation")}
+              </>
+            ) : (
+              <>
+                <Crosshair size={17} weight="bold" aria-hidden="true" />
+                {t("beachesList.requestLocation")}
+              </>
+            )}
+          </button>
+        </div>
+      </section>
 
       {/* Screen reader announcement for filtered results */}
       <div className="sr-only" role="status" aria-live="polite" aria-atomic="true">
         {filtered.length} {t("beaches")}
       </div>
 
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <h2 className="font-display text-xl">{t("home.resultsTitle")}</h2>
+          <p className="text-sm text-ink-muted">
+            {t("home.resultsMeta", {
+              visible: filtered.length,
+              total: items.length,
+            })}
+          </p>
+        </div>
+        <span className="liquid-chip w-fit">
+          <MapPin size={15} weight="bold" aria-hidden="true" />
+          {modeLabel}
+        </span>
+      </div>
+
       {/* List (keep to 50 for UX) */}
-      <ul className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3" aria-label={t("beaches")}>
+      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label={t("beaches")}>
         {filtered.slice(0, 50).map((b) => (
           <li key={b.id}>
             <Link
               to={`/beach/${b.id}`}
-              className="card card-hover block p-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              className="card card-hover block p-4 no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
             >
-              <div className="flex items-start justify-between gap-3">
+              <div className="flex min-h-[6.25rem] flex-col justify-between gap-4">
                 <div className="min-w-0">
-                  <h3 className="font-beach text-lg leading-tight truncate">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <span className="liquid-chip px-2.5 py-0.5">
+                      {t("home.euSite")}
+                    </span>
+                    <ArrowRight
+                      size={17}
+                      weight="bold"
+                      aria-hidden="true"
+                      className="shrink-0 text-ink-muted"
+                    />
+                  </div>
+                  <h3 className="font-beach text-xl leading-tight">
                     {b.name}
                   </h3>
-                  <p className="text-ink-muted text-sm">
+                  <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
+                    <MapPin size={14} weight="bold" aria-hidden="true" />
                     {b.municipality || "–"}
                   </p>
                 </div>
-                {typeof b._distanceKm === "number" && (
-                  <span className="badge shrink-0">
-                    {formatKm(b._distanceKm)}
-                  </span>
-                )}
+                <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-3 text-sm">
+                  <span className="text-ink-muted">{t("home.openDetails")}</span>
+                  {typeof b._distanceKm === "number" && (
+                    <span className="badge shrink-0">
+                      {formatKm(b._distanceKm)}
+                    </span>
+                  )}
+                </div>
               </div>
             </Link>
           </li>

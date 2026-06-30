@@ -6,12 +6,15 @@ import toast from "react-hot-toast";
 import LanguageSwitcher from "@/components/LanguageSwitcher";
 import { useAuth } from "@/store/auth";
 import { deleteAccount } from "@/api/account";
+import { ArrowLeft, Bell, Moon, Sun, Translate, Trash } from "@phosphor-icons/react";
+import { useToggleDarkMode } from "@/hooks/useToggleDarkMode";
 
 export default function SettingsPage() {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const clearLocal = useAuth((s) => s.clearLocal);
   const queryClient = useQueryClient();
+  const { isDark, setIsDark } = useToggleDarkMode();
 
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -32,28 +35,64 @@ export default function SettingsPage() {
   }
 
   return (
-    <main className="max-w-2xl mx-auto p-6 space-y-6">
-      <h1 className="font-display text-3xl">Settings</h1>
+    <main className="content-shell space-y-5">
+      <div className="space-y-2">
+        <span className="liquid-chip">
+          {isDark ? (
+            <Moon size={15} weight="bold" aria-hidden="true" />
+          ) : (
+            <Sun size={15} weight="bold" aria-hidden="true" />
+          )}
+          {t("pages.settings.appearance")}
+        </span>
+        <h1 className="font-display text-3xl">{t("pages.settings.title")}</h1>
+      </div>
 
       <section className="card p-6 space-y-4">
-        <h2 className="font-display text-xl">Language</h2>
+        <h2 className="font-display text-xl flex items-center gap-2">
+          <Translate size={20} weight="bold" aria-hidden="true" />
+          {t("pages.settings.language")}
+        </h2>
         <p className="text-ink-muted">
-          Choose your preferred language for BADA.
+          {t("pages.settings.languageDescription")}
         </p>
         <LanguageSwitcher />
       </section>
 
       <section className="card p-6 space-y-4">
-        <h2 className="font-display text-xl">Dark Mode</h2>
+        <h2 className="font-display text-xl flex items-center gap-2">
+          {isDark ? (
+            <Moon size={20} weight="bold" aria-hidden="true" />
+          ) : (
+            <Sun size={20} weight="bold" aria-hidden="true" />
+          )}
+          {t("pages.settings.theme")}
+        </h2>
         <p className="text-ink-muted">
-          Toggle dark mode from the user menu in the header.
+          {t("pages.settings.themeDesc")}
         </p>
+        <button
+          type="button"
+          className="btn"
+          aria-pressed={isDark}
+          onClick={() => setIsDark(!isDark)}
+        >
+          {isDark ? (
+            <Sun size={17} weight="bold" aria-hidden="true" />
+          ) : (
+            <Moon size={17} weight="bold" aria-hidden="true" />
+          )}
+          {isDark ? t("pages.settings.useLight") : t("pages.settings.useDark")}
+        </button>
       </section>
 
       <section className="card p-6 space-y-4">
-        <h2 className="font-display text-xl">Notifications</h2>
+        <h2 className="font-display text-xl flex items-center gap-2">
+          <Bell size={20} weight="bold" aria-hidden="true" />
+          {t("pages.settings.notifications")}
+        </h2>
         <p className="text-ink-muted">
-          Notification preferences will be available in a future update.
+          {t("pages.settings.notificationsDesc")}
         </p>
       </section>
 
@@ -70,6 +109,7 @@ export default function SettingsPage() {
             className="btn"
             onClick={() => setConfirming(true)}
           >
+            <Trash size={17} weight="bold" aria-hidden="true" />
             {t("pages.settings.deleteAccount")}
           </button>
         ) : (
@@ -104,8 +144,9 @@ export default function SettingsPage() {
       </section>
 
       <div className="pt-6">
-        <Link to="/" className="btn btn-primary">
-          ← Back to map
+          <Link to="/" className="btn btn-primary">
+          <ArrowLeft size={17} weight="bold" aria-hidden="true" />
+          {t("pages.backToMap")}
         </Link>
       </div>
     </main>

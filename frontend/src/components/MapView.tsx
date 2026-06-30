@@ -95,7 +95,7 @@ function MapFallback({ message }: { message: string }) {
   return (
     <div className="card p-0">
       <div
-        className="w-full h-[260px] rounded-2xl overflow-hidden border border-border bg-surface-muted flex items-center justify-center p-6 text-center"
+        className="h-[260px] w-full overflow-hidden rounded-2xl border border-border bg-surface-muted p-6 text-center sm:h-[320px] lg:min-h-[360px] flex items-center justify-center"
         role="status"
       >
         <div className="max-w-[17rem] space-y-3">
@@ -504,7 +504,10 @@ export default function MapView({
 
   return (
     <div className="card p-0">
-      <div ref={ref} className="w-full h-[260px] rounded-2xl overflow-hidden" />
+      <div
+        ref={ref}
+        className="h-[260px] w-full overflow-hidden rounded-2xl sm:h-[320px] lg:min-h-[360px]"
+      />
     </div>
   );
 }
