@@ -166,6 +166,9 @@
     "retry": "Försök igen",
     "noMatches": "Inga träffar här.",
     "panOrZoom": "Panorera eller zooma till ett annat område.",
+    "noMatchesHelp": "Zooma ut, panorera kartan eller gå tillbaka till startvyn.",
+    "resetToStart": "Återgå till start",
+    "showNearby5km": "Visa 5 km nära mig",
     "widenRadius": "Prova att öka sökradien.",
     "mapUnavailable": "Kartan kan inte visas på den här enheten. Badplatserna visas fortfarande i listan nedan."
   },

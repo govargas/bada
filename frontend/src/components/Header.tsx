@@ -55,6 +55,7 @@ export default function Header({ languageSwitcher }: HeaderProps) {
 
   const search = useUI((s) => s.search);
   const setSearch = useUI((s) => s.setSearch);
+  const resetHomeView = useUI((s) => s.resetHomeView);
 
   const status = useAuth((s) => s.status);
   const logout = useAuth((s) => s.logout);
@@ -205,8 +206,9 @@ export default function Header({ languageSwitcher }: HeaderProps) {
             <div className="flex items-center justify-center gap-2">
               <Link
                 to="/"
+                onClick={resetHomeView}
                 className="font-title text-4xl leading-none text-ink shrink-0"
-                aria-label="BADA – home"
+                aria-label="BADA home"
               >
                 BADA
               </Link>

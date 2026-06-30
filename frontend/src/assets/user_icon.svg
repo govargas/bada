@@ -4,25 +4,25 @@
   <defs>
     <style>
       .st0 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st1 { fill: currentColor; }
 
       .st2 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st3 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st4 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st5 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st6 { fill: currentColor; }
@@ -30,31 +30,31 @@
       .st7 { fill: currentColor; }
 
       .st8 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st9 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st10 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st11 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st12 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st13 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st14 {
-        fill: var(--color-accent, #002fa7);
+        fill: var(--color-swimmer-cap, #e11418);
       }
 
       .st15 { fill: currentColor; }

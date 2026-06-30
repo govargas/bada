@@ -166,6 +166,9 @@
     "retry": "Retry",
     "noMatches": "No matches here.",
     "panOrZoom": "Pan or zoom to a different area.",
+    "noMatchesHelp": "Zoom out, pan the map, or return to the start view.",
+    "resetToStart": "Reset to start",
+    "showNearby5km": "Show 5 km near me",
     "widenRadius": "Try widening the radius.",
     "mapUnavailable": "The map cannot be shown on this device. The beach list is still available below."
   },

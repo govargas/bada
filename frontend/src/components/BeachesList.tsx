@@ -1,5 +1,5 @@
 // frontend/src/components/BeachesList.tsx
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Link } from "react-router";
 import { useTranslation } from "react-i18next";
@@ -8,6 +8,7 @@ import {
   Crosshair,
   MapPin,
   NavigationArrow,
+  XCircle,
   Waves,
 } from "@phosphor-icons/react";
 import MapView from "./MapView";
@@ -35,6 +36,8 @@ export default function BeachesList() {
 
   // Global search text
   const search = useUI((s) => s.search);
+  const setSearch = useUI((s) => s.setSearch);
+  const homeResetVersion = useUI((s) => s.homeResetVersion);
   const q = search.trim().toLowerCase();
 
   // Geo hook
@@ -59,7 +62,7 @@ export default function BeachesList() {
   // Distance-annotated list (stable type)
   const items = useMemo<(BeachSummary & { _distanceKm?: number })[]>(() => {
     if (!data) return [];
-    const refPoint = coords ? coords : mode === "viewport" ? null : center;
+    const refPoint = mode === "viewport" ? null : center;
     const withDist = data.map((b) => {
       const km = refPoint
         ? distanceKm(
@@ -72,7 +75,7 @@ export default function BeachesList() {
     return refPoint
       ? withDist.sort((a, b) => (a._distanceKm ?? 0) - (b._distanceKm ?? 0))
       : withDist;
-  }, [data, coords, center, mode]);
+  }, [data, center, mode]);
 
   // Text filter
   const filteredBySearch = useMemo(() => {
@@ -108,33 +111,38 @@ export default function BeachesList() {
     });
   }, [filteredBySearch, mode, bounds, center, radiusKm, q]);
 
-  // Geolocation → nearby mode
+  const resetToStart = useCallback(() => {
+    setSearch("");
+    setCenter(SERGELS_TORG);
+    setRadiusKm(DEFAULT_RADIUS_KM);
+    setBounds(null);
+    setMode("default");
+  }, [setSearch]);
+
+  const activateNearby = useCallback((location: { lat: number; lon: number }) => {
+    setCenter({ lat: location.lat, lon: location.lon });
+    setRadiusKm(NEARBY_RADIUS_KM);
+    setBounds(null);
+    setMode("nearby");
+  }, []);
+
+  useEffect(() => {
+    resetToStart();
+  }, [homeResetVersion, resetToStart]);
+
+  // Geolocation -> nearby mode
   useEffect(() => {
     if (!coords) return;
-    setCenter({ lat: coords.lat, lon: coords.lon });
-    setRadiusKm(NEARBY_RADIUS_KM);
-    setBounds(null); // Clear bounds when switching to nearby mode
-    setMode("nearby");
-  }, [coords]);
+    activateNearby(coords);
+  }, [coords, activateNearby]);
 
   const handleUseLocation = async () => {
-    // Reset mode to trigger map fit
-    setMode("default");
-    await request(); // coords effect handles the rest
+    if (coords) activateNearby(coords);
+    await request();
   };
 
-  // Map move → viewport mode
+  // Map move -> viewport mode
   const handleMoveEnd = (e: {
-    bounds: { west: number; south: number; east: number; north: number };
-    center: { lon: number; lat: number };
-    zoom: number;
-  }) => {
-    setBounds(e.bounds);
-    setMode("viewport");
-  };
-
-  // Programmatic fit → viewport mode
-  const handleFitBounds = (e: {
     bounds: { west: number; south: number; east: number; north: number };
     center: { lon: number; lat: number };
     zoom: number;
@@ -156,6 +164,7 @@ export default function BeachesList() {
       : mode === "viewport"
       ? t("home.modeViewport")
       : t("home.modeDefault");
+  const hasNoFilteredResults = (q || mode !== "default") && filtered.length === 0;
 
   /* ---------- STATES ---------- */
   if (isLoading) {
@@ -198,21 +207,6 @@ export default function BeachesList() {
         </p>
         <p className="text-sm text-ink-muted mt-1">
           {t("beachesList.emptyState")}
-        </p>
-      </div>
-    );
-  }
-
-  if ((q || mode !== "default") && filtered.length === 0) {
-    return (
-      <div className="rounded-2xl border border-border bg-surface-muted p-4">
-        <p className="font-display text-lg">{t("beachesList.noMatches")}</p>
-        <p className="text-sm text-ink-muted mt-1">
-          {q
-            ? t("beachesList.emptyState")
-            : mode === "viewport"
-            ? t("beachesList.panOrZoom")
-            : t("beachesList.widenRadius")}
         </p>
       </div>
     );
@@ -264,26 +258,32 @@ export default function BeachesList() {
             }))}
             focus={mapFocus}
             onMoveEnd={handleMoveEnd}
-            onFitBounds={handleFitBounds}
           />
 
-          <button
-            className="btn w-full py-3 text-center font-semibold"
-            onClick={handleUseLocation}
-            disabled={geoLoading}
-          >
-            {geoLoading ? (
-              <>
-                <NavigationArrow size={17} weight="bold" aria-hidden="true" />
-                {t("beachesList.gettingLocation")}
-              </>
-            ) : (
-              <>
-                <Crosshair size={17} weight="bold" aria-hidden="true" />
-                {t("beachesList.requestLocation")}
-              </>
+          <div className="space-y-2">
+            <button
+              className="btn w-full py-3 text-center font-semibold"
+              onClick={handleUseLocation}
+              disabled={geoLoading}
+            >
+              {geoLoading ? (
+                <>
+                  <NavigationArrow size={17} weight="bold" aria-hidden="true" />
+                  {t("beachesList.gettingLocation")}
+                </>
+              ) : (
+                <>
+                  <Crosshair size={17} weight="bold" aria-hidden="true" />
+                  {t("beachesList.requestLocation")}
+                </>
+              )}
+            </button>
+            {geoError && (
+              <p className="px-1 text-xs text-[var(--color-quality-poor)]">
+                {t("beachesList.locationError")}
+              </p>
             )}
-          </button>
+          </div>
         </div>
       </section>
 
@@ -308,48 +308,80 @@ export default function BeachesList() {
         </span>
       </div>
 
-      {/* List (keep to 50 for UX) */}
-      <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label={t("beaches")}>
-        {filtered.slice(0, 50).map((b) => (
-          <li key={b.id}>
-            <Link
-              to={`/beach/${b.id}`}
-              className="card card-hover block p-4 no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
-            >
-              <div className="flex min-h-[6.25rem] flex-col justify-between gap-4">
-                <div className="min-w-0">
-                  <div className="mb-2 flex items-center justify-between gap-3">
-                    <span className="liquid-chip px-2.5 py-0.5">
-                      {t("home.euSite")}
-                    </span>
-                    <ArrowRight
-                      size={17}
-                      weight="bold"
-                      aria-hidden="true"
-                      className="shrink-0 text-ink-muted"
-                    />
-                  </div>
-                  <h3 className="font-beach text-xl leading-tight">
-                    {b.name}
-                  </h3>
-                  <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
-                    <MapPin size={14} weight="bold" aria-hidden="true" />
-                    {b.municipality || "–"}
-                  </p>
-                </div>
-                <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-3 text-sm">
-                  <span className="text-ink-muted">{t("home.openDetails")}</span>
-                  {typeof b._distanceKm === "number" && (
-                    <span className="badge shrink-0">
-                      {formatKm(b._distanceKm)}
-                    </span>
-                  )}
-                </div>
+      {hasNoFilteredResults ? (
+        <div className="card p-4 sm:p-5">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <div className="max-w-xl">
+              <div className="mb-2 flex items-center gap-2 text-sm font-semibold">
+                <XCircle size={18} weight="bold" aria-hidden="true" />
+                {t("beachesList.noMatches")}
               </div>
-            </Link>
-          </li>
-        ))}
-      </ul>
+              <p className="text-sm leading-relaxed text-ink-muted">
+                {q
+                  ? t("beachesList.emptyState")
+                  : mode === "viewport"
+                  ? t("beachesList.noMatchesHelp")
+                  : t("beachesList.widenRadius")}
+              </p>
+            </div>
+            <div className="flex w-full flex-col gap-2 sm:w-auto sm:min-w-52">
+              <button className="btn w-full" onClick={resetToStart}>
+                {t("beachesList.resetToStart")}
+              </button>
+              {coords && (
+                <button
+                  className="btn w-full"
+                  onClick={() => activateNearby(coords)}
+                >
+                  {t("beachesList.showNearby5km")}
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <ul className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3" aria-label={t("beaches")}>
+          {filtered.slice(0, 50).map((b) => (
+            <li key={b.id}>
+              <Link
+                to={`/beach/${b.id}`}
+                className="card card-hover block p-4 no-underline hover:no-underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-accent"
+              >
+                <div className="flex min-h-[6.25rem] flex-col justify-between gap-4">
+                  <div className="min-w-0">
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                      <span className="liquid-chip px-2.5 py-0.5">
+                        {t("home.euSite")}
+                      </span>
+                      <ArrowRight
+                        size={17}
+                        weight="bold"
+                        aria-hidden="true"
+                        className="shrink-0 text-ink-muted"
+                      />
+                    </div>
+                    <h3 className="font-beach text-xl leading-tight">
+                      {b.name}
+                    </h3>
+                    <p className="mt-1 flex items-center gap-1.5 text-sm text-ink-muted">
+                      <MapPin size={14} weight="bold" aria-hidden="true" />
+                      {b.municipality || "–"}
+                    </p>
+                  </div>
+                  <div className="flex items-center justify-between gap-3 border-t border-border/40 pt-3 text-sm">
+                    <span className="text-ink-muted">{t("home.openDetails")}</span>
+                    {typeof b._distanceKm === "number" && (
+                      <span className="badge shrink-0">
+                        {formatKm(b._distanceKm)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

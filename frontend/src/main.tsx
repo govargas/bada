@@ -13,10 +13,9 @@ import "maplibre-gl/dist/maplibre-gl.css";
 const queryClient = new QueryClient();
 
 const savedTheme = localStorage.getItem("theme");
-const prefersDark = window.matchMedia?.("(prefers-color-scheme: dark)").matches;
 document.documentElement.classList.toggle(
   "dark",
-  savedTheme ? savedTheme === "dark" : prefersDark
+  savedTheme ? savedTheme === "dark" : true
 );
 
 // Set HTML lang attribute based on i18n language
